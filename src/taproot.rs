@@ -1,0 +1,128 @@
+#![allow(dead_code)]
+
+use sha2::Digest as _;
+use sha2::Sha256;
+use std::cmp::Ordering;
+
+const LEAF_VERSION: u8 = 0xc0;
+
+pub enum HashTag {
+    TapLeafTag,
+    TapBranchTag,
+    TapTweakTag,
+}
+#[derive(Clone)]
+pub struct TapLeaf {
+    leaf_version: u8,
+    tap_script: Vec<u8>,
+}
+
+impl TapLeaf {
+    pub fn new(tap_script: Vec<u8>) -> TapLeaf {
+        TapLeaf {
+            leaf_version: LEAF_VERSION,
+            tap_script,
+        }
+    }
+
+    pub fn hash(&self) -> [u8; 32] {
+        hash_tap_leaf(&self.tap_script, self.leaf_version)
+    }
+
+    pub fn hash_as_vec(&self) -> Vec<u8> {
+        self.hash().to_vec()
+    }
+}
+
+#[derive(Clone)]
+pub enum Branch {
+    Leaf(TapLeaf),
+    Branch(Box<TapBranch>),
+}
+
+#[derive(Clone)]
+pub struct TapBranch {
+    left_branch: Branch,
+    right_branch: Branch,
+}
+
+impl TapBranch {
+    pub fn new(first_branch: Branch, second_branch: Branch) -> TapBranch {
+        let first_branch_vec = match &first_branch {
+            Branch::Leaf(leaf) => leaf.hash_as_vec(),
+            Branch::Branch(branch) => branch.hash_as_vec(),
+        };
+
+        let second_branch_vec = match &second_branch {
+            Branch::Leaf(leaf) => leaf.hash_as_vec(),
+            Branch::Branch(branch) => branch.hash_as_vec(),
+        };
+
+        match &first_branch_vec.cmp(&second_branch_vec) {
+            Ordering::Less => TapBranch {
+                left_branch: first_branch,
+                right_branch: second_branch,
+            },
+            _ => TapBranch {
+                left_branch: second_branch,
+                right_branch: first_branch,
+            },
+        }
+    }
+
+    pub fn hash(&self) -> [u8; 32] {
+        let left_branch_vec = match &self.left_branch {
+            Branch::Branch(branch) => branch.hash_as_vec(),
+            Branch::Leaf(leaf) => leaf.hash_as_vec(),
+        };
+
+        let right_branch_vec = match &self.right_branch {
+            Branch::Branch(branch) => branch.hash_as_vec(),
+            Branch::Leaf(leaf) => leaf.hash_as_vec(),
+        };
+
+        hash_tap_branch(&left_branch_vec, &right_branch_vec)
+    }
+
+    pub fn hash_as_vec(&self) -> Vec<u8> {
+        self.hash().to_vec()
+    }
+}
+
+pub fn tagged_hash(data: impl AsRef<[u8]>, tag: HashTag) -> [u8; 32] {
+    let tag_digest = match tag {
+        HashTag::TapLeafTag => Sha256::digest("TapLeaf"),
+        HashTag::TapBranchTag => Sha256::digest("TapBranch"),
+        HashTag::TapTweakTag => Sha256::digest("Taptweak"),
+    };
+
+    let hash: [u8; 32] = {
+        Sha256::new()
+            .chain_update(&tag_digest)
+            .chain_update(&tag_digest)
+            .chain_update(&data)
+            .finalize()
+            .into()
+    };
+
+    hash
+}
+
+pub fn hash_tap_leaf(raw_script: &Vec<u8>, version: u8) -> [u8; 32] {
+    let mut data: Vec<u8> = Vec::new();
+
+    data.extend_from_slice(&[version]);
+    data.extend_from_slice(&[(&raw_script).len() as u8]);
+    data.extend_from_slice(raw_script);
+
+    tagged_hash(&data, HashTag::TapLeafTag)
+}
+
+pub fn hash_tap_branch(left_branch: &Vec<u8>, right_branch: &Vec<u8>) -> [u8; 32] {
+    let mut data: Vec<u8> = Vec::new();
+
+    data.extend_from_slice(left_branch);
+    data.extend_from_slice(right_branch);
+
+    tagged_hash(&data, HashTag::TapBranchTag)
+}
