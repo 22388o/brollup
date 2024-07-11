@@ -1,3 +1,1 @@
-# bvm
-# bvm
-# bvm
+# The Bitcoin Virtual Machine Project
