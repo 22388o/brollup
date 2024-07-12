@@ -32,6 +32,13 @@ impl TapLeaf {
         }
     }
 
+    pub fn new_with_version(tap_script: Vec<u8>, leaf_version: u8) -> TapLeaf {
+        TapLeaf {
+            leaf_version,
+            tap_script,
+        }
+    }
+
     pub fn hash(&self) -> [u8; 32] {
         hash_tap_leaf(&self.tap_script, self.leaf_version)
     }
