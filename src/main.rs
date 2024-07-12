@@ -92,15 +92,36 @@ mod tests {
     #[test]
     fn test_tap_root() {
         let tap_leaf: TapLeaf = TapLeaf::new(vec![0xaa, 0xbb, 0xcc]);
-        let inner_key: PublicKey =
-            "022b1a426e4e68cf052240da0ef9256e6cb2c713adf5f9d1a6b51349d90fb00ca3"
+
+        // Test - with even inner key
+
+        let inner_key_even: PublicKey =
+            "028c17db0c798574086299e5041ffbcfa06bd501eb0e50914731bfbd2f3c9f980e"
                 .parse()
                 .unwrap();
 
-        let taproot = TapRoot::new(inner_key, tap_leaf.into_branch());
+        let taproot = TapRoot::new(inner_key_even, tap_leaf.into_branch());
 
-        println!("tweaked key is: {}", taproot.tweaked_key().to_string());
-        println!("spk is: {}", hex::encode(taproot.spk()));
+        let expected_with_odd: Vec<u8> =
+            hex::decode("51202e1a63521f2d72ff54da28cf8e114c6e3ce3ef497e9a6ac71b3e28e06446a218")
+                .unwrap();
+
+        assert_eq!(taproot.spk(), expected_with_odd);
+
+        // Test - with odd inner key
+
+        let inner_key_odd: PublicKey =
+            "037b55a1c853b28c398141c8fdf4eb69469430f019983af4be4b5aa7512936f295"
+                .parse()
+                .unwrap();
+
+        let taproot = TapRoot::new(inner_key_odd, tap_leaf.into_branch());
+
+        let expected_with_even: Vec<u8> =
+            hex::decode("51208cda55510b8f99ec248ed9772e6a71537eb26142d6624d38426a7a1311b488e6")
+                .unwrap();
+
+        assert_eq!(taproot.spk(), expected_with_even);
     }
 }
 

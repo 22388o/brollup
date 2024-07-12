@@ -108,40 +108,41 @@ impl TapBranch {
 }
 
 pub struct TapRoot {
-    inner_key: PublicKey,
+    inner_key: XOnlyPublicKey,
     uppermost_branch: Branch,
 }
 
 impl TapRoot {
     pub fn new(key: PublicKey, branch: Branch) -> TapRoot {
+        let inner_key = match &key.x_only_public_key().1 {
+            Parity::Even => key.clone().x_only_public_key().0,
+            Parity::Odd => key.clone().negate(&Secp256k1::new()).x_only_public_key().0,
+        };
+
         TapRoot {
-            inner_key: key,
+            inner_key,
             uppermost_branch: branch,
         }
     }
-    pub fn inner_key_parity(&self) -> Parity {
-        let (_, parity) = self.inner_key.x_only_public_key();
-        parity
-    }
-    pub fn inner_key_x_only(&self) -> XOnlyPublicKey {
-        let (x_only, _) = self.inner_key.x_only_public_key();
-        x_only
+
+    pub fn inner_key_full(&self) -> PublicKey {
+        self.inner_key.public_key(Parity::Even)
     }
 
     pub fn tap_tweak(&self) -> [u8; 32] {
-        let inner: Vec<u8> = self.inner_key.x_only_public_key().0.serialize().to_vec();
-        let tweak: Vec<u8> = match &self.uppermost_branch {
+        let inner_vec: Vec<u8> = self.inner_key.serialize().to_vec();
+        let tweak_vec: Vec<u8> = match &self.uppermost_branch {
             Branch::Leaf(leaf) => leaf.hash_as_vec(),
             Branch::Branch(branch) => branch.hash_as_vec(),
         };
 
-        hash_tap_tweak(&inner, &tweak)
+        hash_tap_tweak(&inner_vec, &tweak_vec)
     }
 
     pub fn tweaked_key(&self) -> PublicKey {
         let scalar: Scalar = Scalar::from_be_bytes(self.tap_tweak()).unwrap();
 
-        self.inner_key
+        self.inner_key_full()
             .add_exp_tweak(&Secp256k1::new(), &scalar)
             .unwrap()
     }
