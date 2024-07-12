@@ -161,14 +161,27 @@ mod tests {
 
     #[test]
     fn test_taproot_script_path_only() {
-        let tap_leaf: TapLeaf = TapLeaf::new(vec![0x01, 0x23, 0xab, 0xcd]);
-        let tap_root: TapRoot = TapRoot::script_path_only(tap_leaf.into_branch());
+        // Test with odd tweaked key
+
+        let tap_leaf_with_odd: TapLeaf = TapLeaf::new(vec![0x01, 0x23, 0xab, 0xcd]);
+        let tap_root_with_odd: TapRoot = TapRoot::script_path_only(tap_leaf_with_odd.into_branch());
 
         let expected_spk =
             hex::decode("512085dbf94f892274c41acb75d48daf338c739d1157c70963912db526c4cad30d1a")
                 .unwrap();
-        assert_eq!(tap_root.spk(), expected_spk);
-        assert_eq!(tap_root.tweaked_key_parity(), Parity::Odd);
+        assert_eq!(tap_root_with_odd.spk(), expected_spk);
+        assert_eq!(tap_root_with_odd.tweaked_key_parity(), Parity::Odd);
+
+        // Test with even tweaked key
+
+        let tap_leaf_with_odd: TapLeaf = TapLeaf::new(vec![0x01, 0x23, 0xab, 0xcd, 0xef, 0xff]);
+        let tap_root_with_odd: TapRoot = TapRoot::script_path_only(tap_leaf_with_odd.into_branch());
+
+        let expected_spk =
+            hex::decode("51201fbb64a309f43ee6a442cd293a9df3ce3bbb0864a2215a1091c06521021f9de4")
+                .unwrap();
+        assert_eq!(tap_root_with_odd.spk(), expected_spk);
+        assert_eq!(tap_root_with_odd.tweaked_key_parity(), Parity::Even);
     }
 }
 
