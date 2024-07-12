@@ -114,9 +114,9 @@ pub struct TapRoot {
 
 impl TapRoot {
     pub fn new(key: PublicKey, branch: Branch) -> TapRoot {
-        let inner_key = match &key.x_only_public_key().1 {
-            Parity::Even => key.clone().x_only_public_key().0,
-            Parity::Odd => key.clone().negate(&Secp256k1::new()).x_only_public_key().0,
+        let inner_key: XOnlyPublicKey = match key.x_only_public_key().1 {
+            Parity::Even => key.x_only_public_key().0,
+            Parity::Odd => key.negate(&Secp256k1::new()).x_only_public_key().0,
         };
 
         TapRoot {
