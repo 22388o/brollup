@@ -109,42 +109,52 @@ impl TapBranch {
 
 pub struct TapRoot {
     inner_key: XOnlyPublicKey,
-    uppermost_branch: Branch,
+    uppermost_branch: Option<Branch>,
 }
 
 impl TapRoot {
-    pub fn new(key: PublicKey, branch: Branch) -> TapRoot {
-        let inner_key: XOnlyPublicKey = match key.x_only_public_key().1 {
-            Parity::Even => key.x_only_public_key().0,
-            Parity::Odd => key.negate(&Secp256k1::new()).x_only_public_key().0,
-        };
-
+    pub fn key_and_script_path(key: PublicKey, branch: Branch) -> TapRoot {
         TapRoot {
-            inner_key,
-            uppermost_branch: branch,
+            inner_key: key.x_only_public_key().0,
+            uppermost_branch: Some(branch),
         }
     }
 
-    pub fn inner_key_full(&self) -> PublicKey {
+    pub fn key_path_only(key: PublicKey) -> TapRoot {
+        TapRoot {
+            inner_key: key.x_only_public_key().0,
+            uppermost_branch: None,
+        }
+    }
+
+    pub fn lift_x(&self) -> PublicKey {
         self.inner_key.public_key(Parity::Even)
     }
 
     pub fn tap_tweak(&self) -> [u8; 32] {
         let inner_vec: Vec<u8> = self.inner_key.serialize().to_vec();
-        let tweak_vec: Vec<u8> = match &self.uppermost_branch {
-            Branch::Leaf(leaf) => leaf.hash_as_vec(),
-            Branch::Branch(branch) => branch.hash_as_vec(),
-        };
+        let mut tweak_vec: Vec<u8> = vec![];
+
+        if let Some(branch) = &self.uppermost_branch {
+            match branch {
+                Branch::Leaf(leaf) => tweak_vec.extend(leaf.hash_as_vec()),
+                Branch::Branch(branch) => tweak_vec.extend(branch.hash_as_vec()),
+            };
+        }
 
         hash_tap_tweak(&inner_vec, &tweak_vec)
     }
 
     pub fn tweaked_key(&self) -> PublicKey {
-        let scalar: Scalar = Scalar::from_be_bytes(self.tap_tweak()).unwrap();
+        if let Some(_) = &self.uppermost_branch {
+            let scalar: Scalar = Scalar::from_be_bytes(self.tap_tweak()).unwrap();
 
-        self.inner_key_full()
-            .add_exp_tweak(&Secp256k1::new(), &scalar)
-            .unwrap()
+            self.lift_x()
+                .add_exp_tweak(&Secp256k1::new(), &scalar)
+                .unwrap()
+        } else {
+            self.lift_x()
+        }
     }
 
     pub fn tweaked_key_parity(&self) -> Parity {
@@ -188,30 +198,30 @@ pub fn tagged_hash(data: impl AsRef<[u8]>, tag: HashTag) -> [u8; 32] {
     hash
 }
 
-pub fn hash_tap_leaf(raw_script: &Vec<u8>, version: u8) -> [u8; 32] {
+pub fn hash_tap_leaf(raw_script_vec: &Vec<u8>, version: u8) -> [u8; 32] {
     let mut data: Vec<u8> = Vec::new();
 
     data.extend_from_slice(&[version]);
-    data.extend_from_slice(&[(&raw_script).len() as u8]);
-    data.extend_from_slice(raw_script);
+    data.extend_from_slice(&[(&raw_script_vec).len() as u8]);
+    data.extend_from_slice(raw_script_vec);
 
     tagged_hash(&data, HashTag::TapLeafTag)
 }
 
-pub fn hash_tap_branch(left_branch: &Vec<u8>, right_branch: &Vec<u8>) -> [u8; 32] {
+pub fn hash_tap_branch(left_branch_vec: &Vec<u8>, right_branch_vec: &Vec<u8>) -> [u8; 32] {
     let mut data: Vec<u8> = Vec::new();
 
-    data.extend_from_slice(left_branch);
-    data.extend_from_slice(right_branch);
+    data.extend_from_slice(left_branch_vec);
+    data.extend_from_slice(right_branch_vec);
 
     tagged_hash(&data, HashTag::TapBranchTag)
 }
 
-pub fn hash_tap_tweak(inner_key: &Vec<u8>, tweak: &Vec<u8>) -> [u8; 32] {
+pub fn hash_tap_tweak(inner_key_vec: &Vec<u8>, tweak_vec: &Vec<u8>) -> [u8; 32] {
     let mut data: Vec<u8> = Vec::new();
 
-    data.extend_from_slice(inner_key);
-    data.extend_from_slice(tweak);
+    data.extend_from_slice(inner_key_vec);
+    data.extend_from_slice(tweak_vec);
 
     tagged_hash(&data, HashTag::TapTweakTag)
 }

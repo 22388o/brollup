@@ -90,7 +90,7 @@ mod tests {
     }
 
     #[test]
-    fn test_tap_root() {
+    fn test_taproot_key_and_script_path() {
         let tap_leaf: TapLeaf = TapLeaf::new(vec![0xaa, 0xbb, 0xcc]);
 
         // Test - with even inner key
@@ -100,7 +100,7 @@ mod tests {
                 .parse()
                 .unwrap();
 
-        let taproot = TapRoot::new(inner_key_even, tap_leaf.into_branch());
+        let taproot = TapRoot::key_and_script_path(inner_key_even, tap_leaf.into_branch());
 
         let expected_with_odd: Vec<u8> =
             hex::decode("51202e1a63521f2d72ff54da28cf8e114c6e3ce3ef497e9a6ac71b3e28e06446a218")
@@ -115,13 +115,46 @@ mod tests {
                 .parse()
                 .unwrap();
 
-        let taproot = TapRoot::new(inner_key_odd, tap_leaf.into_branch());
+        let taproot = TapRoot::key_and_script_path(inner_key_odd, tap_leaf.into_branch());
 
         let expected_with_even: Vec<u8> =
             hex::decode("51208cda55510b8f99ec248ed9772e6a71537eb26142d6624d38426a7a1311b488e6")
                 .unwrap();
 
         assert_eq!(taproot.spk(), expected_with_even);
+    }
+
+    #[test]
+    fn test_taproot_key_path_only() {
+        // Test with even inner key
+
+        let inner_key_even: PublicKey =
+            "02d14c281713f15b608cc75d94717bbb1c2a4ff11e169c757f87a149daf61d54f0"
+                .parse()
+                .unwrap();
+
+        let taproot_with_even_inner = TapRoot::key_path_only(inner_key_even);
+
+        let expected_spk_with_inner =
+            hex::decode("5120d14c281713f15b608cc75d94717bbb1c2a4ff11e169c757f87a149daf61d54f0")
+                .unwrap();
+
+        assert_eq!(taproot_with_even_inner.spk(), expected_spk_with_inner);
+
+        // Test with odd inner key
+
+        let inner_key_odd: PublicKey =
+            "03a2314467943d47cf102477b985d21c5ffa6512961b08906724f13e779cfed299"
+                .parse()
+                .unwrap();
+
+        let taproot_with_odd_inner = TapRoot::key_path_only(inner_key_odd);
+
+        let expected_spk_with_inner =
+            hex::decode("5120a2314467943d47cf102477b985d21c5ffa6512961b08906724f13e779cfed299")
+                .unwrap();
+
+        assert_eq!(taproot_with_odd_inner.spk(), expected_spk_with_inner);
     }
 }
 
