@@ -1,8 +1,10 @@
 #![allow(dead_code)]
 
+use musig2::secp256k1::{Parity, PublicKey, Scalar, Secp256k1, XOnlyPublicKey};
 use sha2::Digest as _;
 use sha2::Sha256;
 use std::cmp::Ordering;
+use std::vec;
 
 const LEAF_VERSION: u8 = 0xc0;
 
@@ -32,7 +34,7 @@ impl TapLeaf {
         }
     }
 
-    pub fn new_with_version(tap_script: Vec<u8>, leaf_version: u8) -> TapLeaf {
+    pub fn new_version(tap_script: Vec<u8>, leaf_version: u8) -> TapLeaf {
         TapLeaf {
             leaf_version,
             tap_script,
@@ -105,11 +107,79 @@ impl TapBranch {
     }
 }
 
+pub struct TapRoot {
+    inner_key: PublicKey,
+    uppermost_branch: Branch,
+}
+
+impl TapRoot {
+    pub fn new(key: PublicKey, branch: Branch) -> TapRoot {
+        TapRoot {
+            inner_key: key,
+            uppermost_branch: branch,
+        }
+    }
+    pub fn inner_key_parity(&self) -> Parity {
+        let (_, parity) = self.inner_key.x_only_public_key();
+        parity
+    }
+    pub fn inner_key_x_only(&self) -> XOnlyPublicKey {
+        let (x_only, _) = self.inner_key.x_only_public_key();
+        x_only
+    }
+
+    pub fn tap_tweak(&self) -> [u8; 32] {
+        let inner: Vec<u8> = self
+            .inner_key
+            .clone()
+            .x_only_public_key()
+            .0
+            .serialize()
+            .to_vec();
+        let tweak: Vec<u8> = match &self.uppermost_branch {
+            Branch::Leaf(leaf) => leaf.hash_as_vec(),
+            Branch::Branch(branch) => branch.hash_as_vec(),
+        };
+
+        hash_tap_tweak(&inner, &tweak)
+    }
+
+    pub fn tweaked_key(&self) -> PublicKey {
+        let scalar: Scalar = Scalar::from_be_bytes(self.tap_tweak()).unwrap();
+
+        self.inner_key
+            .clone()
+            .add_exp_tweak(&Secp256k1::new(), &scalar)
+            .unwrap()
+    }
+
+    pub fn tweaked_key_parity(&self) -> Parity {
+        let (_, parity) = self.tweaked_key().x_only_public_key();
+        parity
+    }
+    pub fn tweaked_key_x_only(&self) -> XOnlyPublicKey {
+        let (x_only, _) = self.tweaked_key().x_only_public_key();
+        x_only
+    }
+
+    pub fn spk(&self) -> Vec<u8> {
+        let mut spk: Vec<u8> = vec![0x51, 0x20];
+        spk.extend(
+            self.tweaked_key()
+                .x_only_public_key()
+                .0
+                .serialize()
+                .to_vec(),
+        );
+        spk
+    }
+}
+
 pub fn tagged_hash(data: impl AsRef<[u8]>, tag: HashTag) -> [u8; 32] {
     let tag_digest = match tag {
         HashTag::TapLeafTag => Sha256::digest("TapLeaf"),
         HashTag::TapBranchTag => Sha256::digest("TapBranch"),
-        HashTag::TapTweakTag => Sha256::digest("Taptweak"),
+        HashTag::TapTweakTag => Sha256::digest("TapTweak"),
     };
 
     let hash: [u8; 32] = {
@@ -141,4 +211,13 @@ pub fn hash_tap_branch(left_branch: &Vec<u8>, right_branch: &Vec<u8>) -> [u8; 32
     data.extend_from_slice(right_branch);
 
     tagged_hash(&data, HashTag::TapBranchTag)
+}
+
+pub fn hash_tap_tweak(inner_key: &Vec<u8>, tweak: &Vec<u8>) -> [u8; 32] {
+    let mut data: Vec<u8> = Vec::new();
+
+    data.extend_from_slice(inner_key);
+    data.extend_from_slice(tweak);
+
+    tagged_hash(&data, HashTag::TapTweakTag)
 }

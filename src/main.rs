@@ -67,7 +67,7 @@ mod tests {
         // Test - Reversed order does not affect the branch
 
         let tap_branch_reversed: TapBranch =
-        TapBranch::new(tap_leaf_2.into_branch(), tap_leaf_1.into_branch());
+            TapBranch::new(tap_leaf_2.into_branch(), tap_leaf_1.into_branch());
 
         assert_eq!(tap_branch_reversed.hash_as_vec(), expected);
 
@@ -87,6 +87,20 @@ mod tests {
                 .unwrap();
 
         assert_eq!(upper_tap_branch.hash_as_vec(), expected_upper);
+    }
+
+    #[test]
+    fn test_tap_root() {
+        let tap_leaf: TapLeaf = TapLeaf::new(vec![0xaa, 0xbb, 0xcc]);
+        let inner_key: PublicKey =
+            "022b1a426e4e68cf052240da0ef9256e6cb2c713adf5f9d1a6b51349d90fb00ca3"
+                .parse()
+                .unwrap();
+
+        let taproot = TapRoot::new(inner_key, tap_leaf.into_branch());
+
+        println!("tweaked key is: {}", taproot.tweaked_key().to_string());
+        println!("spk is: {}", hex::encode(taproot.spk()));
     }
 }
 
