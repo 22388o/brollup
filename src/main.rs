@@ -50,14 +50,15 @@ mod tests {
 
     #[test]
     fn test_tap_branch() {
+        // Test - Branch two TapLeaves
+
         let tap_leaf_1: TapLeaf = TapLeaf::new(vec![0xde, 0xad]);
         let tap_leaf_2: TapLeaf = TapLeaf::new(vec![0xbe, 0xef]);
 
-        let branch_1: Branch = Branch::Leaf(tap_leaf_1.clone());
-        let branch_2: Branch = Branch::Leaf(tap_leaf_2.clone());
-
-        let tap_branch: TapBranch = TapBranch::new(branch_1.clone(), branch_2.clone());
-        let tap_branch_reversed: TapBranch = TapBranch::new(branch_2, branch_1);
+        let tap_branch: TapBranch =
+            TapBranch::new(tap_leaf_1.into_branch(), tap_leaf_2.into_branch());
+        let tap_branch_reversed: TapBranch =
+            TapBranch::new(tap_leaf_2.into_branch(), tap_leaf_1.into_branch());
 
         let expected: Vec<u8> =
             hex::decode("b220872a5f6915e7779e659c2925b4b6cef6c1792f2e7bed0ba6331631fa7c63")
@@ -65,6 +66,23 @@ mod tests {
 
         assert_eq!(tap_branch.hash_as_vec(), expected);
         assert_eq!(tap_branch_reversed.hash_as_vec(), expected);
+
+        // Test - Branch two TapBranches
+
+        let tap_leaf_3: TapLeaf = TapLeaf::new(vec![0xaa, 0xbb]);
+        let tap_leaf_4: TapLeaf = TapLeaf::new(vec![0xcc, 0xdd]);
+
+        let tap_branch_2: TapBranch =
+            TapBranch::new(tap_leaf_3.into_branch(), tap_leaf_4.into_branch());
+
+        let upper_tap_branch: TapBranch =
+            TapBranch::new(tap_branch.into_branch(), tap_branch_2.into_branch());
+
+        let expected_upper: Vec<u8> =
+            hex::decode("a590e5a5cc3576cacb587676397bb8c7fa8645279ce740e5bf48bc7c25b1d813")
+                .unwrap();
+
+        assert_eq!(upper_tap_branch.hash_as_vec(), expected_upper);
     }
 }
 

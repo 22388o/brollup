@@ -32,6 +32,10 @@ impl TapLeaf {
     pub fn hash_as_vec(&self) -> Vec<u8> {
         self.hash().to_vec()
     }
+
+    pub fn into_branch(&self) -> Branch {
+        Branch::Leaf(self.clone())
+    }
 }
 
 #[derive(Clone)]
@@ -47,25 +51,25 @@ pub struct TapBranch {
 }
 
 impl TapBranch {
-    pub fn new(first_branch: Branch, second_branch: Branch) -> TapBranch {
-        let first_branch_vec = match &first_branch {
+    pub fn new(first: Branch, second: Branch) -> TapBranch {
+        let first_branch_vec = match &first {
             Branch::Leaf(leaf) => leaf.hash_as_vec(),
             Branch::Branch(branch) => branch.hash_as_vec(),
         };
 
-        let second_branch_vec = match &second_branch {
+        let second_branch_vec = match &second {
             Branch::Leaf(leaf) => leaf.hash_as_vec(),
             Branch::Branch(branch) => branch.hash_as_vec(),
         };
 
         match &first_branch_vec.cmp(&second_branch_vec) {
             Ordering::Less => TapBranch {
-                left_branch: first_branch,
-                right_branch: second_branch,
+                left_branch: first,
+                right_branch: second,
             },
             _ => TapBranch {
-                left_branch: second_branch,
-                right_branch: first_branch,
+                left_branch: second,
+                right_branch: first,
             },
         }
     }
@@ -86,6 +90,10 @@ impl TapBranch {
 
     pub fn hash_as_vec(&self) -> Vec<u8> {
         self.hash().to_vec()
+    }
+
+    pub fn into_branch(&self) -> Branch {
+        Branch::Branch(Box::new(self.clone()))
     }
 }
 
