@@ -53,12 +53,12 @@ pub struct TapBranch {
 
 impl TapBranch {
     pub fn new(first: Branch, second: Branch) -> TapBranch {
-        let first_branch_vec = match &first {
+        let first_branch_vec: Vec<u8> = match &first {
             Branch::Leaf(leaf) => leaf.hash_as_vec(),
             Branch::Branch(branch) => branch.hash_as_vec(),
         };
 
-        let second_branch_vec = match &second {
+        let second_branch_vec: Vec<u8> = match &second {
             Branch::Leaf(leaf) => leaf.hash_as_vec(),
             Branch::Branch(branch) => branch.hash_as_vec(),
         };
@@ -76,12 +76,12 @@ impl TapBranch {
     }
 
     pub fn hash(&self) -> [u8; 32] {
-        let left_branch_vec = match &self.left_branch {
+        let left_branch_vec: Vec<u8> = match &self.left_branch {
             Branch::Branch(branch) => branch.hash_as_vec(),
             Branch::Leaf(leaf) => leaf.hash_as_vec(),
         };
 
-        let right_branch_vec = match &self.right_branch {
+        let right_branch_vec: Vec<u8> = match &self.right_branch {
             Branch::Branch(branch) => branch.hash_as_vec(),
             Branch::Leaf(leaf) => leaf.hash_as_vec(),
         };
