@@ -1,5 +1,6 @@
 mod taproot;
 
+use hex;
 use musig2::secp256k1::PublicKey;
 use musig2::KeyAggContext;
 use taproot::*;
@@ -48,21 +49,22 @@ mod tests {
     }
 
     #[test]
-    fn test_tapbranch() {
-        let tap_script_1: Vec<u8> = vec![0xaa, 0xbb];
-        let tap_leaf_1: TapLeaf = TapLeaf::new(tap_script_1);
+    fn test_tap_branch() {
+        let tap_leaf_1: TapLeaf = TapLeaf::new(vec![0xde, 0xad]);
+        let tap_leaf_2: TapLeaf = TapLeaf::new(vec![0xbe, 0xef]);
 
-        let tap_script_2: Vec<u8> = vec![0xcc, 0xdd];
-        let tap_leaf_2: TapLeaf = TapLeaf::new(tap_script_2);
+        let branch_1: Branch = Branch::Leaf(tap_leaf_1.clone());
+        let branch_2: Branch = Branch::Leaf(tap_leaf_2.clone());
 
-        let left_branch = Branch::Leaf(tap_leaf_1.clone());
-        let right_branch = Branch::Leaf(tap_leaf_2.clone());
+        let tap_branch: TapBranch = TapBranch::new(branch_1.clone(), branch_2.clone());
+        let tap_branch_reversed: TapBranch = TapBranch::new(branch_2, branch_1);
 
-        let tap_branch = TapBranch::new(left_branch, right_branch);
+        let expected: Vec<u8> =
+            hex::decode("b220872a5f6915e7779e659c2925b4b6cef6c1792f2e7bed0ba6331631fa7c63")
+                .unwrap();
 
-        println!("tap_leaf_1 hash is: {:?}", tap_leaf_1.hash_as_vec());
-        println!("tap_leaf_1 hash is: {:?}", tap_leaf_2.hash_as_vec());
-        println!("tapbranch hash is: {:?}", tap_branch.hash_as_vec());
+        assert_eq!(tap_branch.hash_as_vec(), expected);
+        assert_eq!(tap_branch_reversed.hash_as_vec(), expected);
     }
 }
 
