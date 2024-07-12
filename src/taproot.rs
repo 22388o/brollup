@@ -21,6 +21,7 @@ pub enum HashTag {
     TapLeafTag,
     TapBranchTag,
     TapTweakTag,
+    CustomTag(String),
 }
 
 #[derive(Clone)]
@@ -200,6 +201,7 @@ pub fn tagged_hash(data: impl AsRef<[u8]>, tag: HashTag) -> [u8; 32] {
         HashTag::TapLeafTag => Sha256::digest("TapLeaf"),
         HashTag::TapBranchTag => Sha256::digest("TapBranch"),
         HashTag::TapTweakTag => Sha256::digest("TapTweak"),
+        HashTag::CustomTag(string) => Sha256::digest(string),
     };
 
     let hash: [u8; 32] = {
