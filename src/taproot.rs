@@ -11,6 +11,13 @@ pub enum HashTag {
     TapBranchTag,
     TapTweakTag,
 }
+
+#[derive(Clone)]
+pub enum Branch {
+    Leaf(TapLeaf),
+    Branch(Box<TapBranch>),
+}
+
 #[derive(Clone)]
 pub struct TapLeaf {
     leaf_version: u8,
@@ -36,12 +43,6 @@ impl TapLeaf {
     pub fn into_branch(&self) -> Branch {
         Branch::Leaf(self.clone())
     }
-}
-
-#[derive(Clone)]
-pub enum Branch {
-    Leaf(TapLeaf),
-    Branch(Box<TapBranch>),
 }
 
 #[derive(Clone)]

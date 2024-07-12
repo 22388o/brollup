@@ -64,7 +64,7 @@ mod tests {
 
         assert_eq!(tap_branch.hash_as_vec(), expected);
 
-        // Test - Reversed order does not effect the branch
+        // Test - Reversed order does not affect the branch
 
         let tap_branch_reversed: TapBranch =
         TapBranch::new(tap_leaf_2.into_branch(), tap_leaf_1.into_branch());
