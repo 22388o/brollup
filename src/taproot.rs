@@ -129,12 +129,7 @@ impl TapRoot {
     }
 
     pub fn tap_tweak(&self) -> [u8; 32] {
-        let inner: Vec<u8> = self
-            .inner_key
-            .x_only_public_key()
-            .0
-            .serialize()
-            .to_vec();
+        let inner: Vec<u8> = self.inner_key.x_only_public_key().0.serialize().to_vec();
         let tweak: Vec<u8> = match &self.uppermost_branch {
             Branch::Leaf(leaf) => leaf.hash_as_vec(),
             Branch::Branch(branch) => branch.hash_as_vec(),
