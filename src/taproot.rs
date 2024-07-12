@@ -144,7 +144,7 @@ impl TapRoot {
         }
     }
 
-    pub fn lift_x(&self) -> PublicKey {
+    pub fn inner_key_lifted(&self) -> PublicKey {
         self.inner_key.public_key(Parity::Even)
     }
 
@@ -166,11 +166,11 @@ impl TapRoot {
         if let Some(_) = &self.uppermost_branch {
             let scalar: Scalar = Scalar::from_be_bytes(self.tap_tweak()).unwrap();
 
-            self.lift_x()
+            self.inner_key_lifted()
                 .add_exp_tweak(&Secp256k1::new(), &scalar)
                 .unwrap()
         } else {
-            self.lift_x()
+            self.inner_key_lifted()
         }
     }
 
