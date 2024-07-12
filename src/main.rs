@@ -37,9 +37,9 @@ mod tests {
             .with_taproot_tweak(&tap_leaf.hash())
             .unwrap();
 
-        let agg_pubkey: PublicKey = (&key_agg_ctx).aggregated_pubkey();
+        let agg_pubkey: PublicKey = key_agg_ctx.aggregated_pubkey();
 
-        let agg_pubkey_without_tweak: PublicKey = (&key_agg_ctx).aggregated_pubkey_untweaked();
+        let agg_pubkey_without_tweak: PublicKey = key_agg_ctx.aggregated_pubkey_untweaked();
 
         println!(
             "aggregate pubkey without tweak: {} ",
@@ -57,14 +57,18 @@ mod tests {
 
         let tap_branch: TapBranch =
             TapBranch::new(tap_leaf_1.into_branch(), tap_leaf_2.into_branch());
-        let tap_branch_reversed: TapBranch =
-            TapBranch::new(tap_leaf_2.into_branch(), tap_leaf_1.into_branch());
 
         let expected: Vec<u8> =
             hex::decode("b220872a5f6915e7779e659c2925b4b6cef6c1792f2e7bed0ba6331631fa7c63")
                 .unwrap();
 
         assert_eq!(tap_branch.hash_as_vec(), expected);
+
+        // Test - Reversed order does not effect the branch
+
+        let tap_branch_reversed: TapBranch =
+        TapBranch::new(tap_leaf_2.into_branch(), tap_leaf_1.into_branch());
+
         assert_eq!(tap_branch_reversed.hash_as_vec(), expected);
 
         // Test - Branch two TapBranches
