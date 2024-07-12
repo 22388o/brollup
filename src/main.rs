@@ -7,6 +7,8 @@ use taproot::*;
 
 #[cfg(test)]
 mod tests {
+    use musig2::secp256k1::Parity;
+
     use super::*;
 
     #[test]
@@ -155,6 +157,18 @@ mod tests {
                 .unwrap();
 
         assert_eq!(taproot_with_odd_inner.spk(), expected_spk_with_inner);
+    }
+
+    #[test]
+    fn test_taproot_script_path_only() {
+        let tap_leaf: TapLeaf = TapLeaf::new(vec![0x01, 0x23, 0xab, 0xcd]);
+        let tap_root: TapRoot = TapRoot::script_path_only(tap_leaf.into_branch());
+
+        let expected_spk =
+            hex::decode("512085dbf94f892274c41acb75d48daf338c739d1157c70963912db526c4cad30d1a")
+                .unwrap();
+        assert_eq!(tap_root.spk(), expected_spk);
+        assert_eq!(tap_root.tweaked_key_parity(), Parity::Odd);
     }
 }
 

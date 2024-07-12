@@ -1,5 +1,6 @@
 #![allow(dead_code)]
 
+use lazy_static::lazy_static;
 use musig2::secp256k1::{Parity, PublicKey, Scalar, Secp256k1, XOnlyPublicKey};
 use sha2::Digest as _;
 use sha2::Sha256;
@@ -7,6 +8,14 @@ use std::cmp::Ordering;
 use std::vec;
 
 const LEAF_VERSION: u8 = 0xc0;
+
+lazy_static! {
+    static ref POINT_WITH_UNKNOWN_DISCRETE_LOGARITHM: Vec<u8> = vec![
+        0x50, 0x92, 0x9b, 0x74, 0xc1, 0xa0, 0x49, 0x54, 0xb7, 0x8b, 0x4b, 0x60, 0x35, 0xe9, 0x7a,
+        0x5e, 0x07, 0x8a, 0x5a, 0x0f, 0x28, 0xec, 0x96, 0xd5, 0x47, 0xbf, 0xee, 0x9a, 0xce, 0x80,
+        0x3a, 0xc0
+    ];
+}
 
 pub enum HashTag {
     TapLeafTag,
@@ -124,6 +133,13 @@ impl TapRoot {
         TapRoot {
             inner_key: key.x_only_public_key().0,
             uppermost_branch: None,
+        }
+    }
+
+    pub fn script_path_only(branch: Branch) -> TapRoot {
+        TapRoot {
+            inner_key: XOnlyPublicKey::from_slice(&POINT_WITH_UNKNOWN_DISCRETE_LOGARITHM).unwrap(),
+            uppermost_branch: Some(branch),
         }
     }
 
