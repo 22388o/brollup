@@ -131,7 +131,6 @@ impl TapRoot {
     pub fn tap_tweak(&self) -> [u8; 32] {
         let inner: Vec<u8> = self
             .inner_key
-            .clone()
             .x_only_public_key()
             .0
             .serialize()
@@ -148,7 +147,6 @@ impl TapRoot {
         let scalar: Scalar = Scalar::from_be_bytes(self.tap_tweak()).unwrap();
 
         self.inner_key
-            .clone()
             .add_exp_tweak(&Secp256k1::new(), &scalar)
             .unwrap()
     }
