@@ -183,6 +183,26 @@ mod tests {
         assert_eq!(tap_root_with_odd.spk(), expected_spk);
         assert_eq!(tap_root_with_odd.tweaked_key_parity(), Parity::Even);
     }
+
+    #[test]
+    fn test_control_block_create() {
+        let inner_key: PublicKey =
+            "03a2314467943d47cf102477b985d21c5ffa6512961b08906724f13e779cfed299"
+                .parse()
+                .unwrap();
+
+        let path: Vec<u8> =
+            hex::decode("0576e0a5d1c8fd852ab17ffac14e336b3143298fad1d3d9a302212ec9b1f8202")
+                .unwrap();
+
+        let control_block = ControlBlock::new(inner_key.x_only_public_key().0, Parity::Odd, path);
+
+        let expected_cb =
+        hex::decode("c1a2314467943d47cf102477b985d21c5ffa6512961b08906724f13e779cfed2990576e0a5d1c8fd852ab17ffac14e336b3143298fad1d3d9a302212ec9b1f8202")
+            .unwrap();
+
+        assert_eq!(control_block.to_vec(), expected_cb);
+    }
 }
 
 fn main() {}

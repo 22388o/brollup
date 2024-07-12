@@ -196,6 +196,37 @@ impl TapRoot {
     }
 }
 
+pub struct ControlBlock {
+    inner_key: XOnlyPublicKey,
+    parity: Parity,
+    leaf_version: u8,
+    path: Vec<u8>,
+}
+
+impl ControlBlock {
+    pub fn new(inner_key: XOnlyPublicKey, parity: Parity, path: Vec<u8>) -> ControlBlock {
+        ControlBlock {
+            inner_key,
+            parity,
+            leaf_version: LEAF_VERSION,
+            path,
+        }
+    }
+
+    pub fn to_vec(&self) -> Vec<u8> {
+        let mut vec: Vec<u8> = Vec::<u8>::new();
+
+        match self.parity {
+            Parity::Even => vec.push(self.leaf_version),
+            Parity::Odd => vec.push(self.leaf_version + 1),
+        };
+
+        vec.extend(self.inner_key.serialize().to_vec());
+        vec.extend(self.path.clone());
+        vec
+    }
+}
+
 pub fn tagged_hash(data: impl AsRef<[u8]>, tag: HashTag) -> [u8; 32] {
     let tag_digest = match tag {
         HashTag::TapLeafTag => Sha256::digest("TapLeaf"),
