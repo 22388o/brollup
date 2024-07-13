@@ -203,6 +203,12 @@ mod tests {
 
         assert_eq!(control_block.to_vec(), expected_cb);
     }
+
+    #[test]
+    fn test_tap_tree() {
+        let number: u8 = 18;
+        println!("zortio {} ", (number as f64).log2() as u8);
+    }
 }
 
 fn main() {}

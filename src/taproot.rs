@@ -1,7 +1,10 @@
 #![allow(dead_code)]
 
+use core::num;
 use lazy_static::lazy_static;
 use musig2::secp256k1::{Parity, PublicKey, Scalar, Secp256k1, XOnlyPublicKey};
+use sha2::digest::consts::False;
+use sha2::digest::consts::True;
 use sha2::Digest as _;
 use sha2::Sha256;
 use std::cmp::Ordering;
@@ -193,6 +196,93 @@ impl TapRoot {
                 .to_vec(),
         );
         spk
+    }
+}
+
+pub struct TapTree {
+    leaves: Vec<TapLeaf>,
+    uppermost_branch: Branch,
+}
+
+impl TapTree {
+    pub fn new(leaves: Vec<TapLeaf>) -> TapTree {
+        match leaves.len() {
+            0 => panic!("TapTree must be initialized with at least one TapLeaf."),
+            1 => TapTree {
+                leaves: leaves.clone(),
+                uppermost_branch: leaves[0].into_branch(),
+            },
+            _ => {
+                // Number of TapTree levels is = log2(number of TapLeaves)
+                let num_levels: u8 = (leaves.len() as f64).log2() as u8;
+
+                let mut current_level: Vec<Branch> = Vec::new();
+                let mut above_level: Vec<Branch> = Vec::new();
+
+                // For each level of the TapTree
+                for level in 0..num_levels {
+                    // If it is the level zero, initialize current_level  with individual TapLeaves
+                    if level == 0 {
+                        for i in 0..leaves.len() {
+                            current_level.push(leaves[i].clone().into_branch());
+                        }
+                    }
+                    // If it is the level one or above, move above_level items into current_level, and reset above_level
+                    else {
+                        current_level.clear();
+                        current_level.extend(above_level.clone());
+                        above_level.clear();
+                    }
+
+                    let mut iterator: usize = 0;
+                    let iterator_bound: usize = current_level.len();
+
+                    let operations: usize = (iterator_bound / 2) + (iterator_bound % 2);
+
+                    for _ in 0..operations {
+                        match (iterator_bound - iterator) {
+                            0 => panic!("This should not be the case."),
+                            // last
+                            1 => {
+                                above_level.push(current_level[iterator].clone());
+                                iterator += 1;
+                            }
+                            // two or more left in the current scope
+                            _ => {
+                                let new_branch: TapBranch = TapBranch::new(
+                                    current_level[iterator].clone(),
+                                    current_level[iterator + 1].clone(),
+                                );
+                                above_level.push(new_branch.into_branch());
+                                iterator += 2;
+                            }
+                        }
+                    }
+
+                    // At the end of each level, the itertor must have covered all branched of that level
+                    assert_eq!(iterator, iterator_bound);
+                }
+
+                match above_level.len() {
+                    1 => {
+                        return TapTree {
+                            leaves: leaves.clone(),
+                            uppermost_branch: above_level[0].clone(),
+                        }
+                    }
+                    2 => {
+                        let final_branch: Branch =
+                            TapBranch::new(above_level[0].clone(), above_level[1].clone())
+                                .into_branch();
+                        return TapTree {
+                            leaves: leaves.clone(),
+                            uppermost_branch: final_branch,
+                        };
+                    }
+                    _ => panic!("This should not be the case."),
+                }
+            }
+        }
     }
 }
 
