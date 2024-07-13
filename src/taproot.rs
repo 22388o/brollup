@@ -259,7 +259,7 @@ impl TapTree {
                         }
                     }
 
-                    // At the end of each level, the itertor must have covered all branched of that level
+                    // At the end of each level, the itertor must have covered all branches of that level
                     assert_eq!(iterator, iterator_bound);
                 }
 
