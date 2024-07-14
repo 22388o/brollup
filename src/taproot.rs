@@ -214,7 +214,7 @@ impl TapTree {
             },
             _ => {
                 // Number of TapTree levels is = log2(number of TapLeaves)
-                let num_levels: u8 = (leaves.len() as f64).log2() as u8;
+                let num_levels: u8 = (leaves.len() as f64).log2() as u8 +1;
 
                 let mut current_level: Vec<Branch> = Vec::new();
                 let mut above_level: Vec<Branch> = Vec::new();
@@ -263,23 +263,12 @@ impl TapTree {
                     assert_eq!(iterator, iterator_bound);
                 }
 
-                match above_level.len() {
-                    1 => {
-                        return TapTree {
-                            leaves: leaves.clone(),
-                            uppermost_branch: above_level[0].clone(),
-                        }
-                    }
-                    2 => {
-                        let final_branch: Branch =
-                            TapBranch::new(above_level[0].clone(), above_level[1].clone())
-                                .into_branch();
-                        return TapTree {
-                            leaves: leaves.clone(),
-                            uppermost_branch: final_branch,
-                        };
-                    }
-                    _ => panic!("This should not be the case."),
+                // At the end, only the uppermost branch must have left
+                assert_eq!(above_level.len(), 1);
+
+                TapTree {
+                    leaves: leaves.clone(),
+                    uppermost_branch: above_level[0].clone(),
                 }
             }
         }
