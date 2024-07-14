@@ -162,6 +162,10 @@ impl TapRoot {
         }
     }
 
+    pub fn inner_key_x_only(&self) -> XOnlyPublicKey {
+        self.inner_key
+    }
+
     pub fn inner_key_lifted(&self) -> PublicKey {
         self.inner_key.public_key(Parity::Even)
     }
@@ -196,7 +200,7 @@ impl TapRoot {
         let (_, parity) = self.tweaked_key().x_only_public_key();
         parity
     }
-    
+
     pub fn tweaked_key_x_only(&self) -> XOnlyPublicKey {
         let (x_only, _) = self.tweaked_key().x_only_public_key();
         x_only
@@ -212,6 +216,15 @@ impl TapRoot {
                 .to_vec(),
         );
         spk
+    }
+
+    pub fn control_block(&self, index: usize) -> ControlBlock {
+        let path: Vec<u8> = match &self.tree {
+            Some(tree) => tree.path(index),
+            None => panic!(),
+        };
+
+        ControlBlock::new(self.inner_key_x_only(), self.tweaked_key_parity(), path)
     }
 }
 

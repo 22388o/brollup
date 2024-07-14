@@ -164,7 +164,8 @@ mod tests {
         // Test with odd tweaked key
 
         let tap_leaf_with_odd: TapLeaf = TapLeaf::new(vec![0x01, 0x23, 0xab, 0xcd]);
-        let tap_root_with_odd: TapRoot = TapRoot::script_path_only_single(tap_leaf_with_odd.clone());
+        let tap_root_with_odd: TapRoot =
+            TapRoot::script_path_only_single(tap_leaf_with_odd.clone());
 
         let expected_spk =
             hex::decode("512085dbf94f892274c41acb75d48daf338c739d1157c70963912db526c4cad30d1a")
@@ -175,7 +176,8 @@ mod tests {
         // Test with even tweaked key
 
         let tap_leaf_with_odd: TapLeaf = TapLeaf::new(vec![0x01, 0x23, 0xab, 0xcd, 0xef, 0xff]);
-        let tap_root_with_odd: TapRoot = TapRoot::script_path_only_single(tap_leaf_with_odd.clone());
+        let tap_root_with_odd: TapRoot =
+            TapRoot::script_path_only_single(tap_leaf_with_odd.clone());
 
         let expected_spk =
             hex::decode("51201fbb64a309f43ee6a442cd293a9df3ce3bbb0864a2215a1091c06521021f9de4")
@@ -398,6 +400,38 @@ mod tests {
         assert_eq!(tap_tree.path(2), expected_path_3);
         assert_eq!(tap_tree.path(3), expected_path_4);
         assert_eq!(tap_tree.path(4), expected_path_5);
+    }
+
+    #[test]
+    fn test_control_block() {
+        let tap_leaf_1: TapLeaf = TapLeaf::new(vec![0xaa]);
+        let tap_leaf_2: TapLeaf = TapLeaf::new(vec![0xbb]);
+        let tap_leaf_3: TapLeaf = TapLeaf::new(vec![0xcc]);
+
+        let mut leaves: Vec<TapLeaf> = vec![];
+
+        // Test single-leaf - aa
+        leaves.push(tap_leaf_1);
+        leaves.push(tap_leaf_2);
+        leaves.push(tap_leaf_3);
+
+        let tap_root: TapRoot = TapRoot::script_path_only_multi(leaves);
+
+        let expected_cb_1 =
+        hex::decode("c050929b74c1a04954b78b4b6035e97a5e078a5a0f28ec96d547bfee9ace803ac091af7e676faf0d787dd6628f8d068756dd2de2473b94e5aa63915f168764e821fe06075904b2d09b06d544283b5ed7948355e691785c7b3e1a952a1a705151fe")
+            .unwrap();
+
+        let expected_cb_2 =
+        hex::decode("c050929b74c1a04954b78b4b6035e97a5e078a5a0f28ec96d547bfee9ace803ac0083b809ebc8a6e8077a1521d2621ef988887817d95691059b63db4efa6b354c8fe06075904b2d09b06d544283b5ed7948355e691785c7b3e1a952a1a705151fe")
+            .unwrap();
+
+        let expected_cb_3 =
+         hex::decode("c050929b74c1a04954b78b4b6035e97a5e078a5a0f28ec96d547bfee9ace803ac0823a89de31a35a726355b97b88e0f8fa0692fbf38630ebed328478f17c054a8c")
+             .unwrap();
+
+        assert_eq!(tap_root.control_block(0).to_vec(), expected_cb_1);
+        assert_eq!(tap_root.control_block(1).to_vec(), expected_cb_2);
+        assert_eq!(tap_root.control_block(2).to_vec(), expected_cb_3);
     }
 }
 
