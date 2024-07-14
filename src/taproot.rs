@@ -123,28 +123,42 @@ impl TapBranch {
 
 pub struct TapRoot {
     inner_key: XOnlyPublicKey,
-    uppermost_branch: Option<Branch>,
+    tree: Option<TapTree>,
 }
 
 impl TapRoot {
-    pub fn key_and_script_path(key: PublicKey, branch: Branch) -> TapRoot {
+    pub fn key_and_script_path_single(key: PublicKey, leaf: TapLeaf) -> TapRoot {
         TapRoot {
             inner_key: key.x_only_public_key().0,
-            uppermost_branch: Some(branch),
+            tree: Some(TapTree::new(vec![leaf])),
+        }
+    }
+
+    pub fn key_and_script_path_multi(key: PublicKey, leaves: Vec<TapLeaf>) -> TapRoot {
+        TapRoot {
+            inner_key: key.x_only_public_key().0,
+            tree: Some(TapTree::new(leaves)),
         }
     }
 
     pub fn key_path_only(key: PublicKey) -> TapRoot {
         TapRoot {
             inner_key: key.x_only_public_key().0,
-            uppermost_branch: None,
+            tree: None,
         }
     }
 
-    pub fn script_path_only(branch: Branch) -> TapRoot {
+    pub fn script_path_only_single(leaf: TapLeaf) -> TapRoot {
         TapRoot {
             inner_key: XOnlyPublicKey::from_slice(&POINT_WITH_UNKNOWN_DISCRETE_LOGARITHM).unwrap(),
-            uppermost_branch: Some(branch),
+            tree: Some(TapTree::new(vec![leaf])),
+        }
+    }
+
+    pub fn script_path_only_multi(leaves: Vec<TapLeaf>) -> TapRoot {
+        TapRoot {
+            inner_key: XOnlyPublicKey::from_slice(&POINT_WITH_UNKNOWN_DISCRETE_LOGARITHM).unwrap(),
+            tree: Some(TapTree::new(leaves)),
         }
     }
 
@@ -154,20 +168,20 @@ impl TapRoot {
 
     pub fn tap_tweak(&self) -> [u8; 32] {
         let inner_vec: Vec<u8> = self.inner_key.serialize().to_vec();
-        let mut tweak_vec: Vec<u8> = vec![];
 
-        if let Some(branch) = &self.uppermost_branch {
-            match branch {
-                Branch::Leaf(leaf) => tweak_vec.extend(leaf.hash_as_vec()),
-                Branch::Branch(branch) => tweak_vec.extend(branch.hash_as_vec()),
-            };
-        }
+        let tweak_vec: Vec<u8> = match &self.tree {
+            Some(tree) => match &tree.root {
+                Branch::Leaf(leaf) => leaf.hash_as_vec(),
+                Branch::Branch(branch) => branch.hash_as_vec(),
+            },
+            None => panic!(),
+        };
 
         hash_tap_tweak(&inner_vec, &tweak_vec)
     }
 
     pub fn tweaked_key(&self) -> PublicKey {
-        if let Some(_) = &self.uppermost_branch {
+        if let Some(_) = &self.tree {
             let scalar: Scalar = Scalar::from_be_bytes(self.tap_tweak()).unwrap();
 
             self.inner_key_lifted()
@@ -182,6 +196,7 @@ impl TapRoot {
         let (_, parity) = self.tweaked_key().x_only_public_key();
         parity
     }
+    
     pub fn tweaked_key_x_only(&self) -> XOnlyPublicKey {
         let (x_only, _) = self.tweaked_key().x_only_public_key();
         x_only
@@ -234,7 +249,6 @@ impl TapTree {
 // tree_builder returns given a vector of leaves, the tree root,
 // and optinoally a merkle path corresponding to some leaf
 pub fn tree_builder(leaves: &Vec<TapLeaf>, index: Option<usize>) -> (Branch, Option<Vec<u8>>) {
-
     // Initialize path as empyt
     let path: Vec<u8> = Vec::<u8>::new();
 

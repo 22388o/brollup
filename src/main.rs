@@ -102,7 +102,7 @@ mod tests {
                 .parse()
                 .unwrap();
 
-        let taproot = TapRoot::key_and_script_path(inner_key_even, tap_leaf.into_branch());
+        let taproot = TapRoot::key_and_script_path_single(inner_key_even, tap_leaf.clone());
 
         let expected_with_odd: Vec<u8> =
             hex::decode("51202e1a63521f2d72ff54da28cf8e114c6e3ce3ef497e9a6ac71b3e28e06446a218")
@@ -117,7 +117,7 @@ mod tests {
                 .parse()
                 .unwrap();
 
-        let taproot = TapRoot::key_and_script_path(inner_key_odd, tap_leaf.into_branch());
+        let taproot = TapRoot::key_and_script_path_single(inner_key_odd, tap_leaf.clone());
 
         let expected_with_even: Vec<u8> =
             hex::decode("51208cda55510b8f99ec248ed9772e6a71537eb26142d6624d38426a7a1311b488e6")
@@ -164,7 +164,7 @@ mod tests {
         // Test with odd tweaked key
 
         let tap_leaf_with_odd: TapLeaf = TapLeaf::new(vec![0x01, 0x23, 0xab, 0xcd]);
-        let tap_root_with_odd: TapRoot = TapRoot::script_path_only(tap_leaf_with_odd.into_branch());
+        let tap_root_with_odd: TapRoot = TapRoot::script_path_only_single(tap_leaf_with_odd.clone());
 
         let expected_spk =
             hex::decode("512085dbf94f892274c41acb75d48daf338c739d1157c70963912db526c4cad30d1a")
@@ -175,7 +175,7 @@ mod tests {
         // Test with even tweaked key
 
         let tap_leaf_with_odd: TapLeaf = TapLeaf::new(vec![0x01, 0x23, 0xab, 0xcd, 0xef, 0xff]);
-        let tap_root_with_odd: TapRoot = TapRoot::script_path_only(tap_leaf_with_odd.into_branch());
+        let tap_root_with_odd: TapRoot = TapRoot::script_path_only_single(tap_leaf_with_odd.clone());
 
         let expected_spk =
             hex::decode("51201fbb64a309f43ee6a442cd293a9df3ce3bbb0864a2215a1091c06521021f9de4")
