@@ -269,10 +269,11 @@ impl TapTree {
 
                 // At the end, only the uppermost branch must have left
                 assert_eq!(above_level.len(), 1);
+                let uppermost_branch: Branch = above_level[0].clone();
 
                 TapTree {
                     leaves: leaves.clone(),
-                    uppermost_branch: above_level[0].clone(),
+                    uppermost_branch: uppermost_branch,
                 }
             }
         }
