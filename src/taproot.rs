@@ -213,8 +213,8 @@ impl TapTree {
                 uppermost_branch: leaves[0].into_branch(),
             },
             _ => {
-                // Number of TapTree levels is = log2(number of TapLeaves)
-                let num_levels: u8 = (leaves.len() as f64).log2() as u8 +1;
+                // Number of TapTree levels is = log2(number of TapLeaves) + 1
+                let num_levels: u8 = (leaves.len() as f64).log2() as u8 + 1;
 
                 let mut current_level: Vec<Branch> = Vec::new();
                 let mut above_level: Vec<Branch> = Vec::new();
@@ -237,7 +237,11 @@ impl TapTree {
                     let mut iterator: usize = 0;
                     let iterator_bound: usize = current_level.len();
 
-                    let operations: usize = (iterator_bound / 2) + (iterator_bound % 2);
+                    let operations: usize = match iterator_bound {
+                        0 => panic!("This should not be the case."),
+                        1 => 1,
+                        _ => (iterator_bound / 2) + (iterator_bound % 2),
+                    };
 
                     for _ in 0..operations {
                         match (iterator_bound - iterator) {
