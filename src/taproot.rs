@@ -201,87 +201,192 @@ impl TapRoot {
 
 pub struct TapTree {
     leaves: Vec<TapLeaf>,
-    uppermost_branch: Branch,
+    root: Branch,
 }
 
 impl TapTree {
     pub fn new(leaves: Vec<TapLeaf>) -> TapTree {
-        match leaves.len() {
-            0 => panic!("TapTree must be initialized with at least one TapLeaf."),
-            1 => TapTree {
-                leaves: leaves.clone(),
-                uppermost_branch: leaves[0].into_branch(),
-            },
-            _ => {
-                // Number of TapTree levels is = log2(number of TapLeaves)
-                let num_levels: u8 = (leaves.len() as f64).log2() as u8;
-
-                let mut current_level: Vec<Branch> = Vec::new();
-                let mut above_level: Vec<Branch> = Vec::new();
-
-                // For each level of the TapTree
-                for level in 0..(num_levels + 1) {
-                    // If it is the level zero, initialize current_level  with individual TapLeaves
-                    if level == 0 {
-                        for i in 0..leaves.len() {
-                            current_level.push(leaves[i].clone().into_branch());
-                        }
-                    }
-                    // If it is the level one or above, move above_level items into current_level, and reset above_level
-                    else {
-                        current_level.clear();
-                        current_level.extend(above_level.clone());
-                        above_level.clear();
-                    }
-
-                    let mut iterator: usize = 0;
-                    let iterator_bound: usize = current_level.len();
-
-                    let operations: usize = match iterator_bound {
-                        0 => panic!("This should not be the case."),
-                        1 => 1,
-                        _ => (iterator_bound / 2) + (iterator_bound % 2),
-                    };
-
-                    for _ in 0..operations {
-                        match (iterator_bound - iterator) {
-                            0 => panic!("This should not be the case."),
-                            // last
-                            1 => {
-                                above_level.push(current_level[iterator].clone());
-                                iterator += 1;
-                            }
-                            // two or more left in the current scope
-                            _ => {
-                                let new_branch: TapBranch = TapBranch::new(
-                                    current_level[iterator].clone(),
-                                    current_level[iterator + 1].clone(),
-                                );
-                                above_level.push(new_branch.into_branch());
-                                iterator += 2;
-                            }
-                        }
-                    }
-
-                    // At the end of each level, the itertor must have covered all branches of that level
-                    assert_eq!(iterator, iterator_bound);
-                }
-
-                // At the end, only the uppermost branch must have left
-                assert_eq!(above_level.len(), 1);
-                let uppermost_branch: Branch = above_level[0].clone();
-
-                TapTree {
-                    leaves: leaves.clone(),
-                    uppermost_branch,
-                }
-            }
+        TapTree {
+            leaves: leaves.clone(),
+            root: tap_tree_root(&leaves),
         }
     }
-    pub fn branch_to_vec(&self) -> Vec<u8> {
-        match &self.uppermost_branch {
+
+    pub fn root(&self) -> Vec<u8> {
+        match &self.root {
             Branch::Leaf(leaf) => leaf.hash_as_vec(),
             Branch::Branch(branch) => branch.hash_as_vec(),
+        }
+    }
+
+    pub fn path(&self, index: usize) -> Vec<u8> {
+        // Given leaf index return the merkle path
+        tap_tree_path(&self.leaves, index)
+    }
+}
+
+pub fn tap_tree_root(leaves: &Vec<TapLeaf>) -> Branch {
+    match leaves.len() {
+        0 => panic!("TapTree must be initialized with at least one TapLeaf."),
+        1 => leaves[0].into_branch(),
+        _ => {
+            // Number of TapTree levels is = log2(number of TapLeaves)
+            let num_levels: u8 = (leaves.len() as f64).log2() as u8;
+
+            let mut current_level: Vec<Branch> = Vec::new();
+            let mut above_level: Vec<Branch> = Vec::new();
+
+            // For each level of the TapTree
+            for level in 0..(num_levels + 1) {
+                // If it is the level zero, initialize current_level  with individual TapLeaves
+                if level == 0 {
+                    for i in 0..leaves.len() {
+                        current_level.push(leaves[i].clone().into_branch());
+                    }
+                }
+                // If it is the level one or above, move above_level items into current_level, and reset above_level
+                else {
+                    current_level.clear();
+                    current_level.extend(above_level.clone());
+                    above_level.clear();
+                }
+
+                let mut iterator: usize = 0;
+                let iterator_bound: usize = current_level.len();
+
+                let operations: usize = match iterator_bound {
+                    0 => panic!("This should not be the case."),
+                    1 => 1,
+                    _ => (iterator_bound / 2) + (iterator_bound % 2),
+                };
+
+                for _ in 0..operations {
+                    match (iterator_bound - iterator) {
+                        0 => panic!("This should not be the case."),
+                        // last
+                        1 => {
+                            above_level.push(current_level[iterator].clone());
+                            iterator += 1;
+                        }
+                        // two or more left in the current scope
+                        _ => {
+                            let new_branch: TapBranch = TapBranch::new(
+                                current_level[iterator].clone(),
+                                current_level[iterator + 1].clone(),
+                            );
+                            above_level.push(new_branch.into_branch());
+                            iterator += 2;
+                        }
+                    }
+                }
+
+                // At the end of each level, the itertor must have covered all branches of that level
+                assert_eq!(iterator, iterator_bound);
+            }
+
+            // At the end, only the uppermost branch must have left
+            assert_eq!(above_level.len(), 1);
+            above_level[0].clone()
+        }
+    }
+}
+
+pub fn tap_tree_path(leaves: &Vec<TapLeaf>, index: usize) -> Vec<u8> {
+    match leaves.len() {
+        0 => panic!("TapTree must be initialized with at least one TapLeaf."),
+        // Single leaf has no path
+        1 => Vec::<u8>::new(),
+        _ => {
+            let mut path: Vec<u8> = Vec::<u8>::new();
+            let mut lookup: Branch = leaves[index].into_branch();
+
+            // Number of TapTree levels is = log2(number of TapLeaves)
+            let num_levels: u8 = (leaves.len() as f64).log2() as u8;
+
+            let mut current_level: Vec<Branch> = Vec::new();
+            let mut above_level: Vec<Branch> = Vec::new();
+
+            // For each level of the TapTree
+            for level in 0..(num_levels + 1) {
+                // If it is the level zero, initialize current_level  with individual TapLeaves
+                if level == 0 {
+                    for i in 0..leaves.len() {
+                        current_level.push(leaves[i].clone().into_branch());
+                    }
+                }
+                // If it is the level one or above, move above_level items into current_level, and reset above_level
+                else {
+                    current_level.clear();
+                    current_level.extend(above_level.clone());
+                    above_level.clear();
+                }
+
+                let mut iterator: usize = 0;
+                let iterator_bound: usize = current_level.len();
+
+                let operations: usize = match iterator_bound {
+                    0 => panic!("This should not be the case."),
+                    1 => 1,
+                    _ => (iterator_bound / 2) + (iterator_bound % 2),
+                };
+
+                for _ in 0..operations {
+                    match (iterator_bound - iterator) {
+                        0 => panic!("This should not be the case."),
+                        // last
+                        1 => {
+                            above_level.push(current_level[iterator].clone());
+                            iterator += 1;
+                        }
+                        // two or more left in the current scope
+                        _ => {
+                            let first: Branch = current_level[iterator].clone();
+                            let second: Branch = current_level[iterator + 1].clone();
+
+                            let first_vec: Vec<u8> = match &first {
+                                Branch::Leaf(leaf) => leaf.hash_as_vec(),
+                                Branch::Branch(branch) => branch.hash_as_vec(),
+                            };
+
+                            let second_vec: Vec<u8> = match &second {
+                                Branch::Leaf(leaf) => leaf.hash_as_vec(),
+                                Branch::Branch(branch) => branch.hash_as_vec(),
+                            };
+
+                            let lookup_vec = match &lookup {
+                                Branch::Leaf(leaf) => leaf.hash_as_vec(),
+                                Branch::Branch(branch) => branch.hash_as_vec(),
+                            };
+
+                            // Lookup match?
+                            let mut match_bool: bool = false;
+                            if &first_vec == &lookup_vec {
+                                path.extend(&second_vec);
+                                match_bool = true;
+                            } else if &second_vec == &lookup_vec {
+                                path.extend(&first_vec);
+                                match_bool = true;
+                            }
+
+                            let new_branch: TapBranch = TapBranch::new(first, second);
+
+                            if match_bool {
+                                lookup = new_branch.into_branch();
+                            }
+
+                            above_level.push(new_branch.into_branch());
+                            iterator += 2;
+                        }
+                    }
+                }
+
+                // At the end of each level, the itertor must have covered all branches of that level
+                assert_eq!(iterator, iterator_bound);
+            }
+
+            // At the end, only the uppermost branch must have left
+            assert_eq!(above_level.len(), 1);
+            path
         }
     }
 }

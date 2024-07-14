@@ -221,7 +221,7 @@ mod tests {
 
         let mut leaves: Vec<TapLeaf> = vec![];
 
-        // Test 1 leaf - aa
+        // Test single-leaf - aa
         leaves.push(tap_leaf_1);
 
         let tap_tree: TapTree = TapTree::new(leaves.clone());
@@ -230,7 +230,7 @@ mod tests {
             hex::decode("083b809ebc8a6e8077a1521d2621ef988887817d95691059b63db4efa6b354c8")
                 .unwrap();
 
-        assert_eq!(tap_tree.branch_to_vec(), expected);
+        assert_eq!(tap_tree.root(), expected);
 
         // Test 2 leaves - aa bb
         leaves.push(tap_leaf_2);
@@ -241,7 +241,7 @@ mod tests {
             hex::decode("823a89de31a35a726355b97b88e0f8fa0692fbf38630ebed328478f17c054a8c")
                 .unwrap();
 
-        assert_eq!(tap_tree.branch_to_vec(), expected);
+        assert_eq!(tap_tree.root(), expected);
 
         // Test 3 leaves - aa bb cc
         leaves.push(tap_leaf_3);
@@ -252,7 +252,7 @@ mod tests {
             hex::decode("fbacf98dc7eed29334d7f70ad70b78d8d0fd3362537f1f23d27fdbe7df302636")
                 .unwrap();
 
-        assert_eq!(tap_tree.branch_to_vec(), expected);
+        assert_eq!(tap_tree.root(), expected);
 
         // Test 4 leaves - aa bb cc dd
         leaves.push(tap_leaf_4);
@@ -263,7 +263,7 @@ mod tests {
             hex::decode("4ab024178a74f8e2435cc88b8fd5c03cbb75d0e14b4e72e8388062b67be8e842")
                 .unwrap();
 
-        assert_eq!(tap_tree.branch_to_vec(), expected);
+        assert_eq!(tap_tree.root(), expected);
 
         // Test 5 leaves - aa bb cc dd ee
         leaves.push(tap_leaf_5);
@@ -274,7 +274,7 @@ mod tests {
             hex::decode("fda09a939d87da777a274e0ad4232769445f15acd6b6e9d72053e4268354782d")
                 .unwrap();
 
-        assert_eq!(tap_tree.branch_to_vec(), expected);
+        assert_eq!(tap_tree.root(), expected);
 
         // Test 6 leaves - aa bb cc dd ee ff
         leaves.push(tap_leaf_6);
@@ -285,7 +285,7 @@ mod tests {
             hex::decode("4ad803081bbcd04f49c4682d999ee748bf8400629a424f0c3dbad2638af45cc9")
                 .unwrap();
 
-        assert_eq!(tap_tree.branch_to_vec(), expected);
+        assert_eq!(tap_tree.root(), expected);
 
         // Test 7 leaves - aa bb cc dd ee ff 00
         leaves.push(tap_leaf_7);
@@ -296,7 +296,7 @@ mod tests {
             hex::decode("73e54d9b7301cd6d8b528c16b801edba35347fcbf99da51abcc9727d43401ea7")
                 .unwrap();
 
-        assert_eq!(tap_tree.branch_to_vec(), expected);
+        assert_eq!(tap_tree.root(), expected);
 
         // Test 8 leaves - aa bb cc dd ee ff 00 11
         leaves.push(tap_leaf_8);
@@ -307,7 +307,7 @@ mod tests {
             hex::decode("7648d42aead620a6ed02d82cc44a8e18a08da8ca1467928220ecf43ab308f195")
                 .unwrap();
 
-        assert_eq!(tap_tree.branch_to_vec(), expected);
+        assert_eq!(tap_tree.root(), expected);
 
         // Test 9 leaves - aa bb cc dd ee ff 00 11 22
         leaves.push(tap_leaf_9);
@@ -318,7 +318,7 @@ mod tests {
             hex::decode("01efb5b091f906f27aa04dcb5a7a74938f736538a75df778acd66f3a968a310a")
                 .unwrap();
 
-        assert_eq!(tap_tree.branch_to_vec(), expected);
+        assert_eq!(tap_tree.root(), expected);
 
         // Test 10 leaves - aa bb cc dd ee ff 00 11 22 33
         leaves.push(tap_leaf_10);
@@ -329,7 +329,7 @@ mod tests {
             hex::decode("3dad9105423be9dce1422e4f4f3ea6e49196104df08db7bcd8fd6d39591e79d4")
                 .unwrap();
 
-        assert_eq!(tap_tree.branch_to_vec(), expected);
+        assert_eq!(tap_tree.root(), expected);
 
         // Test 11 leaves - aa bb cc dd ee ff 00 11 22 33 44
         leaves.push(tap_leaf_11);
@@ -340,7 +340,7 @@ mod tests {
             hex::decode("fe90a52c636872a7c7f1bc8faf59da361ad7d51d5bf88c883cc2dd268fa26b47")
                 .unwrap();
 
-        assert_eq!(tap_tree.branch_to_vec(), expected);
+        assert_eq!(tap_tree.root(), expected);
 
         // Test 12 leaves - aa bb cc dd ee ff 00 11 22 33 44 55
         leaves.push(tap_leaf_12);
@@ -351,7 +351,53 @@ mod tests {
             hex::decode("44446fb50fce9c698734e1bfd10ed894baaed244dc7ce67e4bf12b1d38760c30")
                 .unwrap();
 
-        assert_eq!(tap_tree.branch_to_vec(), expected);
+        assert_eq!(tap_tree.root(), expected);
+    }
+
+    #[test]
+    fn test_tap_tree_path() {
+        let tap_leaf_1: TapLeaf = TapLeaf::new(vec![0xaa]);
+        let tap_leaf_2: TapLeaf = TapLeaf::new(vec![0xbb]);
+        let tap_leaf_3: TapLeaf = TapLeaf::new(vec![0xcc]);
+        let tap_leaf_4: TapLeaf = TapLeaf::new(vec![0xdd]);
+        let tap_leaf_5: TapLeaf = TapLeaf::new(vec![0xee]);
+
+        let mut leaves: Vec<TapLeaf> = vec![];
+
+        // Test single-leaf - aa
+        leaves.push(tap_leaf_1);
+        leaves.push(tap_leaf_2);
+        leaves.push(tap_leaf_3);
+        leaves.push(tap_leaf_4);
+        leaves.push(tap_leaf_5);
+
+        let tap_tree: TapTree = TapTree::new(leaves.clone());
+
+        let expected_path_1 =
+            hex::decode("91af7e676faf0d787dd6628f8d068756dd2de2473b94e5aa63915f168764e8217f7b1fecf4af01c485881138c8484c4c7e6f537e896686a5e46d90e9b0c83692f6f920dc9dcb98ba04cff112f583969b4fa240bedf781759d6b6e0f2e74eb7fa")
+                .unwrap();
+
+        let expected_path_2 =
+            hex::decode("083b809ebc8a6e8077a1521d2621ef988887817d95691059b63db4efa6b354c87f7b1fecf4af01c485881138c8484c4c7e6f537e896686a5e46d90e9b0c83692f6f920dc9dcb98ba04cff112f583969b4fa240bedf781759d6b6e0f2e74eb7fa")
+                .unwrap();
+
+        let expected_path_3 =
+             hex::decode("b6537362191d9a5e0aa3a730b93b6f98a99ef63ed893bef4b9dfa7e3451eaf36823a89de31a35a726355b97b88e0f8fa0692fbf38630ebed328478f17c054a8cf6f920dc9dcb98ba04cff112f583969b4fa240bedf781759d6b6e0f2e74eb7fa")
+                 .unwrap();
+
+        let expected_path_4 =
+             hex::decode("fe06075904b2d09b06d544283b5ed7948355e691785c7b3e1a952a1a705151fe823a89de31a35a726355b97b88e0f8fa0692fbf38630ebed328478f17c054a8cf6f920dc9dcb98ba04cff112f583969b4fa240bedf781759d6b6e0f2e74eb7fa")
+                 .unwrap();
+
+        let expected_path_5: Vec<u8> =
+            hex::decode("4ab024178a74f8e2435cc88b8fd5c03cbb75d0e14b4e72e8388062b67be8e842")
+                .unwrap();
+
+        assert_eq!(tap_tree.path(0), expected_path_1);
+        assert_eq!(tap_tree.path(1), expected_path_2);
+        assert_eq!(tap_tree.path(2), expected_path_3);
+        assert_eq!(tap_tree.path(3), expected_path_4);
+        assert_eq!(tap_tree.path(4), expected_path_5);
     }
 }
 
