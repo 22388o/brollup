@@ -404,6 +404,16 @@ mod tests {
 
     #[test]
     fn test_control_block() {
+
+        let tap_leaf_single: TapLeaf = TapLeaf::new(vec![0xaa, 0xbb, 0xcc]);
+        let tap_root_single_leaf: TapRoot = TapRoot::script_path_only_multi(vec![tap_leaf_single]);
+
+        let expected_cb: Vec<u8> =
+        hex::decode("c050929b74c1a04954b78b4b6035e97a5e078a5a0f28ec96d547bfee9ace803ac0")
+            .unwrap();
+
+       assert_eq!(tap_root_single_leaf.control_block(0).to_vec(), expected_cb);
+
         let tap_leaf_1: TapLeaf = TapLeaf::new(vec![0xaa]);
         let tap_leaf_2: TapLeaf = TapLeaf::new(vec![0xbb]);
         let tap_leaf_3: TapLeaf = TapLeaf::new(vec![0xcc]);
