@@ -278,6 +278,12 @@ impl TapTree {
             }
         }
     }
+    pub fn branch_to_vec(&self) -> Vec<u8> {
+        match &self.uppermost_branch {
+            Branch::Leaf(leaf) => leaf.hash_as_vec(),
+            Branch::Branch(branch) => branch.hash_as_vec(),
+        }
+    }
 }
 
 pub struct ControlBlock {
