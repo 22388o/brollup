@@ -404,15 +404,14 @@ mod tests {
 
     #[test]
     fn test_control_block() {
-
         let tap_leaf_single: TapLeaf = TapLeaf::new(vec![0xaa, 0xbb, 0xcc]);
         let tap_root_single_leaf: TapRoot = TapRoot::script_path_only_multi(vec![tap_leaf_single]);
 
         let expected_cb: Vec<u8> =
-        hex::decode("c050929b74c1a04954b78b4b6035e97a5e078a5a0f28ec96d547bfee9ace803ac0")
-            .unwrap();
+            hex::decode("c050929b74c1a04954b78b4b6035e97a5e078a5a0f28ec96d547bfee9ace803ac0")
+                .unwrap();
 
-       assert_eq!(tap_root_single_leaf.control_block(0).to_vec(), expected_cb);
+        assert_eq!(tap_root_single_leaf.control_block(0).to_vec(), expected_cb);
 
         let tap_leaf_1: TapLeaf = TapLeaf::new(vec![0xaa]);
         let tap_leaf_2: TapLeaf = TapLeaf::new(vec![0xbb]);
@@ -442,6 +441,52 @@ mod tests {
         assert_eq!(tap_root.control_block(0).to_vec(), expected_cb_1);
         assert_eq!(tap_root.control_block(1).to_vec(), expected_cb_2);
         assert_eq!(tap_root.control_block(2).to_vec(), expected_cb_3);
+    }
+
+    #[test]
+    fn test_tap_tree_64() {
+        let mut leaves: Vec<TapLeaf> = Vec::<TapLeaf>::new();
+
+        for i in 0..64 {
+            leaves.push(TapLeaf::new(vec![i as u8]));
+        }
+        let tap_root = TapRoot::script_path_only_multi(leaves);
+
+        let expected_spk =
+            hex::decode("5120b88bb9de3afa63f0cd5b533f70a58f60004b65b6a1b6683a1ba766e37b11455b")
+                .unwrap();
+
+        assert_eq!(tap_root.spk(), expected_spk);
+
+        let expected_cb_leaf_0 =
+        hex::decode("c150929b74c1a04954b78b4b6035e97a5e078a5a0f28ec96d547bfee9ace803ac01aac25408a4d28233cd325faefade9ef0fae76fcb1e35d08140045bbaa381b30c01491a3c808832bdf3bab5ea3208726c6eae12c3db3f8098919e145caa981de8fd6e8cdf1c53b7b1509958f4288d46fcc6c172dc9d32a52c0f8af4d5f86efc369632feaaca2e76395ae30e30fa5211fc0c099997a7de3a80d6ac566bdef300b7a41ea55777781977241267979150a1654dd92eecd7eb820b4aae57967a28952a2489c6a8c3011b12b89148d2abafa042d7982533826d3b911851abb34e7e741")
+            .unwrap();
+
+        assert_eq!(tap_root.control_block(0).to_vec(), expected_cb_leaf_0);
+
+        let expected_cb_leaf_10 =
+        hex::decode("c150929b74c1a04954b78b4b6035e97a5e078a5a0f28ec96d547bfee9ace803ac033f0e118ce1dc6ee36199de7766e39d5a37da363e63cdb5342fac9e437c98261e2100cc38af83fde32fdb302ce68109844fa99f71ba58721f7cdbf7c3083ccae9602fd5610cc4ce5ff81afb18acd5140c2c2525e61e0ae7bfc335d1457df2352c33b3b99fa0737f5da94cfb3fe918e3b8467ed9d546588a117531672f48928657a41ea55777781977241267979150a1654dd92eecd7eb820b4aae57967a28952a2489c6a8c3011b12b89148d2abafa042d7982533826d3b911851abb34e7e741")
+            .unwrap();
+
+        assert_eq!(tap_root.control_block(10).to_vec(), expected_cb_leaf_10);
+
+        let expected_cb_leaf_45 =
+        hex::decode("c150929b74c1a04954b78b4b6035e97a5e078a5a0f28ec96d547bfee9ace803ac03fe216e39e56269ca739d5e48e09bc93de208b9ebdbe524f665d28e103c86fe6c4154feadf35d5527875e82839e0878e9b6f18c4096c652830beee93cff38219923ebb8ebff4c5a8907da345ac47ce386249f745e8f2e942de33050358d20b289430f4b106bf5617e6d11333464d368b33b0433bf1f3d32ce840ecb65ac92d84c350786781aec83736c548e62ac04427a1747036cb212292bc4011aecb275e6326f6c6d5df019644b4aa8fa2116fe6c09bcc83bdedb621e2443a69218954063b")
+            .unwrap();
+
+        assert_eq!(tap_root.control_block(45).to_vec(), expected_cb_leaf_45);
+
+        let expected_cb_leaf_61 =
+        hex::decode("c150929b74c1a04954b78b4b6035e97a5e078a5a0f28ec96d547bfee9ace803ac06925381e2d092124c53f87297a6e68f07ed3132a9761684bcaa475ea4fcf248dc870c97467df9cb37e9b481d0296b2660b23ef76ed7f84dee951c0d90b54aef97403758af8698bc5cdf75ca317b1036d1c0a33d9834962095693fc6b72ed68b2082edeb867fd98827cca5c1a0c7b517910712bb20e7c97d7ea50b273c5b19ddcaffb3ddcecd12cc515b9487bdd4b9497a9efa05e22b3c00bad374b7dce8c5f9c26f6c6d5df019644b4aa8fa2116fe6c09bcc83bdedb621e2443a69218954063b")
+            .unwrap();
+
+        assert_eq!(tap_root.control_block(61).to_vec(), expected_cb_leaf_61);
+
+        let expected_cb_leaf_63 =
+        hex::decode("c150929b74c1a04954b78b4b6035e97a5e078a5a0f28ec96d547bfee9ace803ac0a0a62d83f5b0ca6f2623bf7e2c347a9c8c4f950918cafad4ab742ab5c2ae04bebbc8d5c38114a3884f07c076229288ba618fe866ed324ab2e67b482f3c1965607403758af8698bc5cdf75ca317b1036d1c0a33d9834962095693fc6b72ed68b2082edeb867fd98827cca5c1a0c7b517910712bb20e7c97d7ea50b273c5b19ddcaffb3ddcecd12cc515b9487bdd4b9497a9efa05e22b3c00bad374b7dce8c5f9c26f6c6d5df019644b4aa8fa2116fe6c09bcc83bdedb621e2443a69218954063b")
+            .unwrap();
+
+        assert_eq!(tap_root.control_block(63).to_vec(), expected_cb_leaf_63);
     }
 }
 
