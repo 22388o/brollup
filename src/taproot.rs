@@ -273,7 +273,7 @@ impl TapTree {
 
                 TapTree {
                     leaves: leaves.clone(),
-                    uppermost_branch: uppermost_branch,
+                    uppermost_branch,
                 }
             }
         }
