@@ -1,5 +1,6 @@
 use std::vec;
 
+// https://en.bitcoin.it/wiki/Protocol_documentation#Variable_length_integer
 pub fn prefix_compact_size(data: &Vec<u8>) -> Vec<u8> {
     let mut return_vec: Vec<u8> = Vec::<u8>::new();
 
@@ -40,6 +41,7 @@ pub fn prefix_compact_size(data: &Vec<u8>) -> Vec<u8> {
     return_vec
 }
 
+// https://en.bitcoin.it/wiki/Script
 pub fn prefix_pushdata(data: &Vec<u8>) -> Vec<u8> {
     let mut return_vec: Vec<u8> = Vec::<u8>::new();
 
@@ -52,8 +54,7 @@ pub fn prefix_pushdata(data: &Vec<u8>) -> Vec<u8> {
         x if x <= 0xFFFF => {
             return_vec.extend(vec![0x4d]);
 
-            // In little endian order
-            let vec_u8: Vec<u8> = vec![(x >> 8 & 0xFF) as u8, (x & 0xFF) as u8];
+            let vec_u8: Vec<u8> = vec![(x & 0xFF) as u8, (x >> 8 & 0xFF) as u8];
 
             return_vec.extend(vec_u8)
         }
@@ -62,10 +63,10 @@ pub fn prefix_pushdata(data: &Vec<u8>) -> Vec<u8> {
 
             // In little endian order
             let vec_u8: Vec<u8> = vec![
-                ((x >> 24) & 0xFF) as u8,
-                ((x >> 16) & 0xFF) as u8,
-                ((x >> 8) & 0xFF) as u8,
                 (x & 0xFF) as u8,
+                ((x >> 8) & 0xFF) as u8,
+                ((x >> 16) & 0xFF) as u8,
+                ((x >> 24) & 0xFF) as u8,
             ];
 
             return_vec.extend(vec_u8)
