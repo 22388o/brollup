@@ -1,4 +1,5 @@
 mod taproot;
+mod utils;
 
 #[cfg(test)]
 mod tests {
