@@ -9,7 +9,7 @@ The official implementation of  [Bitcoin Virtual Machine](https://brqgoo.medium.
 - Utils ⏳
     - Prefix Compact Size
     - Timelock
-- Output Types 🔜
+- TXO Types 🔜
     - Lift 
     - VTXO 
     - VTXO Projector 
