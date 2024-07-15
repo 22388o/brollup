@@ -15,6 +15,7 @@ The official implementation of  [Bitcoin Virtual Machine](https://brqgoo.medium.
     - VTXO Projector 
     - Connector 
     - Connector Projector 
+    - Payload
     - Trigger 
     - Channel 
     - Self 
