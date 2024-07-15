@@ -1,14 +1,10 @@
 #![allow(dead_code)]
 
-use core::num;
 use lazy_static::lazy_static;
-use musig2::secp256k1::{Parity, PublicKey, Scalar, Secp256k1, XOnlyPublicKey};
-use sha2::digest::consts::False;
-use sha2::digest::consts::True;
+use musig2::secp256k1::{self, Parity, PublicKey, Scalar, Secp256k1, XOnlyPublicKey};
 use sha2::Digest as _;
 use sha2::Sha256;
 use std::cmp::Ordering;
-use std::path;
 use std::vec;
 
 const LEAF_VERSION: u8 = 0xc0;
@@ -148,18 +144,20 @@ impl TapRoot {
         }
     }
 
-    pub fn script_path_only_single(leaf: TapLeaf) -> TapRoot {
-        TapRoot {
-            inner_key: XOnlyPublicKey::from_slice(&POINT_WITH_UNKNOWN_DISCRETE_LOGARITHM).unwrap(),
+    pub fn script_path_only_single(leaf: TapLeaf) -> Result<TapRoot, secp256k1::Error> {
+        let inner_key = XOnlyPublicKey::from_slice(&POINT_WITH_UNKNOWN_DISCRETE_LOGARITHM)?;
+        Ok(TapRoot {
+            inner_key,
             tree: Some(TapTree::new(vec![leaf])),
-        }
+        })
     }
 
-    pub fn script_path_only_multi(leaves: Vec<TapLeaf>) -> TapRoot {
-        TapRoot {
-            inner_key: XOnlyPublicKey::from_slice(&POINT_WITH_UNKNOWN_DISCRETE_LOGARITHM).unwrap(),
+    pub fn script_path_only_multi(leaves: Vec<TapLeaf>) -> Result<TapRoot, secp256k1::Error> {
+        let inner_key = XOnlyPublicKey::from_slice(&POINT_WITH_UNKNOWN_DISCRETE_LOGARITHM)?;
+        Ok(TapRoot {
+            inner_key,
             tree: Some(TapTree::new(leaves)),
-        }
+        })
     }
 
     pub fn inner_key_x_only(&self) -> XOnlyPublicKey {
@@ -184,47 +182,43 @@ impl TapRoot {
         hash_tap_tweak(&inner_vec, &tweak_vec)
     }
 
-    pub fn tweaked_key(&self) -> PublicKey {
+    pub fn tweaked_key(&self) -> Result<PublicKey, secp256k1::Error> {
         if let Some(_) = &self.tree {
-            let scalar: Scalar = Scalar::from_be_bytes(self.tap_tweak()).unwrap();
-
-            self.inner_key_lifted()
-                .add_exp_tweak(&Secp256k1::new(), &scalar)
-                .unwrap()
+            let scalar = Scalar::from_be_bytes(self.tap_tweak()).map_err(|_| secp256k1::Error::InvalidTweak)?;
+            self.inner_key_lifted().add_exp_tweak(&Secp256k1::new(), &scalar)
         } else {
-            self.inner_key_lifted()
+            Ok(self.inner_key_lifted())
         }
     }
 
-    pub fn tweaked_key_parity(&self) -> Parity {
-        let (_, parity) = self.tweaked_key().x_only_public_key();
-        parity
+    pub fn tweaked_key_parity(&self) -> Result<Parity, secp256k1::Error> {
+        let tweaked_key = self.tweaked_key()?;
+        let (_, parity) = tweaked_key.x_only_public_key();
+        Ok(parity)
     }
 
-    pub fn tweaked_key_x_only(&self) -> XOnlyPublicKey {
-        let (x_only, _) = self.tweaked_key().x_only_public_key();
-        x_only
+    pub fn tweaked_key_x_only(&self) -> Result<XOnlyPublicKey, secp256k1::Error> {
+        let (x_only, _) = self.tweaked_key()?.x_only_public_key();
+        Ok(x_only)
     }
 
-    pub fn spk(&self) -> Vec<u8> {
+    pub fn spk(&self) -> Result<Vec<u8>, secp256k1::Error> {
         let mut spk: Vec<u8> = vec![0x51, 0x20];
-        spk.extend(
-            self.tweaked_key()
-                .x_only_public_key()
-                .0
-                .serialize()
-                .to_vec(),
-        );
-        spk
+        let tweaked_key = self.tweaked_key()?;
+        spk.extend(tweaked_key.x_only_public_key().0.serialize().to_vec());
+        Ok(spk)
     }
 
-    pub fn control_block(&self, index: usize) -> ControlBlock {
+    pub fn control_block(&self, index: usize) -> Result<ControlBlock, secp256k1::Error> {
         let path: Vec<u8> = match &self.tree {
             Some(tree) => tree.path(index),
-            None => panic!(),
+            None => return Err(secp256k1::Error::InvalidTweak),
         };
 
-        ControlBlock::new(self.inner_key_x_only(), self.tweaked_key_parity(), path)
+        let inner_key = self.inner_key_x_only();
+        let parity = self.tweaked_key_parity()?;
+
+        Ok(ControlBlock::new(inner_key, parity, path))
     }
 }
 
@@ -260,9 +254,9 @@ impl TapTree {
 }
 
 // tree_builder returns given a vector of leaves, the tree root,
-// and optinoally a merkle path corresponding to some leaf
+// and optionally a merkle path corresponding to some leaf
 pub fn tree_builder(leaves: &Vec<TapLeaf>, index: Option<usize>) -> (Branch, Option<Vec<u8>>) {
-    // Initialize path as empyt
+    // Initialize path as empty
     let path: Vec<u8> = Vec::<u8>::new();
 
     match leaves.len() {
@@ -295,9 +289,8 @@ pub fn tree_builder(leaves: &Vec<TapLeaf>, index: Option<usize>) -> (Branch, Opt
                     for i in 0..leaves.len() {
                         current_level.push(leaves[i].clone().into_branch());
                     }
-                }
-                // If it is the level one or above, move above_level items into current_level, and reset above_level
-                else {
+                } else {
+                    // If it is the level one or above, move above_level items into current_level, and reset above_level
                     current_level.clear();
                     current_level.extend(above_level.clone());
                     above_level.clear();
@@ -305,7 +298,6 @@ pub fn tree_builder(leaves: &Vec<TapLeaf>, index: Option<usize>) -> (Branch, Opt
 
                 let mut iterator: usize = 0;
                 let iterator_bound: usize = current_level.len();
-
                 let operations: usize = match iterator_bound {
                     0 => panic!("This should not be the case."),
                     1 => 1,
@@ -313,7 +305,7 @@ pub fn tree_builder(leaves: &Vec<TapLeaf>, index: Option<usize>) -> (Branch, Opt
                 };
 
                 for _ in 0..operations {
-                    match (iterator_bound - iterator) {
+                    match iterator_bound - iterator {
                         0 => panic!("This should not be the case."),
                         // last
                         1 => {
@@ -365,11 +357,11 @@ pub fn tree_builder(leaves: &Vec<TapLeaf>, index: Option<usize>) -> (Branch, Opt
                     }
                 }
 
-                // At the end of each level, the itertor must have covered all branches of that level
+                // At the end of each level, the iterator must have covered all branches of that level
                 assert_eq!(iterator, iterator_bound);
             }
 
-            // At the end, only the uppermost branch must have left
+            // At the end, only the uppermost branch must be left
             assert_eq!(above_level.len(), 1);
 
             let branch: Branch = above_level[0].clone();
