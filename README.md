@@ -16,5 +16,5 @@ The official implementation of  [Bitcoin Virtual Machine](https://brqgoo.medium.
     - Channel 
     - Self 
     - Remote 
-- Covenant
-- Pool Template
+- Covenant 🔜
+- Pool Template 🔜
