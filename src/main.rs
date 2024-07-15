@@ -139,7 +139,7 @@ mod tests {
         // Test with odd tweaked key
 
         let tap_leaf_with_odd = TapLeaf::new(vec![0x01, 0x23, 0xab, 0xcd]);
-        let tap_root_with_odd = TapRoot::script_path_only_single(tap_leaf_with_odd.clone())?;
+        let tap_root_with_odd = TapRoot::script_path_only_single(tap_leaf_with_odd.clone());
 
         let expected_spk = hex::decode("512085dbf94f892274c41acb75d48daf338c739d1157c70963912db526c4cad30d1a")?;
         assert_eq!(tap_root_with_odd.spk()?, expected_spk);
@@ -148,7 +148,7 @@ mod tests {
         // Test with even tweaked key
 
         let tap_leaf_with_even = TapLeaf::new(vec![0x01, 0x23, 0xab, 0xcd, 0xef, 0xff]);
-        let tap_root_with_even = TapRoot::script_path_only_single(tap_leaf_with_even.clone())?;
+        let tap_root_with_even = TapRoot::script_path_only_single(tap_leaf_with_even.clone());
 
         let expected_spk = hex::decode("51201fbb64a309f43ee6a442cd293a9df3ce3bbb0864a2215a1091c06521021f9de4")?;
         assert_eq!(tap_root_with_even.spk()?, expected_spk);
@@ -161,7 +161,7 @@ mod tests {
     #[test]
     fn test_control_block() -> Result<(), Box<dyn Error>> {
         let tap_leaf_single: TapLeaf = TapLeaf::new(vec![0xaa, 0xbb, 0xcc]);
-        let tap_root_single_leaf: TapRoot = TapRoot::script_path_only_multi(vec![tap_leaf_single])?;
+        let tap_root_single_leaf: TapRoot = TapRoot::script_path_only_multi(vec![tap_leaf_single]);
 
         let expected_cb: Vec<u8> =
             hex::decode("c050929b74c1a04954b78b4b6035e97a5e078a5a0f28ec96d547bfee9ace803ac0")?;
@@ -174,7 +174,7 @@ mod tests {
 
         let leaves: Vec<TapLeaf> = vec![tap_leaf_1, tap_leaf_2, tap_leaf_3];
 
-        let tap_root: TapRoot = TapRoot::script_path_only_multi(leaves)?;
+        let tap_root: TapRoot = TapRoot::script_path_only_multi(leaves);
 
         let expected_cb_1 =
             hex::decode("c050929b74c1a04954b78b4b6035e97a5e078a5a0f28ec96d547bfee9ace803ac091af7e676faf0d787dd6628f8d068756dd2de2473b94e5aa63915f168764e821fe06075904b2d09b06d544283b5ed7948355e691785c7b3e1a952a1a705151fe")?;
@@ -349,7 +349,7 @@ mod tests {
         for i in 0..64 {
             leaves.push(TapLeaf::new(vec![i as u8]));
         }
-        let tap_root = TapRoot::script_path_only_multi(leaves)?;
+        let tap_root = TapRoot::script_path_only_multi(leaves);
 
         let expected_spk = hex::decode("5120b88bb9de3afa63f0cd5b533f70a58f60004b65b6a1b6683a1ba766e37b11455b")?;
         assert_eq!(tap_root.spk()?, expected_spk);

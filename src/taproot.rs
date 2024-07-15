@@ -144,20 +144,20 @@ impl TapRoot {
         }
     }
 
-    pub fn script_path_only_single(leaf: TapLeaf) -> Result<TapRoot, secp256k1::Error> {
-        let inner_key = XOnlyPublicKey::from_slice(&POINT_WITH_UNKNOWN_DISCRETE_LOGARITHM)?;
-        Ok(TapRoot {
+    pub fn script_path_only_single(leaf: TapLeaf) -> TapRoot {
+        let inner_key = XOnlyPublicKey::from_slice(&POINT_WITH_UNKNOWN_DISCRETE_LOGARITHM).unwrap();
+        TapRoot {
             inner_key,
             tree: Some(TapTree::new(vec![leaf])),
-        })
+        }
     }
 
-    pub fn script_path_only_multi(leaves: Vec<TapLeaf>) -> Result<TapRoot, secp256k1::Error> {
-        let inner_key = XOnlyPublicKey::from_slice(&POINT_WITH_UNKNOWN_DISCRETE_LOGARITHM)?;
-        Ok(TapRoot {
+    pub fn script_path_only_multi(leaves: Vec<TapLeaf>) -> TapRoot {
+        let inner_key = XOnlyPublicKey::from_slice(&POINT_WITH_UNKNOWN_DISCRETE_LOGARITHM).unwrap();
+        TapRoot {
             inner_key,
             tree: Some(TapTree::new(leaves)),
-        })
+        }
     }
 
     pub fn inner_key_x_only(&self) -> XOnlyPublicKey {
