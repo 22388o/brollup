@@ -108,7 +108,7 @@ pub fn multi_push_encode(data: &Vec<u8>, flag: PushFlag) {
         // Distribute leftovers by one
         if chunk_leftover > 0 {
             end = end + 1;
-            chunk_leftover = chunk_leftover -1;
+            chunk_leftover = chunk_leftover - 1;
         }
 
         let chunk = data.clone()[start..end].to_vec();
