@@ -99,15 +99,16 @@ pub fn multi_push_encode(data: &Vec<u8>, flag: PushFlag) {
 
     let num_chunks = 1 + (data.len() / chunk_size_max as usize);
 
-    let (chunk_size, chunk_leftover) = (data.len() / num_chunks, data.len() % num_chunks);
+    let (chunk_size, mut chunk_leftover) = (data.len() / num_chunks, data.len() % num_chunks);
 
     for i in 0..num_chunks {
         let start = i * chunk_size;
         let mut end: usize = start + chunk_size;
 
-        // Add leftover in the last iteration
-        if i == num_chunks - 1 {
-            end = end + chunk_leftover;
+        // Distribute leftovers by one
+        if chunk_leftover > 0 {
+            end = end + 1;
+            chunk_leftover = chunk_leftover -1;
         }
 
         let chunk = data.clone()[start..end].to_vec();
