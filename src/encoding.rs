@@ -1,4 +1,6 @@
-use std::vec;
+use std::{usize, vec};
+
+use sha2::digest::consts::True;
 
 // https://en.bitcoin.it/wiki/Protocol_documentation#Variable_length_integer
 pub fn prefix_compact_size(data: &Vec<u8>) -> Vec<u8> {
@@ -75,4 +77,46 @@ pub fn prefix_pushdata(data: &Vec<u8>) -> Vec<u8> {
     }
     return_vec.extend(data);
     return_vec
+}
+
+pub enum PushFlag {
+    WitnessStandardPush,
+    WitnessNonStandardPush,
+    ScriptPush,
+}
+
+pub fn multi_push_encode(data: &Vec<u8>, flag: PushFlag) {
+    let mut return_vec: Vec<u8> = Vec::<u8>::new();
+
+    let chunk_size: u16 = match flag {
+        // https://github.com/bitcoin/bitcoin/blob/master/src/policy/policy.h#L45
+        PushFlag::WitnessStandardPush => 80,
+        // https://github.com/bitcoin/bitcoin/blob/master/src/script/script.h#L27
+        PushFlag::WitnessNonStandardPush => 520,
+        // https://github.com/bitcoin/bitcoin/blob/master/src/script/script.h#L27
+        PushFlag::ScriptPush => 520,
+    };
+
+    let num_chunks = 1 + (data.len() / chunk_size as usize);
+
+    let (chunk_size, chunk_leftover) = (data.len() / num_chunks, data.len() % num_chunks);
+
+    for i in 0..num_chunks {
+        let start = i * chunk_size;
+        let mut end: usize = start + chunk_size;
+
+        // Add leftover in the last iteration
+        if i == num_chunks - 1 {
+            end = end + chunk_leftover;
+        }
+
+        let chunk = data.clone()[start..end].to_vec();
+
+        match flag {
+            // Use OP_PUSHDATA encoding for in-script witness pushes
+            PushFlag::ScriptPush => return_vec.extend(prefix_pushdata(&chunk)),
+            // Use varint encoding for out-script witness pushes
+            _ => return_vec.extend(prefix_compact_size(&chunk)),
+        }
+    }
 }
