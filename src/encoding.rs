@@ -88,7 +88,7 @@ pub enum PushFlag {
 pub fn multi_push_encode(data: &Vec<u8>, flag: PushFlag) {
     let mut return_vec: Vec<u8> = Vec::<u8>::new();
 
-    let chunk_size: u16 = match flag {
+    let chunk_size_max: u16 = match flag {
         // https://github.com/bitcoin/bitcoin/blob/master/src/policy/policy.h#L45
         PushFlag::WitnessStandardPush => 80,
         // https://github.com/bitcoin/bitcoin/blob/master/src/script/script.h#L27
@@ -97,7 +97,7 @@ pub fn multi_push_encode(data: &Vec<u8>, flag: PushFlag) {
         PushFlag::ScriptPush => 520,
     };
 
-    let num_chunks = 1 + (data.len() / chunk_size as usize);
+    let num_chunks = 1 + (data.len() / chunk_size_max as usize);
 
     let (chunk_size, chunk_leftover) = (data.len() / num_chunks, data.len() % num_chunks);
 
