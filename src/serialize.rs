@@ -1,4 +1,4 @@
-use std::{usize, vec};
+use std::{str::Bytes, usize, vec};
 
 use sha2::digest::consts::True;
 
@@ -173,6 +173,60 @@ pub fn encode_multi_push(data: &Bytes, flag: PushFlag) -> Bytes {
             _ => encoded.extend(with_prefix_compact_size(&chunk)),
         }
     }
+
+    encoded
+}
+
+enum CSVFlag {
+    CSVBlock,
+    CSVHour,
+    CSVDay,
+    CSVWeek,
+    CSVTwoWeeks,
+    CSVMonth,
+    CSVTwoMonths,
+    CSVThreeMonths,
+    CSVSixMonths,
+}
+
+pub fn to_n_sequence_encode(flag: CSVFlag) -> Bytes {
+    let mut encoded = Vec::<u8>::new();
+
+    match flag {
+        CSVFlag::CSVBlock => encoded.extend(vec![0x01, 0x00, 0x00, 0x00]),
+        CSVFlag::CSVHour => encoded.extend(vec![0x06, 0x00, 0x00, 0x00]),
+        CSVFlag::CSVDay => encoded.extend(vec![0x02, 0x90, 0x00, 0x00]),
+        CSVFlag::CSVWeek => encoded.extend(vec![0x02, 0xf0, 0x03, 0x00]),
+        CSVFlag::CSVTwoWeeks => encoded.extend(vec![0x02, 0xe0, 0x07, 0x00]),
+        CSVFlag::CSVMonth => encoded.extend(vec![0x02, 0xe0, 0x10, 0x00]),
+        CSVFlag::CSVTwoMonths => encoded.extend(vec![0x02, 0xc0, 0x21, 0x00]),
+        CSVFlag::CSVThreeMonths => encoded.extend(vec![0x02, 0xa0, 0x32, 0x00]),
+        CSVFlag::CSVSixMonths => encoded.extend(vec![0x02, 0x40, 0x65, 0x00]),
+    }
+
+    encoded
+}
+
+pub fn to_csv_script_encode(flag: CSVFlag) -> Bytes {
+    let mut encoded = Vec::<u8>::new();
+
+    match flag {
+        CSVFlag::CSVBlock => encoded.extend(vec![0x51]),
+        CSVFlag::CSVHour => encoded.extend(vec![0x56]),
+        CSVFlag::CSVDay => encoded.extend(vec![0x02, 0x90, 0x00]),
+        CSVFlag::CSVWeek => encoded.extend(vec![0x02, 0xf0, 0x03]),
+        CSVFlag::CSVTwoWeeks => encoded.extend(vec![0x02, 0xe0, 0x07]),
+        CSVFlag::CSVMonth => encoded.extend(vec![0x02, 0xe0, 0x10]),
+        CSVFlag::CSVTwoMonths => encoded.extend(vec![0x02, 0xc0, 0x21]),
+        CSVFlag::CSVThreeMonths => encoded.extend(vec![0x02, 0xa0, 0x32]),
+        CSVFlag::CSVSixMonths => encoded.extend(vec![0x02, 0x40, 0x65]),
+    }
+
+    // OP_CHECKSEQUENCEVERIFY
+    encoded.push(0xb2);
+
+    // OP_DROP
+    encoded.push(0xb275);
 
     encoded
 }
