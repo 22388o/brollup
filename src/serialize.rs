@@ -1,5 +1,3 @@
-use std::{str::Bytes, usize, vec};
-
 use sha2::digest::consts::True;
 
 type Bytes = Vec<u8>;
@@ -226,7 +224,7 @@ pub fn to_csv_script_encode(flag: CSVFlag) -> Bytes {
     encoded.push(0xb2);
 
     // OP_DROP
-    encoded.push(0xb275);
+    encoded.push(0x75);
 
     encoded
 }
