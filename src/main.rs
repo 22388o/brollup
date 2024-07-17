@@ -433,6 +433,46 @@ mod tests {
         let expected_7 = hex::decode("4d0a01aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa").unwrap();
 
         assert_eq!(with_prefix_pushdata(&data_7), expected_7);
+
+        // Minimal pushes
+
+        let data_8 = hex::decode("").unwrap();
+        let expected_8 = hex::decode("00").unwrap();
+
+        assert_eq!(with_prefix_pushdata(&data_8), expected_8);
+
+        let data_9 = hex::decode("01").unwrap();
+        let expected_9 = hex::decode("51").unwrap();
+
+        assert_eq!(with_prefix_pushdata(&data_9), expected_9);
+
+        let data_10 = hex::decode("09").unwrap();
+        let expected_10 = hex::decode("59").unwrap();
+
+        assert_eq!(with_prefix_pushdata(&data_10), expected_10);
+
+        let data_11 = hex::decode("0a").unwrap();
+        let expected_11 = hex::decode("5a").unwrap();
+
+        assert_eq!(with_prefix_pushdata(&data_11), expected_11);
+
+        let data_12 = hex::decode("0f").unwrap();
+        let expected_12 = hex::decode("5f").unwrap();
+
+        assert_eq!(with_prefix_pushdata(&data_12), expected_12);
+
+        let data_13 = hex::decode("10").unwrap();
+        let expected_13 = hex::decode("60").unwrap();
+
+        assert_eq!(with_prefix_pushdata(&data_13), expected_13);
+
+        let data_14 = hex::decode("11").unwrap();
+        let not_expected_14 = hex::decode("61").unwrap();
+        let expected_14 = hex::decode("0111").unwrap();
+
+        assert_eq!(with_prefix_pushdata(&data_14), expected_14);
+        assert_ne!(with_prefix_pushdata(&data_14), not_expected_14);
+
     }
 
     #[test]
