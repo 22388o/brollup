@@ -7,10 +7,12 @@ use sha2::Sha256;
 use std::cmp::Ordering;
 use std::vec;
 
+type Bytes = Vec<u8>;
+
 const LEAF_VERSION: u8 = 0xc0;
 
 lazy_static! {
-    static ref POINT_WITH_UNKNOWN_DISCRETE_LOGARITHM: Vec<u8> = vec![
+    static ref POINT_WITH_UNKNOWN_DISCRETE_LOGARITHM: Bytes = vec![
         0x50, 0x92, 0x9b, 0x74, 0xc1, 0xa0, 0x49, 0x54, 0xb7, 0x8b, 0x4b, 0x60, 0x35, 0xe9, 0x7a,
         0x5e, 0x07, 0x8a, 0x5a, 0x0f, 0x28, 0xec, 0x96, 0xd5, 0x47, 0xbf, 0xee, 0x9a, 0xce, 0x80,
         0x3a, 0xc0
@@ -33,18 +35,18 @@ pub enum Branch {
 #[derive(Clone)]
 pub struct TapLeaf {
     leaf_version: u8,
-    tap_script: Vec<u8>,
+    tap_script: Bytes,
 }
 
 impl TapLeaf {
-    pub fn new(tap_script: Vec<u8>) -> TapLeaf {
+    pub fn new(tap_script: Bytes) -> TapLeaf {
         TapLeaf {
             leaf_version: LEAF_VERSION,
             tap_script,
         }
     }
 
-    pub fn new_version(tap_script: Vec<u8>, leaf_version: u8) -> TapLeaf {
+    pub fn new_version(tap_script: Bytes, leaf_version: u8) -> TapLeaf {
         TapLeaf {
             leaf_version,
             tap_script,
@@ -55,7 +57,7 @@ impl TapLeaf {
         hash_tap_leaf(&self.tap_script, self.leaf_version)
     }
 
-    pub fn hash_as_vec(&self) -> Vec<u8> {
+    pub fn hash_as_vec(&self) -> Bytes {
         self.hash().to_vec()
     }
 
@@ -72,12 +74,12 @@ pub struct TapBranch {
 
 impl TapBranch {
     pub fn new(first: Branch, second: Branch) -> TapBranch {
-        let first_branch_vec: Vec<u8> = match &first {
+        let first_branch_vec: Bytes = match &first {
             Branch::Leaf(leaf) => leaf.hash_as_vec(),
             Branch::Branch(branch) => branch.hash_as_vec(),
         };
 
-        let second_branch_vec: Vec<u8> = match &second {
+        let second_branch_vec: Bytes = match &second {
             Branch::Leaf(leaf) => leaf.hash_as_vec(),
             Branch::Branch(branch) => branch.hash_as_vec(),
         };
@@ -95,12 +97,12 @@ impl TapBranch {
     }
 
     pub fn hash(&self) -> [u8; 32] {
-        let left_branch_vec: Vec<u8> = match &self.left_branch {
+        let left_branch_vec: Bytes = match &self.left_branch {
             Branch::Branch(branch) => branch.hash_as_vec(),
             Branch::Leaf(leaf) => leaf.hash_as_vec(),
         };
 
-        let right_branch_vec: Vec<u8> = match &self.right_branch {
+        let right_branch_vec: Bytes = match &self.right_branch {
             Branch::Branch(branch) => branch.hash_as_vec(),
             Branch::Leaf(leaf) => leaf.hash_as_vec(),
         };
@@ -108,7 +110,7 @@ impl TapBranch {
         hash_tap_branch(&left_branch_vec, &right_branch_vec)
     }
 
-    pub fn hash_as_vec(&self) -> Vec<u8> {
+    pub fn hash_as_vec(&self) -> Bytes {
         self.hash().to_vec()
     }
 
@@ -169,9 +171,9 @@ impl TapRoot {
     }
 
     pub fn tap_tweak(&self) -> [u8; 32] {
-        let inner_vec: Vec<u8> = self.inner_key.serialize().to_vec();
+        let inner_vec: Bytes = self.inner_key.serialize().to_vec();
 
-        let tweak_vec: Vec<u8> = match &self.tree {
+        let tweak_vec: Bytes = match &self.tree {
             Some(tree) => match &tree.root {
                 Branch::Leaf(leaf) => leaf.hash_as_vec(),
                 Branch::Branch(branch) => branch.hash_as_vec(),
@@ -202,15 +204,15 @@ impl TapRoot {
         Ok(x_only)
     }
 
-    pub fn spk(&self) -> Result<Vec<u8>, secp256k1::Error> {
-        let mut spk: Vec<u8> = vec![0x51, 0x20];
+    pub fn spk(&self) -> Result<Bytes, secp256k1::Error> {
+        let mut spk: Bytes = vec![0x51, 0x20];
         let tweaked_key = self.tweaked_key()?;
         spk.extend(tweaked_key.x_only_public_key().0.serialize().to_vec());
         Ok(spk)
     }
 
     pub fn control_block(&self, index: usize) -> Result<ControlBlock, secp256k1::Error> {
-        let path: Vec<u8> = match &self.tree {
+        let path: Bytes = match &self.tree {
             Some(tree) => tree.path(index),
             None => return Err(secp256k1::Error::InvalidTweak),
         };
@@ -235,14 +237,14 @@ impl TapTree {
         }
     }
 
-    pub fn root(&self) -> Vec<u8> {
+    pub fn root(&self) -> Bytes {
         match &self.root {
             Branch::Leaf(leaf) => leaf.hash_as_vec(),
             Branch::Branch(branch) => branch.hash_as_vec(),
         }
     }
 
-    pub fn path(&self, index: usize) -> Vec<u8> {
+    pub fn path(&self, index: usize) -> Bytes {
         // Given leaf index return the merkle path
 
         let path_vec = match tree_builder(&self.leaves, Some(index)).1 {
@@ -255,9 +257,9 @@ impl TapTree {
 
 // tree_builder returns given a vector of leaves, the tree root,
 // and optionally a merkle path corresponding to some leaf
-pub fn tree_builder(leaves: &Vec<TapLeaf>, index: Option<usize>) -> (Branch, Option<Vec<u8>>) {
+pub fn tree_builder(leaves: &Vec<TapLeaf>, index: Option<usize>) -> (Branch, Option<Bytes>) {
     // Initialize path as empty
-    let path: Vec<u8> = Vec::<u8>::new();
+    let path: Bytes = Vec::<u8>::new();
 
     match leaves.len() {
         0 => panic!("TapTree must be initialized with at least one TapLeaf."),
@@ -270,7 +272,7 @@ pub fn tree_builder(leaves: &Vec<TapLeaf>, index: Option<usize>) -> (Branch, Opt
             }
         }
         _ => {
-            let mut path: Vec<u8> = Vec::<u8>::new();
+            let mut path: Bytes = Vec::<u8>::new();
             let mut lookup: Option<Branch> = match index.clone() {
                 Some(index) => Some(leaves[index].into_branch()),
                 None => None,
@@ -317,17 +319,17 @@ pub fn tree_builder(leaves: &Vec<TapLeaf>, index: Option<usize>) -> (Branch, Opt
                             let first: Branch = current_level[iterator].clone();
                             let second: Branch = current_level[iterator + 1].clone();
 
-                            let first_vec: Vec<u8> = match &first {
+                            let first_vec: Bytes = match &first {
                                 Branch::Leaf(leaf) => leaf.hash_as_vec(),
                                 Branch::Branch(branch) => branch.hash_as_vec(),
                             };
 
-                            let second_vec: Vec<u8> = match &second {
+                            let second_vec: Bytes = match &second {
                                 Branch::Leaf(leaf) => leaf.hash_as_vec(),
                                 Branch::Branch(branch) => branch.hash_as_vec(),
                             };
 
-                            let lookup_vec: Vec<u8> = match &lookup {
+                            let lookup_vec: Bytes = match &lookup {
                                 Some(branch) => match branch {
                                     Branch::Leaf(leaf) => leaf.hash_as_vec(),
                                     Branch::Branch(branch) => branch.hash_as_vec(),
@@ -378,11 +380,11 @@ pub struct ControlBlock {
     inner_key: XOnlyPublicKey,
     parity: Parity,
     leaf_version: u8,
-    path: Vec<u8>,
+    path: Bytes,
 }
 
 impl ControlBlock {
-    pub fn new(inner_key: XOnlyPublicKey, parity: Parity, path: Vec<u8>) -> ControlBlock {
+    pub fn new(inner_key: XOnlyPublicKey, parity: Parity, path: Bytes) -> ControlBlock {
         ControlBlock {
             inner_key,
             parity,
@@ -391,8 +393,8 @@ impl ControlBlock {
         }
     }
 
-    pub fn to_vec(&self) -> Vec<u8> {
-        let mut vec: Vec<u8> = Vec::<u8>::new();
+    pub fn to_vec(&self) -> Bytes {
+        let mut vec: Bytes = Vec::<u8>::new();
 
         match self.parity {
             Parity::Even => vec.push(self.leaf_version),
@@ -425,8 +427,8 @@ pub fn tagged_hash(data: impl AsRef<[u8]>, tag: HashTag) -> [u8; 32] {
     hash
 }
 
-pub fn hash_tap_leaf(raw_script_vec: &Vec<u8>, version: u8) -> [u8; 32] {
-    let mut data: Vec<u8> = Vec::new();
+pub fn hash_tap_leaf(raw_script_vec: &Bytes, version: u8) -> [u8; 32] {
+    let mut data: Bytes = Vec::new();
 
     data.extend_from_slice(&[version]);
     data.extend_from_slice(&[(&raw_script_vec).len() as u8]);
@@ -435,8 +437,8 @@ pub fn hash_tap_leaf(raw_script_vec: &Vec<u8>, version: u8) -> [u8; 32] {
     tagged_hash(&data, HashTag::TapLeafTag)
 }
 
-pub fn hash_tap_branch(left_branch_vec: &Vec<u8>, right_branch_vec: &Vec<u8>) -> [u8; 32] {
-    let mut data: Vec<u8> = Vec::new();
+pub fn hash_tap_branch(left_branch_vec: &Bytes, right_branch_vec: &Bytes) -> [u8; 32] {
+    let mut data: Bytes = Vec::new();
 
     data.extend_from_slice(left_branch_vec);
     data.extend_from_slice(right_branch_vec);
@@ -444,8 +446,8 @@ pub fn hash_tap_branch(left_branch_vec: &Vec<u8>, right_branch_vec: &Vec<u8>) ->
     tagged_hash(&data, HashTag::TapBranchTag)
 }
 
-pub fn hash_tap_tweak(inner_key_vec: &Vec<u8>, tweak_vec: &Vec<u8>) -> [u8; 32] {
-    let mut data: Vec<u8> = Vec::new();
+pub fn hash_tap_tweak(inner_key_vec: &Bytes, tweak_vec: &Bytes) -> [u8; 32] {
+    let mut data: Bytes = Vec::new();
 
     data.extend_from_slice(inner_key_vec);
     data.extend_from_slice(tweak_vec);
