@@ -185,6 +185,7 @@ enum CSVFlag {
     CSVTwoMonths,
     CSVThreeMonths,
     CSVSixMonths,
+    CSVYear,
 }
 
 pub fn to_n_sequence_encode(flag: CSVFlag) -> Bytes {
@@ -193,13 +194,14 @@ pub fn to_n_sequence_encode(flag: CSVFlag) -> Bytes {
     match flag {
         CSVFlag::CSVBlock => encoded.extend(vec![0x01, 0x00, 0x00, 0x00]),
         CSVFlag::CSVHour => encoded.extend(vec![0x06, 0x00, 0x00, 0x00]),
-        CSVFlag::CSVDay => encoded.extend(vec![0x02, 0x90, 0x00, 0x00]),
-        CSVFlag::CSVWeek => encoded.extend(vec![0x02, 0xf0, 0x03, 0x00]),
-        CSVFlag::CSVTwoWeeks => encoded.extend(vec![0x02, 0xe0, 0x07, 0x00]),
-        CSVFlag::CSVMonth => encoded.extend(vec![0x02, 0xe0, 0x10, 0x00]),
-        CSVFlag::CSVTwoMonths => encoded.extend(vec![0x02, 0xc0, 0x21, 0x00]),
-        CSVFlag::CSVThreeMonths => encoded.extend(vec![0x02, 0xa0, 0x32, 0x00]),
-        CSVFlag::CSVSixMonths => encoded.extend(vec![0x02, 0x40, 0x65, 0x00]),
+        CSVFlag::CSVDay => encoded.extend(vec![ 0x90, 0x00, 0x00, 0x00]),
+        CSVFlag::CSVWeek => encoded.extend(vec![0xf0, 0x03, 0x00, 0x00]),
+        CSVFlag::CSVTwoWeeks => encoded.extend(vec![0xe0, 0x07, 0x00, 0x00]),
+        CSVFlag::CSVMonth => encoded.extend(vec![0xe0, 0x10, 0x00, 0x00]),
+        CSVFlag::CSVTwoMonths => encoded.extend(vec![0xc0, 0x21, 0x00, 0x00]),
+        CSVFlag::CSVThreeMonths => encoded.extend(vec![0xa0, 0x32, 0x00, 0x00]),
+        CSVFlag::CSVSixMonths => encoded.extend(vec![0x40, 0x65, 0x00, 0x00]),
+        CSVFlag::CSVYear => encoded.extend(vec![0x50, 0xcd, 0x00, 0x00]),
     }
 
     encoded
@@ -218,6 +220,7 @@ pub fn to_csv_script_encode(flag: CSVFlag) -> Bytes {
         CSVFlag::CSVTwoMonths => encoded.extend(vec![0x02, 0xc0, 0x21]),
         CSVFlag::CSVThreeMonths => encoded.extend(vec![0x02, 0xa0, 0x32]),
         CSVFlag::CSVSixMonths => encoded.extend(vec![0x02, 0x40, 0x65]),
+        CSVFlag::CSVYear => encoded.extend(vec![0x03, 0x50, 0xcd, 0x00]),
     }
 
     // OP_CHECKSEQUENCEVERIFY
