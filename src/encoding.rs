@@ -106,8 +106,7 @@ pub fn chunkify(data: &Bytes, flag: PushFlag) -> Vec<Bytes> {
 
     let mut covered = 0;
 
-    for i in 0..num_chunks {
-
+    for _ in 0..num_chunks {
         let mut to_cover = chunk_size;
 
         // Distribute leftovers by one
@@ -116,7 +115,7 @@ pub fn chunkify(data: &Bytes, flag: PushFlag) -> Vec<Bytes> {
             chunk_leftover = chunk_leftover - 1;
         }
 
-        let chunk = data[covered..(covered + to_cover)].to_vec();
+        let chunk: Bytes = data[covered..(covered + to_cover)].to_vec();
         covered = covered + to_cover;
 
         chunks.push(chunk);
@@ -125,17 +124,17 @@ pub fn chunkify(data: &Bytes, flag: PushFlag) -> Vec<Bytes> {
 }
 
 pub fn encode_multi_push(data: &Bytes, flag: PushFlag) -> Bytes {
-    let mut return_vec: Bytes = Vec::<u8>::new();
+    let mut encoded: Bytes = Vec::<u8>::new();
     let chunks: Vec<Bytes> = chunkify(data, flag.clone());
 
     for chunk in chunks {
         match flag {
             // Use OP_PUSHDATA encoding for in-script witness pushes
-            PushFlag::ScriptPush => return_vec.extend(with_prefix_pushdata(&chunk)),
+            PushFlag::ScriptPush => encoded.extend(with_prefix_pushdata(&chunk)),
             // Use varint encoding for out-script witness pushes
-            _ => return_vec.extend(with_prefix_compact_size(&chunk)),
+            _ => encoded.extend(with_prefix_compact_size(&chunk)),
         }
     }
 
-    return_vec
+    encoded
 }
