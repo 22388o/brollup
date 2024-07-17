@@ -1,5 +1,5 @@
 mod taproot;
-mod encoding;
+mod serialize;
 
 #[cfg(test)]
 mod tests {
@@ -7,7 +7,7 @@ mod tests {
     use musig2::KeyAggContext;
     use musig2::secp256k1::{Parity, PublicKey};
     use crate::taproot::{ControlBlock, TapBranch, TapLeaf, TapRoot, TapTree};
-    use crate::encoding::*;
+    use crate::serialize::*;
 
     #[test]
     fn test_key_aggregation() -> Result<(), Box<dyn Error>>  {
