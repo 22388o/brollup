@@ -91,7 +91,7 @@ pub enum PushFlag {
 pub fn chunkify(data: &Bytes, flag: PushFlag) -> Vec<Bytes> {
     let mut chunks: Vec<Bytes> = Vec::<Bytes>::new();
 
-    let chunk_size_max: u16 = match flag {
+    let chunk_size_max: usize = match flag {
         // https://github.com/bitcoin/bitcoin/blob/master/src/policy/policy.h#L45
         PushFlag::WitnessStandardPush => 80,
         // https://github.com/bitcoin/bitcoin/blob/master/src/script/script.h#L27
@@ -100,7 +100,15 @@ pub fn chunkify(data: &Bytes, flag: PushFlag) -> Vec<Bytes> {
         PushFlag::ScriptPush => 520,
     };
 
-    let num_chunks = 1 + (data.len() / chunk_size_max as usize);
+    let mut num_chunks = data.len() / chunk_size_max;
+
+    if data.len() % chunk_size_max != 0 {
+        num_chunks = num_chunks + 1;
+    }
+
+    if data.len() == 0 {
+        num_chunks = 1;
+    }
 
     let (chunk_size, mut chunk_leftover) = (data.len() / num_chunks, data.len() % num_chunks);
 
