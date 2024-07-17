@@ -83,8 +83,8 @@ pub fn with_prefix_pushdata(data: &Bytes) -> Bytes {
 
 #[derive(Clone)]
 pub enum PushFlag {
-    WitnessStandardPush,
-    WitnessNonStandardPush,
+    StandardWitnessPush,
+    NonStandardWitnessPush,
     ScriptPush,
 }
 
@@ -93,9 +93,9 @@ pub fn chunkify(data: &Bytes, flag: PushFlag) -> Vec<Bytes> {
 
     let chunk_size_max: usize = match flag {
         // https://github.com/bitcoin/bitcoin/blob/master/src/policy/policy.h#L45
-        PushFlag::WitnessStandardPush => 80,
+        PushFlag::StandardWitnessPush => 80,
         // https://github.com/bitcoin/bitcoin/blob/master/src/script/script.h#L27
-        PushFlag::WitnessNonStandardPush => 520,
+        PushFlag::NonStandardWitnessPush => 520,
         // https://github.com/bitcoin/bitcoin/blob/master/src/script/script.h#L27
         PushFlag::ScriptPush => 520,
     };
