@@ -128,6 +128,10 @@ pub fn chunkify(data: &Bytes, flag: PushFlag) -> Vec<Bytes> {
 
         chunks.push(chunk);
     }
+
+    // At the end, all bytes must have covered
+    assert_eq!(data.len(), covered);
+
     chunks
 }
 
