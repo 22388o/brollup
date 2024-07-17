@@ -88,6 +88,7 @@ pub enum PushFlag {
     ScriptPush,
 }
 
+// Chunk bytes as evenly as possible
 pub fn chunkify(data: &Bytes, flag: PushFlag) -> Vec<Bytes> {
     let mut chunks: Vec<Bytes> = Vec::<Bytes>::new();
 
