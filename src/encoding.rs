@@ -2,20 +2,22 @@ use std::{usize, vec};
 
 use sha2::digest::consts::True;
 
+type Bytes = Vec<u8>;
+
 // https://en.bitcoin.it/wiki/Protocol_documentation#Variable_length_integer
-pub fn prefix_compact_size(data: &Vec<u8>) -> Vec<u8> {
-    let mut return_vec: Vec<u8> = Vec::<u8>::new();
+pub fn with_prefix_compact_size(data: &Bytes) -> Bytes {
+    let mut return_vec: Bytes = Vec::<u8>::new();
 
     match data.len() {
         x if x < 0xFD => return_vec.extend(vec![x as u8]),
         x if x <= 0xFFFF => {
             return_vec.extend(vec![0xfd]);
-            let vec_u8: Vec<u8> = vec![(x & 0xFF) as u8, (x >> 8 & 0xFF) as u8];
+            let vec_u8: Bytes = vec![(x & 0xFF) as u8, (x >> 8 & 0xFF) as u8];
             return_vec.extend(vec_u8)
         }
         x if x <= 0xFFFFFFFF => {
             return_vec.extend(vec![0xfe]);
-            let vec_u8: Vec<u8> = vec![
+            let vec_u8: Bytes = vec![
                 (x & 0xFF) as u8,
                 ((x >> 8) & 0xFF) as u8,
                 ((x >> 16) & 0xFF) as u8,
@@ -25,7 +27,7 @@ pub fn prefix_compact_size(data: &Vec<u8>) -> Vec<u8> {
         }
         x if x < 0xFFFFFFFFFFFFFFFF => {
             return_vec.extend(vec![0xff]);
-            let vec_u8: Vec<u8> = vec![
+            let vec_u8: Bytes = vec![
                 (x & 0xFF) as u8,
                 ((x >> 8) & 0xFF) as u8,
                 ((x >> 16) & 0xFF) as u8,
@@ -44,8 +46,8 @@ pub fn prefix_compact_size(data: &Vec<u8>) -> Vec<u8> {
 }
 
 // https://en.bitcoin.it/wiki/Script
-pub fn prefix_pushdata(data: &Vec<u8>) -> Vec<u8> {
-    let mut return_vec: Vec<u8> = Vec::<u8>::new();
+pub fn with_prefix_pushdata(data: &Bytes) -> Bytes {
+    let mut return_vec: Bytes = Vec::<u8>::new();
 
     match data.len() {
         x if x <= 75 => return_vec.extend(vec![x as u8]),
@@ -56,7 +58,7 @@ pub fn prefix_pushdata(data: &Vec<u8>) -> Vec<u8> {
         x if x <= 0xFFFF => {
             return_vec.extend(vec![0x4d]);
 
-            let vec_u8: Vec<u8> = vec![(x & 0xFF) as u8, (x >> 8 & 0xFF) as u8];
+            let vec_u8: Bytes = vec![(x & 0xFF) as u8, (x >> 8 & 0xFF) as u8];
 
             return_vec.extend(vec_u8)
         }
@@ -64,7 +66,7 @@ pub fn prefix_pushdata(data: &Vec<u8>) -> Vec<u8> {
             return_vec.extend(vec![0x4e]);
 
             // In little endian order
-            let vec_u8: Vec<u8> = vec![
+            let vec_u8: Bytes = vec![
                 (x & 0xFF) as u8,
                 ((x >> 8) & 0xFF) as u8,
                 ((x >> 16) & 0xFF) as u8,
@@ -79,14 +81,15 @@ pub fn prefix_pushdata(data: &Vec<u8>) -> Vec<u8> {
     return_vec
 }
 
+#[derive(Clone)]
 pub enum PushFlag {
     WitnessStandardPush,
     WitnessNonStandardPush,
     ScriptPush,
 }
 
-pub fn multi_push_encode(data: &Vec<u8>, flag: PushFlag) {
-    let mut return_vec: Vec<u8> = Vec::<u8>::new();
+pub fn chunkify(data: &Bytes, flag: PushFlag) -> Vec<Bytes> {
+    let mut chunks: Vec<Bytes> = Vec::<Bytes>::new();
 
     let chunk_size_max: u16 = match flag {
         // https://github.com/bitcoin/bitcoin/blob/master/src/policy/policy.h#L45
@@ -101,23 +104,38 @@ pub fn multi_push_encode(data: &Vec<u8>, flag: PushFlag) {
 
     let (chunk_size, mut chunk_leftover) = (data.len() / num_chunks, data.len() % num_chunks);
 
+    let mut covered = 0;
+
     for i in 0..num_chunks {
-        let start = i * chunk_size;
-        let mut end: usize = start + chunk_size;
+
+        let mut to_cover = chunk_size;
 
         // Distribute leftovers by one
         if chunk_leftover > 0 {
-            end = end + 1;
+            to_cover = to_cover + 1;
             chunk_leftover = chunk_leftover - 1;
         }
 
-        let chunk = data.clone()[start..end].to_vec();
+        let chunk = data[covered..(covered + to_cover)].to_vec();
+        covered = covered + to_cover;
 
+        chunks.push(chunk);
+    }
+    chunks
+}
+
+pub fn encode_multi_push(data: &Bytes, flag: PushFlag) -> Bytes {
+    let mut return_vec: Bytes = Vec::<u8>::new();
+    let chunks: Vec<Bytes> = chunkify(data, flag.clone());
+
+    for chunk in chunks {
         match flag {
             // Use OP_PUSHDATA encoding for in-script witness pushes
-            PushFlag::ScriptPush => return_vec.extend(prefix_pushdata(&chunk)),
+            PushFlag::ScriptPush => return_vec.extend(with_prefix_pushdata(&chunk)),
             // Use varint encoding for out-script witness pushes
-            _ => return_vec.extend(prefix_compact_size(&chunk)),
+            _ => return_vec.extend(with_prefix_compact_size(&chunk)),
         }
     }
+
+    return_vec
 }
