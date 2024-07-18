@@ -6,12 +6,12 @@ The official implementation of  [Bitcoin Virtual Machine](https://brqgoo.medium.
     - TapBranch
     - TapTree
     - TapRoot
-- Serialize ⏳
+- Serializer ✅
     - Chunkify
     - Prefix Compact Size
     - Prefix Pushdata
-    - Timelock Encoding
-- TXO Types 🔜
+    - CSV
+- TXO Types ⏳
     - Lift 
     - VTXO 
     - VTXO Projector 
