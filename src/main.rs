@@ -5,9 +5,10 @@ mod operator;
 
 #[cfg(test)]
 mod tests {
+    use crate::lift::Lift;
     use crate::serialize::{self, *};
     use crate::taproot::{ControlBlock, TapBranch, TapLeaf, TapRoot, TapTree};
-    use musig2::secp256k1::{Parity, PublicKey};
+    use musig2::secp256k1::{Parity, PublicKey, XOnlyPublicKey};
     use musig2::KeyAggContext;
     use std::error::Error;
 
@@ -784,6 +785,19 @@ mod tests {
         let expected = hex::decode("36aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa36aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa35aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa").unwrap();
 
         assert_eq!(encoded, expected);
+    }
+
+    #[test]
+    fn test_lift() {
+        let self_key: XOnlyPublicKey =
+        "b2d9fb51db445564f1d4e754f644597b11ff191d12c2a582fb598e509cd72421".parse().unwrap();
+
+        let lift_txo = Lift::new(self_key);
+
+        println!("spkis {}", hex::encode(lift_txo.spk().unwrap()));
+        
+
+
     }
 }
 

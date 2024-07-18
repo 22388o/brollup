@@ -119,6 +119,7 @@ impl TapBranch {
     }
 }
 
+#[derive(Clone)]
 pub struct TapRoot {
     inner_key: XOnlyPublicKey,
     tree: Option<TapTree>,
@@ -222,8 +223,12 @@ impl TapRoot {
 
         Ok(ControlBlock::new(inner_key, parity, path))
     }
+    pub fn tree(&self) -> Option<TapTree> {
+        self.tree.clone()
+    }
 }
 
+#[derive(Clone)]
 pub struct TapTree {
     leaves: Vec<TapLeaf>,
     root: Branch,
