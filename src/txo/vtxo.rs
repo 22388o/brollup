@@ -1,7 +1,7 @@
 #![allow(dead_code)]
 
 use crate::{
-    well_known,
+    well_known::operator,
     serialize::{to_csv_script_encode, CSVFlag},
     taproot::{TapLeaf, TapRoot},
 };
@@ -16,7 +16,7 @@ pub struct VTXO {
 
 impl VTXO {
     pub fn new(self_key: XOnlyPublicKey) -> VTXO {
-        let operator_key = XOnlyPublicKey::from_slice(&well_known::OPERATOR_KEY_WELL_KNOWN).unwrap();
+        let operator_key = XOnlyPublicKey::from_slice(&operator::OPERATOR_KEY_WELL_KNOWN).unwrap();
         VTXO {
             operator_key,
             self_key,
