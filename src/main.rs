@@ -1,14 +1,12 @@
-mod lift;
 mod well_known;
 mod serialize;
 mod taproot;
-mod connector;
-mod vtxo;
+mod txo;
 
 #[cfg(test)]
 mod tests {
-    use crate::connector::Connector;
-    use crate::lift::Lift;
+    use crate::txo::connector::Connector;
+    use crate::txo::lift::Lift;
     use crate::serialize::{self, *};
     use crate::taproot::{ControlBlock, TapBranch, TapLeaf, TapRoot, TapTree};
     use musig2::secp256k1::{Parity, PublicKey, XOnlyPublicKey};
