@@ -2,9 +2,11 @@ mod lift;
 mod operator;
 mod serialize;
 mod taproot;
+mod connector;
 
 #[cfg(test)]
 mod tests {
+    use crate::connector::Connector;
     use crate::lift::Lift;
     use crate::serialize::{self, *};
     use crate::taproot::{ControlBlock, TapBranch, TapLeaf, TapRoot, TapTree};
@@ -811,6 +813,28 @@ mod tests {
 
             assert_eq!(collab_path, collab_path_expected);
             assert_eq!(escape_path, escape_path_expected);
+        }
+    }
+
+    #[test]
+    fn test_connector() {
+        let self_key: XOnlyPublicKey =
+            "b2d9fb51db445564f1d4e754f644597b11ff191d12c2a582fb598e509cd72421"
+                .parse()
+                .unwrap();
+
+        let lift_txo = Connector::new(self_key);
+
+        println!("spkis {}", hex::encode(lift_txo.spk().unwrap()));
+
+        let tree = lift_txo.taproot().tree();
+
+        if let Some(tree) = tree {
+            let connector = tree.leaves()[0].tap_script();
+
+            let connector_expected = hex::decode("20b2d9fb51db445564f1d4e754f644597b11ff191d12c2a582fb598e509cd72421ad20fe44f87e8dcf65392e213f304bee1e3a31e562bc1061830d6f2e9539496c46f2ac").unwrap();
+
+            assert_eq!(connector, connector_expected);
         }
     }
 }
