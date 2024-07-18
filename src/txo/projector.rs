@@ -12,15 +12,23 @@ use musig2::{
 
 type Bytes = Vec<u8>;
 
-pub struct VTXOProjector {
+#[derive(Clone, Copy)]
+pub enum ProjectorTag {
+    VTXOProjector,
+    ConnectorProjector,
+}
+
+#[derive(Clone)]
+pub struct Projector {
     operator_key: XOnlyPublicKey,
     msg_senders: Vec<XOnlyPublicKey>,
     msg_senders_aggregate_key: XOnlyPublicKey,
     msg_senders_key_agg_ctx: KeyAggContext,
+    tag: ProjectorTag,
 }
 
-impl VTXOProjector {
-    pub fn new(msg_senders: Vec<XOnlyPublicKey>) -> VTXOProjector {
+impl Projector {
+    pub fn new(msg_senders: Vec<XOnlyPublicKey>, tag: ProjectorTag) -> Projector {
         let operator_key = XOnlyPublicKey::from_slice(&operator::OPERATOR_KEY_WELL_KNOWN).unwrap();
 
         // Lift msg.sender from their XOnly keys
@@ -40,15 +48,16 @@ impl VTXOProjector {
 
         let msg_senders_aggregate_key: PublicKey = msg_senders_key_agg_ctx.aggregated_pubkey();
 
-        VTXOProjector {
+        Projector {
             operator_key,
             msg_senders,
             msg_senders_aggregate_key: msg_senders_aggregate_key.x_only_public_key().0,
-            msg_senders_key_agg_ctx
+            msg_senders_key_agg_ctx,
+            tag
         }
     }
 
-    pub fn new_with_operator(msg_senders: Vec<XOnlyPublicKey>, operator_key: XOnlyPublicKey) -> VTXOProjector {
+    pub fn new_with_operator(msg_senders: Vec<XOnlyPublicKey>, operator_key: XOnlyPublicKey, tag: ProjectorTag) -> Projector {
 
         let mut msg_senders_lifted = Vec::<PublicKey>::new();
 
@@ -65,11 +74,12 @@ impl VTXOProjector {
 
         let msg_senders_aggregate_key: PublicKey = msg_senders_key_agg_ctx.aggregated_pubkey();
 
-        VTXOProjector {
+        Projector {
             operator_key,
             msg_senders,
             msg_senders_aggregate_key: msg_senders_aggregate_key.x_only_public_key().0,
             msg_senders_key_agg_ctx,
+            tag
         }
     }
 
@@ -119,5 +129,9 @@ impl VTXOProjector {
 
     pub fn spk(&self) -> Result<Bytes, secp256k1::Error> {
         self.taproot().spk()
+    }
+
+    pub fn tag(&self) -> ProjectorTag {
+        self.tag
     }
 }
