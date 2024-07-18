@@ -795,7 +795,16 @@ mod tests {
         let lift_txo = Lift::new(self_key);
 
         println!("spkis {}", hex::encode(lift_txo.spk().unwrap()));
-        //println!("leaf1 is {}", hex::encode(lift_txo.taproot().tree()));
+
+        let tree = lift_txo.taproot().tree();
+
+        if let Some(tree) = tree {
+            println!("1 {}", hex::encode(tree.leaves()[0].tap_script()));
+            println!("2 {}", hex::encode(tree.leaves()[1].tap_script()));
+        }
+
+
+        
 
 
     }

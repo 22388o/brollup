@@ -64,6 +64,10 @@ impl TapLeaf {
     pub fn into_branch(&self) -> Branch {
         Branch::Leaf(self.clone())
     }
+
+    pub fn tap_script(&self) -> Bytes {
+        self.tap_script.clone()
+    }
 }
 
 #[derive(Clone)]
