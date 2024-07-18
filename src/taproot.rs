@@ -258,6 +258,9 @@ impl TapTree {
         };
         path_vec
     }
+    pub fn leaves(&self) -> Vec<TapLeaf> {
+        self.leaves.clone()
+    }
 }
 
 // tree_builder returns given a vector of leaves, the tree root,
