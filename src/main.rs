@@ -1,7 +1,7 @@
-mod serialize;
-mod taproot;
 mod lift;
 mod operator;
+mod serialize;
+mod taproot;
 
 #[cfg(test)]
 mod tests {
@@ -475,7 +475,6 @@ mod tests {
 
         assert_eq!(with_prefix_pushdata(&data_14), expected_14);
         assert_ne!(with_prefix_pushdata(&data_14), not_expected_14);
-
     }
 
     #[test]
@@ -790,7 +789,9 @@ mod tests {
     #[test]
     fn test_lift() {
         let self_key: XOnlyPublicKey =
-        "b2d9fb51db445564f1d4e754f644597b11ff191d12c2a582fb598e509cd72421".parse().unwrap();
+            "b2d9fb51db445564f1d4e754f644597b11ff191d12c2a582fb598e509cd72421"
+                .parse()
+                .unwrap();
 
         let lift_txo = Lift::new(self_key);
 
@@ -799,21 +800,18 @@ mod tests {
         let tree = lift_txo.taproot().tree();
 
         if let Some(tree) = tree {
-
             let collab_path = tree.leaves()[0].tap_script();
             let escape_path = tree.leaves()[1].tap_script();
 
             let collab_path_expected = hex::decode("20b2d9fb51db445564f1d4e754f644597b11ff191d12c2a582fb598e509cd72421ad20fe44f87e8dcf65392e213f304bee1e3a31e562bc1061830d6f2e9539496c46f2ac").unwrap();
-            let escape_path_expected= hex::decode("02e010b27520b2d9fb51db445564f1d4e754f644597b11ff191d12c2a582fb598e509cd72421ac").unwrap();
+            let escape_path_expected = hex::decode(
+                "02e010b27520b2d9fb51db445564f1d4e754f644597b11ff191d12c2a582fb598e509cd72421ac",
+            )
+            .unwrap();
 
             assert_eq!(collab_path, collab_path_expected);
             assert_eq!(escape_path, escape_path_expected);
         }
-
-
-        
-
-
     }
 }
 
