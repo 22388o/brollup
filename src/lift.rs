@@ -62,7 +62,7 @@ impl Lift {
         // Relative timelock
         exit_path.extend(to_csv_script_encode(CSVFlag::CSVMonth));
 
-        // Push 32-bytes
+        // Push self key
         exit_path.push(0x20);
         exit_path.extend(self.self_key().serialize().to_vec());
 
