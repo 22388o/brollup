@@ -113,10 +113,10 @@ impl Projector {
         //// Reclaim path
         let mut reclaim_path = Vec::<u8>::new();
 
-        // Relative timelock - VTXO is like Lift, but lives for three months instead
+        // Relative timelock to sweep funds back to the operator
         reclaim_path.extend(to_csv_script_encode(CSVFlag::CSVThreeMonths));
 
-        // Push 32-bytes
+        // Push operator key
         reclaim_path.push(0x20);
         reclaim_path.extend(self.operator_key().serialize().to_vec());
 
