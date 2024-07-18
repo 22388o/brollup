@@ -1,5 +1,5 @@
 mod lift;
-mod operator;
+mod well_known;
 mod serialize;
 mod taproot;
 mod connector;

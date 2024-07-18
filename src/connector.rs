@@ -1,7 +1,7 @@
 #![allow(dead_code)]
 
 use crate::{
-    operator,
+    well_known,
     taproot::{TapLeaf, TapRoot},
 };
 use musig2::secp256k1::{self, XOnlyPublicKey};
@@ -15,7 +15,7 @@ pub struct Connector {
 
 impl Connector {
     pub fn new(self_key: XOnlyPublicKey) -> Connector {
-        let operator_key = XOnlyPublicKey::from_slice(&operator::OPERATOR_KEY_WELL_KNOWN).unwrap();
+        let operator_key = XOnlyPublicKey::from_slice(&well_known::OPERATOR_KEY_WELL_KNOWN).unwrap();
         Connector {
             operator_key,
             self_key,
