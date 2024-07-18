@@ -803,16 +803,16 @@ mod tests {
 
         if let Some(tree) = tree {
             let collab_path = tree.leaves()[0].tap_script();
-            let escape_path = tree.leaves()[1].tap_script();
+            let exit_path = tree.leaves()[1].tap_script();
 
             let collab_path_expected = hex::decode("20b2d9fb51db445564f1d4e754f644597b11ff191d12c2a582fb598e509cd72421ad20fe44f87e8dcf65392e213f304bee1e3a31e562bc1061830d6f2e9539496c46f2ac").unwrap();
-            let escape_path_expected = hex::decode(
+            let exit_path_expected = hex::decode(
                 "02e010b27520b2d9fb51db445564f1d4e754f644597b11ff191d12c2a582fb598e509cd72421ac",
             )
             .unwrap();
 
             assert_eq!(collab_path, collab_path_expected);
-            assert_eq!(escape_path, escape_path_expected);
+            assert_eq!(exit_path, exit_path_expected);
         }
     }
 

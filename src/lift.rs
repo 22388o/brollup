@@ -56,20 +56,20 @@ impl Lift {
         // OP_CHECKSIG
         collab_path.push(0xac);
 
-        //// Escape path
-        let mut escapte_path = Vec::<u8>::new();
+        //// Exit path
+        let mut exit_path = Vec::<u8>::new();
 
         // Relative timelock
-        escapte_path.extend(to_csv_script_encode(CSVFlag::CSVMonth));
+        exit_path.extend(to_csv_script_encode(CSVFlag::CSVMonth));
 
         // Push 32-bytes
-        escapte_path.push(0x20);
-        escapte_path.extend(self.self_key().serialize().to_vec());
+        exit_path.push(0x20);
+        exit_path.extend(self.self_key().serialize().to_vec());
 
         // OP_CHECKSIG
-        escapte_path.push(0xac);
+        exit_path.push(0xac);
 
-        let leaves = vec![TapLeaf::new(collab_path), TapLeaf::new(escapte_path)];
+        let leaves = vec![TapLeaf::new(collab_path), TapLeaf::new(exit_path)];
         TapRoot::script_path_only_multi(leaves)
     }
 
