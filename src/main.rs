@@ -1,5 +1,7 @@
 mod serialize;
 mod taproot;
+mod lift;
+mod operator;
 
 #[cfg(test)]
 mod tests {

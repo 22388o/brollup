@@ -175,7 +175,7 @@ pub fn encode_multi_push(data: &Bytes, flag: PushFlag) -> Bytes {
     encoded
 }
 
-enum CSVFlag {
+pub enum CSVFlag {
     CSVBlock,
     CSVHour,
     CSVDay,
