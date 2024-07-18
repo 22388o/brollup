@@ -12,15 +12,15 @@ use musig2::{
 
 type Bytes = Vec<u8>;
 
-pub struct Projector {
+pub struct VTXOProjector {
     operator_key: XOnlyPublicKey,
     msg_senders: Vec<XOnlyPublicKey>,
     msg_senders_aggregate_key: XOnlyPublicKey,
     msg_senders_key_agg_ctx: KeyAggContext,
 }
 
-impl Projector {
-    pub fn new(msg_senders: Vec<XOnlyPublicKey>) -> Projector {
+impl VTXOProjector {
+    pub fn new(msg_senders: Vec<XOnlyPublicKey>) -> VTXOProjector {
         let operator_key = XOnlyPublicKey::from_slice(&operator::OPERATOR_KEY_WELL_KNOWN).unwrap();
 
         // Lift msg.sender from their XOnly keys
@@ -40,7 +40,7 @@ impl Projector {
 
         let msg_senders_aggregate_key: PublicKey = msg_senders_key_agg_ctx.aggregated_pubkey();
 
-        Projector {
+        VTXOProjector {
             operator_key,
             msg_senders,
             msg_senders_aggregate_key: msg_senders_aggregate_key.x_only_public_key().0,
@@ -48,7 +48,7 @@ impl Projector {
         }
     }
 
-    pub fn new_with_operator(msg_senders: Vec<XOnlyPublicKey>, operator_key: XOnlyPublicKey) -> Projector {
+    pub fn new_with_operator(msg_senders: Vec<XOnlyPublicKey>, operator_key: XOnlyPublicKey) -> VTXOProjector {
 
         let mut msg_senders_lifted = Vec::<PublicKey>::new();
 
@@ -65,7 +65,7 @@ impl Projector {
 
         let msg_senders_aggregate_key: PublicKey = msg_senders_key_agg_ctx.aggregated_pubkey();
 
-        Projector {
+        VTXOProjector {
             operator_key,
             msg_senders,
             msg_senders_aggregate_key: msg_senders_aggregate_key.x_only_public_key().0,
