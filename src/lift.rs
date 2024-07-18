@@ -59,7 +59,7 @@ impl Lift {
         //// Escape path
         let mut escapte_path = Vec::<u8>::new();
 
-        // Relative Timelock
+        // Relative timelock
         escapte_path.extend(to_csv_script_encode(CSVFlag::CSVMonth));
 
         // Push 32-bytes
