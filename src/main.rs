@@ -3,6 +3,7 @@ mod operator;
 mod serialize;
 mod taproot;
 mod connector;
+mod vtxo;
 
 #[cfg(test)]
 mod tests {
