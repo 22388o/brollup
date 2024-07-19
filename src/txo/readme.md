@@ -3,7 +3,7 @@ Bitcoin Virtual Machine employs 10 transaction output (TXO) types:
 | Type                   | Kind    |  Condition                                                |
 |:-----------------------|:--------|:----------------------------------------------------------|
 | Lift 🛗                | Bare    | `(Self + Operator) or (Self after 1 month)`               | 
-| Lift Connector 🔌      | Bare.   | `Operator`                                                |
+| Lift Connector 🔌      | Bare    | `Operator`                                                |
 | VTXO 💵                | Virtual | `(Self + Operator) or (Self after 3 months)`              |
 | VTXO Projector 🎥      | Bare    | `(msg.senders[] + Operator) or (Operator after 3 months)` |
 | Channel 👥             | Virtual | `(Self + Operator) after degrading timelock`              |
