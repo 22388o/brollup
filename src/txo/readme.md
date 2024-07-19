@@ -36,8 +36,8 @@ Bitcoin Virtual Machine employs 10 transaction output (TXO) types:
 ## VTXO Projector 🎥
 `Projector` is a bare, on-chain transaction output type contained in each pool transaction.  `Projector` is used for for projecting `VTXOs` and `Conenctors` in a pseudo-covenant manner.
                                                       
-                                                      ⋰ ┌──────────────────┐
-                                                   ⋰    │      VTXO #0     │
+                                                     ⋰  ┌──────────────────┐
+                                                  ⋰     │      VTXO #0     │
                                                 ⋰       └──────────────────┘
                                               ⋰         ┌──────────────────┐
                                             ⋰           │      VTXO #1     │
