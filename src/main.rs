@@ -5,10 +5,12 @@ mod well_known;
 
 #[cfg(test)]
 mod tests {
-    use crate::serialize::{self, *};
-    use crate::taproot::{ControlBlock, TapBranch, TapLeaf, TapRoot, TapTree};
     use crate::txo::connector::Connector;
     use crate::txo::lift::Lift;
+    use crate::txo::projector::{Projector, ProjectorTag};
+
+    use crate::serialize::{self, *};
+    use crate::taproot::{ControlBlock, TapBranch, TapLeaf, TapRoot, TapTree};
     use musig2::secp256k1::{Parity, PublicKey, XOnlyPublicKey};
     use musig2::KeyAggContext;
     use std::error::Error;
@@ -835,6 +837,59 @@ mod tests {
 
             assert_eq!(connector, connector_expected);
         }
+    }
+
+    #[test]
+    fn test_projector() {
+        let public_key_1: XOnlyPublicKey =
+            "9dde15a45d76d940f90188537d52136ba5e86c8fb2f521f53be794410352798f"
+                .parse()
+                .unwrap();
+        let public_key_2: XOnlyPublicKey =
+            "cf77e4bb66c0a1ce2cd04cd2838ea5d4210e1474fabe717c47237a1da77b81bc"
+                .parse()
+                .unwrap();
+        let public_key_3: XOnlyPublicKey =
+            "ea3d7da21468ef105ad5f3fef1710dd2c759f0014563fd9df922ec7456a9f811"
+                .parse()
+                .unwrap();
+
+        let mut pubkeys: [PublicKey; 3] = [
+            public_key_1.public_key(Parity::Even),
+            public_key_2.public_key(Parity::Even),
+            public_key_3.public_key(Parity::Even),
+        ];
+        pubkeys.sort();
+
+        let key_agg_ctx: KeyAggContext = KeyAggContext::new(pubkeys).unwrap();
+        let agg_key_expected: XOnlyPublicKey = key_agg_ctx.aggregated_pubkey();
+        // 8c12ef9e2507f9c7898ccf47f9059c70c4005f8b9c738597fd015cefe23ed701
+
+        let pubkeys = vec![public_key_1, public_key_2, public_key_3];
+
+        let projector = Projector::new(pubkeys, ProjectorTag::VTXOProjector);
+
+        assert_eq!(projector.msg_senders_aggregate_key(), agg_key_expected);
+
+        let reveal_path = projector.taproot().tree().unwrap().leaves()[0].tap_script();
+        let expected_reveal_path = hex::decode("208c12ef9e2507f9c7898ccf47f9059c70c4005f8b9c738597fd015cefe23ed701ad20fe44f87e8dcf65392e213f304bee1e3a31e562bc1061830d6f2e9539496c46f2ac").unwrap();
+
+        assert_eq!(reveal_path, expected_reveal_path);
+
+        let expected_reclaim_path = hex::decode(
+            "02a032b27520fe44f87e8dcf65392e213f304bee1e3a31e562bc1061830d6f2e9539496c46f2ac",
+        )
+        .unwrap();
+        let reclaim_path = projector.taproot().tree().unwrap().leaves()[1].tap_script();
+
+        assert_eq!(reclaim_path, expected_reclaim_path);
+
+        let expected_spk =
+            hex::decode("5120e83ee0684831fdf523c7ae8e6448ad32e4bb2b986881414a8494341159ac0e1f")
+                .unwrap();
+        let spk = projector.spk().unwrap();
+
+        assert_eq!(expected_spk, spk);
     }
 }
 
