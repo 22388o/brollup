@@ -1,6 +1,6 @@
 # Transaction Output Types
 Bitcoin Virtual Machine employs 10 transaction output (TXO) types:
-| TXO Type               | Kind    |  Condition                                                |
+| TXO Type               | Kind    |  Spending Condition                                                |
 |:-----------------------|:--------|:----------------------------------------------------------|
 | Lift 🛗                | Bare    | `(Self + Operator) or (Self after 1 month)`               | 
 | Lift Connector 🔌      | Bare    | `Operator`                                                |
@@ -15,12 +15,23 @@ Bitcoin Virtual Machine employs 10 transaction output (TXO) types:
 ## Lift 🛗
 `Lift` is a bare, on-chain transaction output type used for onboarding to the Bitcoin VM. When a `Lift` output is funded and has gained two on-chain confirmations, it can be swapped out for a 1:1 `VTXO` in a process known as lifting. In short, a `Lift` output lifts itself up to a `VTXO`.
 
+### Spending Condition
 `Lift` carries two  spending conditions:
 `(Self + Operator) or (Self after 1 month)`
 
--   Both `Self` and `Operator` must sign from the collaborative path `(Self + Operator)` to forfeit the `Lift` output in exchange for a 1:1 `VTXO`. `Self` forfeits the `Lift` output using the `Lift Connector` provided by the `Operator` to receive a new `VTXO` in return.
+-   Both `Self` and `Operator` must sign from the collaborative path `(Self + Operator)` to forfeit the `Lift` output in exchange for a 1:1 `VTXO`. `Self` swaps out the `Lift` output using the `Lift Connector` provided by the `Operator` to receive a new `VTXO` in return.
     
 -   If the `Operator` is non-collaborative and does not sign from the collaborative path, `Self` can trigger the exit path `(Self after 1 month)` to reclaim their funds.
+
+### Swap Out
+
+                        Prevouts                   Outs
+                  ╔══════════════════╗     ╔══════════════════╗
+               #0 ║       Lift       ║  #0 ║     Operator     ║
+                  ╚══════════════════╝     ╚══════════════════╝
+                  ╔══════════════════╗
+               #1 ║  Lift Connector  ║
+                  ╚══════════════════╝
 
 ## Projector 🎥
 `Projector` is a bare, on-chain transaction output type contained in each pool transaction.  `Projector` is used for for projecting `VTXOs` and `Conenctors` in a pseudo-covenant manner.
