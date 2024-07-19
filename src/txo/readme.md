@@ -1,17 +1,26 @@
 # Transaction Output Types
-Bitcoin-VM employs 8 transaction output types (TXOs):
-| Type         | Kind    |  Condition                                              |
-|:-------------|:--------|:--------------------------------------------------------|
-| Lift 🛗      | Bare    | `(Self + Operator) or (Self after 1 month)`             | 
-| Projector 🎥 | Bare    | `(msg.senders + Operator) or (Operator after 3 months)` |
-| Payload 📦   | Bare    | `(msg.senders after 1 day) or (Operator)`               |
-| VTXO 💵      | Virtual | `(Self + Operator) or (Self after 3 months)`            |
-| Connector 🔌 | Virtual | `(msg.sender + Operator)`                               |
-| Channel 👥   | Virtual | `(Self + Operator) after degrading timelock`            |
-| Self 👨‍💻      | Virtual | `Self`                                                  |
-| Operator 🏭  | Virtual | `Operator`                                              |
+Bitcoin Virtual Machine employs 10 transaction output (TXO) types:
+| Type                   | Kind    |  Condition                                                |
+|:-----------------------|:--------|:----------------------------------------------------------|
+| Lift 🛗                | Bare    | `(Self + Operator) or (Self after 1 month)`               | 
+| Lift Connector 🔌      | Bare.   | `Operator`                                                |
+| VTXO 💵                | Virtual | `(Self + Operator) or (Self after 3 months)`              |
+| VTXO Projector 🎥      | Bare    | `(msg.senders[] + Operator) or (Operator after 3 months)` |
+| Channel 👥             | Virtual | `(Self + Operator) after degrading timelock`              |
+| Channel Connector 🔌   | Virtual | `(msg.sender + Operator)`                                 |
+| Connector Projector 🎥 | Bare    | `(msg.senders[] + Operator) or (Operator after 3 months)` |
+| Payload 📦             | Bare    | `(msg.senders[] after 1 day) or (Operator)`               |
+| Self 👨‍💻                | Virtual | `Self`                                                    |
+| Operator 🏭            | Virtual | `Operator`                                                |
 ## Lift 🛗
-`Lift` is a bare, on-chain transaction output type used for onboarding (or boarding) to the Bitcoin VM.
+`Lift` is a bare, on-chain transaction output type used for onboarding to the Bitcoin VM. When a `Lift` output is funded and has gained two on-chain confirmations, it can be swapped out for a 1:1 `VTXO` in a process known as lifting. In short, a `Lift` output lifts itself up to a `VTXO`.
+
+`Lift` carries two  spending conditions:
+`(Self + Operator) or (Self after 1 month)`
+
+-   Both `Self` and `Operator` must sign from the collaborative path `(Self + Operator)` to forfeit the `Lift` output in exchange for a 1:1 `VTXO`. The `Operator` forfeits the `Lift` output using the provided `Lift Connector`, and `Self` receives a new `VTXO` in return.
+    
+-   If the `Operator` is non-collaborative and does not sign from the collaborative path, `Self` can trigger the exit path `(Self after 1 month)` to reclaim their funds.
 
 ## Projector 🎥
 `Projector` is a bare, on-chain transaction output type contained in each pool transaction.  `Projector` is used for for projecting `VTXOs` and `Conenctors` in a pseudo-covenant manner.
