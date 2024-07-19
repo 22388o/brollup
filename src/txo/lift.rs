@@ -1,3 +1,6 @@
+// Lift 🛗 is a bare, on-chain transaction output type used for onboarding (or boarding) to the Bitcoin-VM.
+// Lift 🛗 carries the following spending condition: (Self + Operator) or (Self after 3 months).
+
 #![allow(dead_code)]
 
 use crate::{
