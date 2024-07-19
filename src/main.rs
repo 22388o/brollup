@@ -1,14 +1,14 @@
-mod well_known;
 mod serialize;
 mod taproot;
 mod txo;
+mod well_known;
 
 #[cfg(test)]
 mod tests {
-    use crate::txo::connector::Connector;
-    use crate::txo::lift::Lift;
     use crate::serialize::{self, *};
     use crate::taproot::{ControlBlock, TapBranch, TapLeaf, TapRoot, TapTree};
+    use crate::txo::connector::Connector;
+    use crate::txo::lift::Lift;
     use musig2::secp256k1::{Parity, PublicKey, XOnlyPublicKey};
     use musig2::KeyAggContext;
     use std::error::Error;

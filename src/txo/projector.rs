@@ -22,7 +22,6 @@ pub enum ProjectorTag {
 pub struct Projector {
     operator_key: XOnlyPublicKey,
     msg_senders: Vec<XOnlyPublicKey>,
-    msg_senders_aggregate_key: XOnlyPublicKey,
     msg_senders_key_agg_ctx: KeyAggContext,
     tag: ProjectorTag,
 }
@@ -46,45 +45,16 @@ impl Projector {
         // Create Key Aggregation Context from the the msg.sender keys
         let msg_senders_key_agg_ctx: KeyAggContext = KeyAggContext::new(msg_senders_iter).unwrap();
 
-        let msg_senders_aggregate_key: PublicKey = msg_senders_key_agg_ctx.aggregated_pubkey();
-
         Projector {
             operator_key,
             msg_senders,
-            msg_senders_aggregate_key: msg_senders_aggregate_key.x_only_public_key().0,
             msg_senders_key_agg_ctx,
-            tag
-        }
-    }
-
-    pub fn new_with_operator(msg_senders: Vec<XOnlyPublicKey>, operator_key: XOnlyPublicKey, tag: ProjectorTag) -> Projector {
-
-        let mut msg_senders_lifted = Vec::<PublicKey>::new();
-
-        for sender in &msg_senders {
-            msg_senders_lifted.push(sender.public_key(secp256k1::Parity::Even));
-        }
-
-        // Sort the keys
-        msg_senders_lifted.sort();
-
-        let msg_senders_iter = msg_senders_lifted.into_iter();
-
-        let msg_senders_key_agg_ctx: KeyAggContext = KeyAggContext::new(msg_senders_iter).unwrap();
-
-        let msg_senders_aggregate_key: PublicKey = msg_senders_key_agg_ctx.aggregated_pubkey();
-
-        Projector {
-            operator_key,
-            msg_senders,
-            msg_senders_aggregate_key: msg_senders_aggregate_key.x_only_public_key().0,
-            msg_senders_key_agg_ctx,
-            tag
+            tag,
         }
     }
 
     pub fn msg_senders_aggregate_key(&self) -> XOnlyPublicKey {
-        self.msg_senders_aggregate_key
+        self.msg_senders_key_agg_ctx.aggregated_pubkey()
     }
 
     pub fn operator_key(&self) -> XOnlyPublicKey {
@@ -92,7 +62,6 @@ impl Projector {
     }
 
     pub fn taproot(&self) -> TapRoot {
-
         // Reveal path
         let mut reveal_path = Vec::<u8>::new();
 
