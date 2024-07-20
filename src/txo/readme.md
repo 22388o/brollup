@@ -7,15 +7,15 @@ Bitcoin Virtual Machine employs 10 transaction output (TXO) types:
 | VTXO 💵                | Virtual | `(Self + Operator) or (Self after 3 months)`              |
 | VTXO Projector 🎥      | Bare    | `(msg.senders[] + Operator) or (Operator after 3 months)` |
 | Channel 👥             | Virtual | `(Self + Operator) after degrading timelock`              |
-| Channel Connector 🔌   | Virtual | `(msg.sender + Operator)`                                 |
+| Connector 🔌           | Virtual | `(msg.sender + Operator)`                                 |
 | Connector Projector 🎥 | Bare    | `(msg.senders[] + Operator) or (Operator after 3 months)` |
 | Payload 📦             | Bare    | `(msg.senders[] after 1 day) or (Operator)`               |
 | Self 👨‍💻                | Virtual | `Self`                                                    |
 | Operator 🏭            | Virtual | `Operator`                                                |
+
 ## Lift 🛗
 `Lift` is a bare, on-chain transaction output type used for onboarding to the Bitcoin VM. When a `Lift` output is funded and has gained two on-chain confirmations, it can be swapped out for a 1:1 `VTXO` in a process known as lifting. In short, a `Lift` output lifts itself up to a `VTXO`.
 
-#### Spending Condition
 `Lift` carries two  spending conditions:
 `(Self + Operator) or (Self after 1 month)`
 
@@ -23,15 +23,26 @@ Bitcoin Virtual Machine employs 10 transaction output (TXO) types:
     
 -   If the `Operator` is non-collaborative and does not sign from the collaborative path, `Self` can trigger the exit path `(Self after 1 month)` to reclaim their funds.
 
-#### Swap Out
+## Lift Connector 🔌
 
-                  Prevouts                   Outs
-            ┌──────────────────┐     ┌──────────────────┐
-         #0 │       Lift       │  #0 │     Operator     │
-            └──────────────────┘     └──────────────────┘
-            ┌──────────────────┐
-         #1 │  Lift Connector  │
-            └──────────────────┘
+                  Outs                                                  Prevouts                   Outs
+          ┌─────────────────────┐    ⋰ ┌────────────┐              ┌───────────────┐     ┌───────────────┐
+       #0 │    VTXO Projector   │ 🎥 ⋮  │  1:1 VTXO  │           #0 │     Lift      │  #0 │    Operator   │ 
+          └─────────────────────┘    ⋱ └────────────┘              └───────────────┘     └───────────────┘
+          ┌─────────────────────┐                                  ┌────────────────┐
+       #1 │ Connector Projector │                        ╷┄┄┄┄┄ #1┄│ Lift Connector │
+          └─────────────────────┘                        ┆         └────────────────┘
+          ┌─────────────────────┐                        ┆                    Lift Transaction
+       #2 │       Payload       │                        ┆
+          └─────────────────────┘                        ┆
+          ┌─────────────────────┐                        ┆
+       #3 │   Lift Connector 1  │                        ┆
+          └─────────────────────┘                        ┆
+                    ┊                                    ┆ 
+          ┌─────────────────────┐                        ┆
+     #n+2 │   Lift Connector n  │┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄╵
+          └─────────────────────┘   
+             Pool Transaction          
 
 ## VTXO Projector 🎥
 `Projector` is a bare, on-chain transaction output type contained in each pool transaction.  `Projector` is used for for projecting `VTXOs` and `Conenctors` in a pseudo-covenant manner.
@@ -43,7 +54,7 @@ Bitcoin Virtual Machine employs 10 transaction output (TXO) types:
                                        ⋰         │      VTXO #1     │
             ┌──────────────────┐     ⋰           └──────────────────┘
             │  VTXO Projector  │ 🎥 ⋮                        
-            └──────────────────┘     ⋱                    ┊
+            └──────────────────┘     ⋱                     ┊
                                        ⋱                
                                          ⋱       ┌──────────────────┐
                                            ⋱     │      VTXO #n     │
