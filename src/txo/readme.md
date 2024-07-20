@@ -14,7 +14,7 @@ The transactional structure of the `Bitcoin Virtual Machine` consists of ten typ
 | Self 👨‍💻                | Virtual | `Self`                                                    |
 | Operator 🏭            | Virtual | `Operator`                                                |
 
-`Bitcoin Virtual Machine` advances the rollup state by chaining a special transaction called `Pool Transactions` at regular intervals. Four of the output types are contained *barely*, while five are included *virtually* in a `Pool Transaction`. 
+`Bitcoin Virtual Machine` advances the rollup state by chaining `Pool Transactions` at regular intervals. Four of the output types are contained *barely*, while five are included *virtually* in a `Pool Transaction`. 
 
                                                                              ⋰
                                                                            ⋰  ┌────────────────┐   ┌────────────────┐
