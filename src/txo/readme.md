@@ -1,5 +1,5 @@
 # Transaction Output Types
-The transactional structure of the Bitcoin Virtual Machine consists of ten types of transaction outputs (TXOs). Five of these TXO types are bare; meaning they are literal on-chain outputs that consume block space, and the other five are virtual; meaning they are commited, and yet to be revealed.
+The transactional structure of the `Bitcoin VM` consists of ten types of transaction outputs (TXOs). Five of these TXO types are bare; meaning they are literal on-chain outputs that consume block space, and the other five are virtual; meaning they are commited, and yet to be revealed.
 
 | TXO Type               | Kind    |  Spending Condition                                       |
 |:-----------------------|:--------|:----------------------------------------------------------|
@@ -14,7 +14,7 @@ The transactional structure of the Bitcoin Virtual Machine consists of ten types
 | Self 👨‍💻                | Virtual | `Self`                                                    |
 | Operator 🏭            | Virtual | `Operator`                                                |
 
-The Bitcoin Virtual Machine advances the rollup state by chaining a special transaction called `Pool Transactions` at regular intervals. Four of the then output types are contained *barely*, while five are included *virtually* in a `Pool Transaction`. 
+`Bitcoin VM` advances the rollup state by chaining a special transaction called `Pool Transactions` at regular intervals. Four of the then output types are contained *barely*, while five are included *virtually* in a `Pool Transaction`. 
 
                                                                              ⋰
                                                                            ⋰  ┌────────────────┐   ┌────────────────┐
