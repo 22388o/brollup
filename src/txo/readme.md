@@ -1,5 +1,5 @@
 # Transaction Outputs
-On-chain transaction structure of the `Bitcoin Virtual Machine` consists of ten types of transaction outputs (TXOs):
+`Bitcoin Virtual Machine` employs of ten types of transaction outputs (TXOs):
 
 | TXO Type               | Kind    |  Spending Condition                                       |
 |:-----------------------|:--------|:----------------------------------------------------------|
