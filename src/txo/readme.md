@@ -70,7 +70,7 @@ The `Bitcoin Virtual Machine` advances the rollup state by chaining `Pool Transa
 ## VTXO 💵
 `VTXO` is a virtual, off-chain transaction output that holds the `Self` funds. `VTXOs` are projected by the `VTXO Projector` and can be unilaterally redeemed on-chain. A `VTXO` expires three months after its creation, or, in other words, three months after the moment its projector `VTXO Projector` hits on-chain. 
 
-Once a `VTXO` expires, it can no longer be redeemed, or claimed, on-chain; therefore, `Self` must refresh its `VTXOs` into new ones on a monthly basis.  It is the client software's job to abstract away the refresh UX for the `Self`.
+Once a `VTXO` expires, it can no longer be redeemed or claimed on-chain; therefore, `Self` must refresh its `VTXOs` into new ones on a monthly basis. It is the client software's job to abstract away the refresh UX for the `Self`. At the protocol level, the `Operator` is not allowed to charge any fees for refreshes.
 
 ## VTXO Projector 🎥
 `VTXO Projector` is a bare, on-chain transaction output type contained in each pool transaction.  `Projector` is used for for projecting `VTXOs` and `Connectors` in a pseudo-covenant manner.
