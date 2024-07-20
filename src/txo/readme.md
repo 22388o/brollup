@@ -24,8 +24,7 @@
                                      └─────────────────────┘                       
                           
                         Pool Transaction     
-
-The transactional structure of the Bitcoin Virtual Machine consists of 10 transaction output (TXO) types:
+The transactional structure of the Bitcoin Virtual Machine consists of 10 types of transaction outputs (TXOs):
 | TXO Type               | Kind    |  Spending Condition                                                |
 |:-----------------------|:--------|:----------------------------------------------------------|
 | Lift 🛗                | Bare    | `(Self + Operator) or (Self after 1 month)`               | 
