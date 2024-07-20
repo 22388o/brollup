@@ -53,8 +53,7 @@ The `Bitcoin Virtual Machine` advances the rollup state by chaining `Pool Transa
 -   In case the `Operator` is non-collaborative and does not sign from the collaborative path, `Self` can trigger the exit path `(Self after 1 month)` to reclaim their funds.
 
 ## Bare Connector 🔌
-`Bare Connector` is a bare, on-chain transaction output type used for lifting a `Lift` output. `Bare Connector` is provided to `Self` by the `Operator`.
-                                                            
+`Bare Connector` is a bare, on-chain transaction output type used for lifting a `Lift` output. `Bare Connector` is a key-path-only `Operator` single-sig, provided to `Self` by the `Operator`.                                                            
                                                             
                                 Prevouts                      Outs          
                          ┌────────────────────┐      ┌────────────────────┐ 
@@ -70,7 +69,7 @@ The `Bitcoin Virtual Machine` advances the rollup state by chaining `Pool Transa
 `VTXO` or Virtual Transaction Output, is a virtual, off-chain transaction output that holds `Self` funds. `VTXOs` are projected by `VTXO Projector`.
 
 ## VTXO Projector 🎥
-`VTXO Projector` is a bare, on-chain transaction output type contained in each pool transaction.  `Projector` is used for for projecting `VTXOs` and `Conenctors` in a pseudo-covenant manner.
+`VTXO Projector` is a bare, on-chain transaction output type contained in each pool transaction.  `Projector` is used for for projecting `VTXOs` and `Connectors` in a pseudo-covenant manner.
                                                       
                                            ⋰ ┌──────────────────┐
                                          ⋰   │      VTXO #0     │
