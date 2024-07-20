@@ -24,7 +24,7 @@ Bitcoin Virtual Machine employs 10 transaction output (TXO) types:
                                                                ⋰          ┌────────────┐   ┌────────────┐
               Prevouts                     Outs              ⋰            │   VTXO #n  │-->│ Channel #n │ 
        ┌───────────────────┐     ┌─────────────────────┐   ⋰              └────────────┘   └────────────┘
-    #0 │    Prev Payload   │  #0 │    VTXO Projector   │ 🎥 ．．．．．．．．．．．．．．．．．．．      
+    #0 │    Prev Payload   │  #0 │    VTXO Projector   │ 🎥 ┈ ┈ ┈ ┈ ┈ ┈ ┈ ┈      
        └───────────────────┘     └─────────────────────┘         
                  ┊               ┌─────────────────────┐                          
        ┌───────────────────┐  #1 │ Connector Projector │ 🎥 ．．．．．．．．．．．．．．．．．．．            
