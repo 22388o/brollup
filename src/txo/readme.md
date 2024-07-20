@@ -45,7 +45,7 @@ Bitcoin Virtual Machine employs 10 transaction output (TXO) types:
 `Lift` carries two  spending conditions:
 `(Self + Operator) or (Self after 1 month)`
 
--   Both `Self` and `Operator` must sign from the collaborative path `(Self + Operator)` to forfeit the `Lift` output in exchange for a 1:1 `VTXO`. `Self` swaps out the `Lift` output with the provided `Bare Connector` to receive a 1:1 `VTXO` in return.
+-   Both `Self` and `Operator` must sign from the collaborative path `(Self + Operator)` to forfeit the `Lift` output in exchange for a 1:1 `VTXO`. `Self` swaps out the `Lift` output with the provided `Bare Connector` to receive a new `VTXO` in return.
     
 -   If the `Operator` is non-collaborative and does not sign from the collaborative path, `Self` can trigger the exit path `(Self after 1 month)` to reclaim their funds.
 
