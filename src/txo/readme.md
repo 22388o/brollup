@@ -49,8 +49,8 @@ Bitcoin Virtual Machine employs 10 transaction output (TXO) types:
     
 -   In case the `Operator` is non-collaborative and does not sign from the collaborative path, `Self` can trigger the exit path `(Self after 1 month)` to reclaim their funds.
 
-## Lift Connector 🔌
-
+## Bare Connector 🔌
+`Bare Connector` is a bare, on-chain transaction output type used for lifting a `Lift` output. `Bare Connector` is provided to `Self` by the `Operator`.
                                                             
                                                             
                                 Prevouts                      Outs          
