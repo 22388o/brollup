@@ -14,7 +14,7 @@ The transactional structure of the `Bitcoin Virtual Machine` consists of ten typ
 | Self 👨‍💻                | Virtual | `Self`                                                    |
 | Operator 🏭            | Virtual | `Operator`                                                |
 
-Five of the TXO types are bare, meaning they are literal, on-chain transaction outputs that consume block space, while the other five are virtual, meaning they are committed but not yet revealed transaction outputs.
+Five of the transaction output types are bare, meaning they are literal, on-chain transaction outputs that consume block space, while the other five are virtual, meaning they are committed but not yet revealed transaction outputs.
 
 The `Bitcoin Virtual Machine` advances the rollup state by chaining `Pool Transactions` at regular intervals. Three output types—`VTXO Projector`, `Connector Projector`, and `Payload`—and optionally one or more `Bare Connectors` are contained in the `Pool Transaction`.
 
