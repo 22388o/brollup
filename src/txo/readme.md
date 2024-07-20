@@ -1,20 +1,4 @@
 # Transaction Output Types
-The transactional structure of the Bitcoin Virtual Machine consists of ten types of transaction outputs (TXOs). Five of these TXO types are bare, meaning they are literal UTXOs that consume on-chain footprint, while the other five are virtual, meaning they are committed but yet to be revealed:
-| TXO Type               | Kind    |  Spending Condition                                       |
-|:-----------------------|:--------|:----------------------------------------------------------|
-| Lift 🛗                | Bare    | `(Self + Operator) or (Self after 1 month)`               | 
-| Bare Connector 🔌      | Bare    | `Operator`                                                |
-| VTXO 💵                | Virtual | `(Self + Operator) or (Self after 3 months)`              |
-| VTXO Projector 🎥      | Bare    | `(msg.senders[] + Operator) or (Operator after 3 months)` |
-| Channel 👥             | Virtual | `(Self + Operator) after degrading timelock`              |
-| Virtual Connector 🔌   | Virtual | `(msg.sender + Operator)`                                 |
-| Connector Projector 🎥 | Bare    | `(msg.senders[] + Operator) or (Operator after 3 months)` |
-| Payload 📦             | Bare    | `(msg.senders[] after 1 day) or (Operator)`               |
-| Self 👨‍💻                | Virtual | `Self`                                                    |
-| Operator 🏭            | Virtual | `Operator`                                                |
-The Bitcoin Virtual Machine advances the rollup state by chaining a special transaction called `Pool Transactions` at regular intervals. Four of these output types are contained *barely*, while five are included *virtually* in a `Pool Transaction`.
-
-Bitcoin Virtual Machine advances the rollup state by chaining `Pool Transactions` at regular intervals. 4 of these output types are contained barely, and 5 virtually in the `Pool Transaction`.
                                                                              ⋰
                                                                            ⋰  ┌────────────────┐   ┌────────────────┐
                                                                          ⋰    │     VTXO #0    │-->│   Channel #0   │ 
@@ -40,6 +24,23 @@ Bitcoin Virtual Machine advances the rollup state by chaining `Pool Transactions
                                      └─────────────────────┘                       
                           
                         Pool Transaction     
+The transactional structure of the Bitcoin Virtual Machine consists of ten types of transaction outputs (TXOs). Five of these TXO types are bare; meaning they are literal UTXOs that consume on-chain footprint, and the other five are virtual; meaning they are commited, and yet to be revealed.
+
+
+| TXO Type               | Kind    |  Spending Condition                                       |
+|:-----------------------|:--------|:----------------------------------------------------------|
+| Lift 🛗                | Bare    | `(Self + Operator) or (Self after 1 month)`               | 
+| Bare Connector 🔌      | Bare    | `Operator`                                                |
+| VTXO 💵                | Virtual | `(Self + Operator) or (Self after 3 months)`              |
+| VTXO Projector 🎥      | Bare    | `(msg.senders[] + Operator) or (Operator after 3 months)` |
+| Channel 👥             | Virtual | `(Self + Operator) after degrading timelock`              |
+| Virtual Connector 🔌   | Virtual | `(msg.sender + Operator)`                                 |
+| Connector Projector 🎥 | Bare    | `(msg.senders[] + Operator) or (Operator after 3 months)` |
+| Payload 📦             | Bare    | `(msg.senders[] after 1 day) or (Operator)`               |
+| Self 👨‍💻                | Virtual | `Self`                                                    |
+| Operator 🏭            | Virtual | `Operator`                                                |
+
+The Bitcoin Virtual Machine advances the rollup state by chaining a special transaction called `Pool Transactions` at regular intervals. Four of the then output types are contained *barely*, while five are included *virtually* in a `Pool Transaction`. 
 
 ## Lift 🛗
 `Lift` is a bare, on-chain transaction output type used for onboarding to the Bitcoin VM. When a `Lift` output is funded and has gained two on-chain confirmations, it can be swapped out for a 1:1 `VTXO` in a process known as lifting. In short, a `Lift` output lifts itself up to a `VTXO`.
