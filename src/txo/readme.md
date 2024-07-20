@@ -55,7 +55,7 @@ The `Bitcoin Virtual Machine` advances the rollup state by chaining `Pool Transa
 -   In case the `Operator` is non-collaborative and does not sign from the collaborative path, `Self` can trigger the exit path `(Self after 1 month)` to reclaim their funds.
 
 ## Bare Connector 🔌
-`Bare Connector` is a bare, on-chain transaction output type used for lifting a `Lift` output. `Bare Connector` is a key-path-only `Operator` single-sig, provided to `Self` by the `Operator`.
+`Bare Connector` is a bare, on-chain transaction output type used for lifting a `Lift` output. `Bare Connector` is a key-path-only `Operator` single-sig. A series of `Bare Connectors` can be included in a `Pool Transaction` and provided to `Self` by the `Operator`.
                                                             
                                                             
                                 Prevouts                      Outs          
