@@ -51,6 +51,17 @@ Bitcoin Virtual Machine employs 10 transaction output (TXO) types:
 
 ## Lift Connector 🔌
 
+                                                            
+                                                            
+                                    Prevouts                        Outs          
+                             ┌────────────────────┐       ┌──────────────────────┐ 
+                        #0   │        Lift        │   #0  │       Operator       │
+                             └────────────────────┘       └──────────────────────┘                    
+          From               ┌────────────────────┐
+    Pool Transaction -- #1 ->│   Bare Connector   │ 
+                             └────────────────────┘    
+     
+                                             Lift Transaction 
 ## VTXO Projector 🎥
 `Projector` is a bare, on-chain transaction output type contained in each pool transaction.  `Projector` is used for for projecting `VTXOs` and `Conenctors` in a pseudo-covenant manner.
                                                       
