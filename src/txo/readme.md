@@ -25,7 +25,7 @@
                           
                         Pool Transaction     
 
-The transactional structure of the Bitcoin Virtual Machine consists of 10 different kinds of lego pieces, otherwise known as transaction output (TXO) types:
+Bitcoin Virtual Machine advance the rollup state by chanining `Pool Transactions` at regular intervals. The transactional structure of the `Pool Transaction` consists of 10 transaction output (TXO) types:
 | TXO Type               | Kind    |  Spending Condition                                                |
 |:-----------------------|:--------|:----------------------------------------------------------|
 | Lift 🛗                | Bare    | `(Self + Operator) or (Self after 1 month)`               | 
