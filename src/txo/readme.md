@@ -24,7 +24,9 @@
                                      └─────────────────────┘                       
                           
                         Pool Transaction     
-The transactional structure of the Bitcoin Virtual Machine consists of 10 types of transaction outputs (TXOs). Four of these output types are contained directly, while five are included virtually in a special transaction called `Pool Transaction`. The Bitcoin Virtual Machine advances the rollup state by chaining `Pool Transactions` at regular intervals.
+The transactional structure of the Bitcoin Virtual Machine consists of ten types of transaction outputs (TXOs). Five of these TXO types are bare, meaning they are literal UTXOs that consume on-chain footprint, while the other five are virtual, meaning they are committed but yet to be revealed.
+
+The Bitcoin Virtual Machine advances the rollup state by chaining a special transaction called `Pool Transactions` at regular intervals. Four of these output types are contained *barely*, while five are included *virtually* in a `Pool Transaction`.
 | TXO Type               | Kind    |  Spending Condition                                       |
 |:-----------------------|:--------|:----------------------------------------------------------|
 | Lift 🛗                | Bare    | `(Self + Operator) or (Self after 1 month)`               | 
