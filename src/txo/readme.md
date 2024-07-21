@@ -142,15 +142,15 @@ In contrast to the state channel design employed by Lightning Network, `Channel`
 ## Virtual Connector 🔌
 `Virtual Connector` is a virtual, off-chain transaction output type used for updating `Channel` states. `Virtual Connector` is a 2-of-2 `(msg.sender + Operator)` between the msg.sender and the `Operator`, and carries dust a value of `450 sats`. A series of `Virtual Connectors` can be included in a `Connector Projector` and provided to `Self` by the `Operator`.                          
                                                             
-                                        Prevouts                      Outs          
-                                 ┌────────────────────┐      ┌────────────────────┐ 
-                             #0  │       Channel      │   #0 │        Self        │
-                                 └────────────────────┘      └────────────────────┘                    
-      From  Virtual              ┌────────────────────┐      ┌────────────────────┐ 
-      Connector Projector -- #1->│  Virtual Connector │   #1 │      Operator      │
-                                 └────────────────────┘      └────────────────────┘
+                              Prevouts                      Outs          
+                       ┌────────────────────┐      ┌────────────────────┐ 
+                   #0  │       Channel      │   #0 │        Self        │
+                       └────────────────────┘      └────────────────────┘                    
+      From  Connector  ┌────────────────────┐      ┌────────────────────┐ 
+      Projector -- #1->│  Virtual Connector │   #1 │      Operator      │
+                       └────────────────────┘      └────────────────────┘
       
-                                               Channel State Update 
+                                     Channel State Update 
 
 ## Connector Projector 🎥
 `Connector Projector` is the same as `VTXO Projector`, but for `Connectors` instead. `Connector Projector` is a bare, on-chain transaction output type contained in each pool transaction, and projects `Connectors` into a covenant template.
