@@ -110,22 +110,22 @@ Once a `VTXO` expires, it can no longer be redeemed or claimed on-chain; therefo
 
 `Channel` is a TapTree with 128 leaves, where each TapLead corresponds to a degrading period. Each period is a 2-of-2 between `Self` and `Operator` with a relative timelock, where the duration starts at 128 days and degrades by one with each subsequent period.
 
-                                                  ┌─────────────────────────┐
-    -Lv 7                                         │     Channel TapRoot     │                                  
-                                                  └─────────────────────────┘       
-
+                                                   ┌───────────────────────┐
+    -Lv 7                                          │    Channel TapRoot    │                                  
+                                                   └───────────────────────┘       
+                                                 ⋰                          ⋱
     -Lv 2..6                                   ⋰                              ⋱         
-                                             
-                      ┌─────────────────────────┐                             ┌─────────────────────────┐
-    -Lv 1             │       TapBranch 1       │             ┄               │       TapBranch 64      │  
-                      └─────────────────────────┘                             └─────────────────────────┘
+                                             ⋰                                  ⋱
+                        ┌───────────────────────┐                              ┌───────────────────────┐
+    -Lv 1               │      TapBranch 1      │             ┄                │      TapBranch 64     │  
+                        └───────────────────────┘                              └───────────────────────┘
                       ┌─────┘              └─────┐                            ┌─────┘             └─────┐
-            ┌───────────────────┐     ┌───────────────────┐       ┌───────────────────┐     ┌───────────────────┐
-            │      TapLeaf 1    │     │      TapLeaf 2    │       │    TapLeaf 127    │     │    TapLeaf 128    │
-    -Lv 0   │ (Self + Operator) │     │ (Self + Operator) │   ┄   │ (Self + Operator) │     │ (Self + Operator) │
-            │   After 128 days  │     │   After 127 days  │       │    After 2 days   │     │    After 1 day    │
-            └───────────────────┘     └───────────────────┘       └───────────────────┘     └───────────────────┘
-                      ⬇                        ⬇                           ⬇                        ⬇
+             ┌─────────────────┐      ┌─────────────────┐           ┌─────────────────┐      ┌─────────────────┐
+             │    TapLeaf 1    │      │     TapLeaf 2   │           │   TapLeaf 127   │      │   TapLeaf 128   │
+    -Lv 0    │(Self + Operator)│      │(Self + Operator)│     ┄     │(Self + Operator)│      │(Self + Operator)│
+             │  After 128 days │      │  After 127 days │           │   After 2 days  │      │   After 1 day   │
+             └─────────────────┘      └─────────────────┘           └─────────────────┘      └─────────────────┘
+                      ⬇                       ⬇                            ⬇                        ⬇
           ┌──────────┐┌──────────┐  ┌──────────┐┌──────────┐     ┌──────────┐┌──────────┐  ┌──────────┐┌──────────┐
           │  State 1 ││  State 1 │  │  State 2 ││  State 2 │  ┄  │ State 127││ State 127│  │ State 128││ State 128│
           │  (Self)  ││(Operator)│  │  (Self)  ││(Operator)│     │  (Self)  ││(Operator)│  │  (Self)  ││(Operator)│
