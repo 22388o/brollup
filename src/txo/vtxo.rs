@@ -8,33 +8,34 @@ use crate::{
 use musig2::secp256k1::{self, XOnlyPublicKey};
 
 type Bytes = Vec<u8>;
+type Key = XOnlyPublicKey;
 
 pub struct VTXO {
-    operator_key: XOnlyPublicKey,
-    self_key: XOnlyPublicKey,
+    operator_key: Key,
+    self_key: Key,
 }
 
 impl VTXO {
-    pub fn new(self_key: XOnlyPublicKey) -> VTXO {
-        let operator_key = XOnlyPublicKey::from_slice(&operator::OPERATOR_KEY_WELL_KNOWN).unwrap();
+    pub fn new(self_key: Key) -> VTXO {
+        let operator_key = Key::from_slice(&operator::OPERATOR_KEY_WELL_KNOWN).unwrap();
         VTXO {
             operator_key,
             self_key,
         }
     }
 
-    pub fn new_with_operator(self_key: XOnlyPublicKey, operator_key: XOnlyPublicKey) -> VTXO {
+    pub fn new_with_operator(self_key: Key, operator_key: Key) -> VTXO {
         VTXO {
             operator_key,
             self_key,
         }
     }
 
-    pub fn self_key(&self) -> XOnlyPublicKey {
+    pub fn self_key(&self) -> Key {
         self.self_key
     }
 
-    pub fn operator_key(&self) -> XOnlyPublicKey {
+    pub fn operator_key(&self) -> Key {
         self.operator_key
     }
 
