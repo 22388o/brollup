@@ -50,9 +50,9 @@ The `Bitcoin Virtual Machine` advances the rollup state by chaining `Pool Transa
 `Lift` carries two  spending conditions:
 `(Self + Operator) or (Self after 1 month)`
 
--   `Self` and `Operator` sign from the collaborative path `(Self + Operator)` to swap the `Lift` output in exchange for a 1:1 `VTXO`. `Self` swaps out the `Lift` output with the provided `Bare Connector` to receive a `VTXO` in return.
+-  **Collaborative Path:** `Self` and `Operator` sign from the collaborative path `(Self + Operator)` to swap the `Lift` output in exchange for a 1:1 `VTXO`. `Self` swaps out the `Lift` output with the provided `Bare Connector` to receive a `VTXO` in return.
     
--   In case the `Operator` is non-collaborative and does not sign from the collaborative path, `Self` can trigger the exit path `(Self after 1 month)` to reclaim their funds.
+-   **Exit Path:** In case the `Operator` is non-collaborative and does not sign from the collaborative path, `Self` can trigger the exit path `(Self after 1 month)` to reclaim their funds.
 
 ## Bare Connector 🔌
 `Bare Connector` is a bare, on-chain transaction output type used for lifting `Lift` outputs. `Bare Connector` is a key-path-only `Operator` single-sig. A series of `Bare Connectors` can be included in a `Pool Transaction` and provided to `Self` by the `Operator`.                                                 
@@ -75,9 +75,9 @@ Once a `VTXO` expires, it can no longer be redeemed or claimed on-chain; therefo
 `VTXO` carries two spending conditions:
 `(Self + Operator) or (Self after 3 month)`
 
--   `Self` and `Operator` sign from the channel path `(Self + Operator)` to establish a `Channel` from which they can sign state updates to send and receive payments.
+-   **Channel Path:** `Self` and `Operator` sign from the channel path `(Self + Operator)` to establish a `Channel` from which they can sign state updates to send and receive payments.
     
--   In case the `Operator` is non-collaborative and does not sign from the channel path, `Self` can trigger the exit path `(Self after 3 month)` to unilaterally claim the `VTXO`.
+-   **Exit Path:** In case the `Operator` is non-collaborative and does not sign from the channel path, `Self` can trigger the exit path `(Self after 3 month)` to unilaterally claim the `VTXO`.
 
 ## VTXO Projector 🎥
 `VTXO Projector` is a bare, on-chain transaction output type contained in each pool transaction. `VTXO Projector` projects `VTXOs` into a covenant template.
@@ -99,9 +99,9 @@ Once a `VTXO` expires, it can no longer be redeemed or claimed on-chain; therefo
 `VTXO Projector` carries two spending conditions:
 `(msg.senders[] + Operator) or (Operator after 3 months)`
 
--   The aggregated [MuSig2](https://github.com/bitcoin/bips/blob/master/bip-0327.mediawiki) key of msg.senders[] and `Operator` pre-sign from the projector path `(msg.senders[] + Operator)` to constrain `VTXOs` in a pseudo-covenant manner.
+-   **Projector Path:** The aggregated [MuSig2](https://github.com/bitcoin/bips/blob/master/bip-0327.mediawiki) key of msg.senders[] and `Operator` pre-sign from the projector path `(msg.senders[] + Operator)` to constrain `VTXOs` in a pseudo-covenant manner.
     
--  `VTXO Projector` expires in three months, at which point all `VTXOs` contained within the projector also expire. Upon expiry, the `Operator` triggers the sweep path `(Operator after 3 months)` to reclaim all expired `VTXOs` directly from the projector root, in a footprint-minimal way, without claiming `VTXOs` one by one.          
+-  **Sweep Path:** `VTXO Projector` expires in three months, at which point all `VTXOs` contained within the projector also expire. Upon expiry, the `Operator` triggers the sweep path `(Operator after 3 months)` to reclaim all expired `VTXOs` directly from the projector root, in a footprint-minimal way, without claiming `VTXOs` one by one.          
 
 ## Channel 👥
 `Channel` turns its parent `VTXO` into a state channel that operates as a 2-of-2 between `Self` and `Remote`. 
