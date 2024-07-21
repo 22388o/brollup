@@ -125,11 +125,11 @@ Once a `VTXO` expires, it can no longer be redeemed or claimed on-chain; therefo
     -Lv 0 │ (Self + Operator) │      │ (Self + Operator) │  ...  │ (Self + Operator) │       │ (Self + Operator) │
           │   After 128 days  │      │   After 127 days  │       │    After 2 days   │       │    After 1 day    │
           └───────────────────┘      └───────────────────┘       └───────────────────┘       └───────────────────┘
-                    ⬇                        ⬇                          ⬇                             ⬇
-        ┌──────────┐ ┌──────────┐ ┌──────────┐ ┌──────────┐ ┌────────────┐ ┌────────────┐ ┌────────────┐ ┌────────────┐
-        │  State 1 │ │  State 1 │ │  State 2 │ │  State 2 │ │  State 127 │ │  State 127 │ │  State 128 │ │  State 128 │
-        │  (Self)  │ │(Operator)│ │  (Self)  │ │(Operator)│ │   (Self)   │ │ (Operator) │ │   (Self)   │ │ (Operator) │
-        └──────────┘ └──────────┘ └──────────┘ └──────────┘ └────────────┘ └────────────┘ └────────────┘ └────────────┘
+                    ⬇                        ⬇                          ⬇                            ⬇
+        ┌──────────┐┌──────────┐  ┌──────────┐┌──────────┐  ┌────────────┐┌────────────┐  ┌────────────┐┌────────────┐
+        │  State 1 ││  State 1 │  │  State 2 ││  State 2 │  │  State 127 ││  State 127 │  │  State 128 ││  State 128 │
+        │  (Self)  ││(Operator)│  │  (Self)  ││(Operator)│  │   (Self)   ││ (Operator) │  │   (Self)   ││ (Operator) │
+        └──────────┘└──────────┘  └──────────┘└──────────┘  └────────────┘└────────────┘  └────────────┘└────────────┘
        
 `Channel` completes its lifetime either when its parent `VTXO` expires (in three months) or after 128 state transitions have occurred. When `Channel`completes its lifetime, `Self` refreshes its parent `VTXO` into a new one and establishes a fresh `Channel` from there.
 
