@@ -45,14 +45,14 @@ impl VTXO {
 
         // Push self key
         channel_path.push(0x20);
-        channel_path.extend(self.self_key().serialize().to_vec());
+        channel_path.extend(self.self_key().serialize());
 
         // OP_CHECKSIGVERIFY
         channel_path.push(0xad);
 
         // Push operator key
         channel_path.push(0x20);
-        channel_path.extend(self.operator_key().serialize().to_vec());
+        channel_path.extend(self.operator_key().serialize());
 
         // OP_CHECKSIG
         channel_path.push(0xac);
@@ -63,9 +63,9 @@ impl VTXO {
         // Relative timelock - VTXO is like Lift, but lives for three months instead
         exit_path.extend(to_csv_script_encode(CSVFlag::CSVThreeMonths));
 
-        // Push 32-bytes
+        // Push self key
         exit_path.push(0x20);
-        exit_path.extend(self.self_key().serialize().to_vec());
+        exit_path.extend(self.self_key().serialize());
 
         // OP_CHECKSIG
         exit_path.push(0xac);
