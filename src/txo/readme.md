@@ -140,7 +140,7 @@ In contrast to the state channel design employed by Lightning Network, `Channel`
 -  **No middle-stages:** No in-flight HTLCs or PTLCs. It is always about `Self` and `Operator`. Payments are linked by connectors.
 
 ## Virtual Connector 🔌
-`Virtual Connector` is a virtual, off-chain transaction output type used for updating `Channel` state. `Virtual Connector` is a 2-of-2 `(msg.sender + Operator)` between the msg.sender and the `Operator`, and carries dust value 450 sats. A series of `Virtual Connectors` can be included in a `Connector Projector` and provided to `Self` by the `Operator`.                          
+`Virtual Connector` is a virtual, off-chain transaction output type used for updating `Channel` states. `Virtual Connector` is a 2-of-2 `(msg.sender + Operator)` between the msg.sender and the `Operator`, and carries dust a value of `450 sats`. A series of `Virtual Connectors` can be included in a `Connector Projector` and provided to `Self` by the `Operator`.                          
                                                             
                                         Prevouts                      Outs          
                                  ┌────────────────────┐      ┌────────────────────┐ 
