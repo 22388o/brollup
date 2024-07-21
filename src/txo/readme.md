@@ -113,10 +113,10 @@ Once a `VTXO` expires, it can no longer be redeemed or claimed on-chain; therefo
 `Channel` turns `VTXO` into a virtual channel, with a lifetime of 128 state transitions.
 
                                                ┌─────────────────────────┐
-                                               │      Channel Root       │                                  
+     Lv7                                       │      Channel Root       │                                  
                                                └─────────────────────────┘       
-                                                                        
-                                            ⋰                             ⋱         
+
+     Lv2..6                                 ⋰                              ⋱         
 
                     ┌─────────────────────────┐                          ┌─────────────────────────┐
      Lv1            │        Branch 1         │    ...                   │        Branch 64        │  
