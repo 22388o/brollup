@@ -53,14 +53,14 @@ impl Channel {
 
             // Push self key
             tap_script.push(0x20);
-            tap_script.extend(self.self_key().serialize().to_vec());
+            tap_script.extend(self.self_key().serialize());
 
             // OP_CHECKSIGVERIFY
             tap_script.push(0xad);
 
             // Push operator key
             tap_script.push(0x20);
-            tap_script.extend(self.operator_key().serialize().to_vec());
+            tap_script.extend(self.operator_key().serialize());
 
             // OP_CHECKSIG
             tap_script.push(0xac);
