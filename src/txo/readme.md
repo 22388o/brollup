@@ -45,17 +45,17 @@ The `Bitcoin Virtual Machine` advances the rollup state by chaining `Pool Transa
                         Pool Transaction     
 
 ## Lift 🛗
-`Lift` is a bare, on-chain transaction output type used for onboarding to the Bitcoin VM. When a `Lift` output is funded and has gained two on-chain confirmations, it can be swapped out for a 1:1 `VTXO` in a process known as lifting. In short, a `Lift` output lifts itself up to a `VTXO`.
+`Lift` is a bare, on-chain transaction output type used for onboarding to the Bitcoin VM. When a `Lift` output is funded and has gained two on-chain confirmations, it can be swapped out for a 1:1 `VTXO` in a process known as lifting. In short, `Lift` lifts itself up to a `VTXO`.
 
 `Lift` carries two  spending conditions:
 `(Self + Operator) or (Self after 1 month)`
 
--   Both `Self` and `Operator` must sign from the collaborative path `(Self + Operator)` to forfeit the `Lift` output in exchange for a 1:1 `VTXO`. `Self` swaps out the `Lift` output with the provided `Bare Connector` to receive a new `VTXO` in return.
+-   `Self` and `Operator` sign from the collaborative path `(Self + Operator)` to swap the `Lift` output in exchange for a 1:1 `VTXO`. `Self` swaps out the `Lift` output with the provided `Bare Connector` to receive a `VTXO` in return.
     
 -   In case the `Operator` is non-collaborative and does not sign from the collaborative path, `Self` can trigger the exit path `(Self after 1 month)` to reclaim their funds.
 
 ## Bare Connector 🔌
-`Bare Connector` is a bare, on-chain transaction output type used for lifting a `Lift` output. `Bare Connector` is a key-path-only `Operator` single-sig. A series of `Bare Connectors` can be included in a `Pool Transaction` and provided to `Self` by the `Operator`.
+`Bare Connector` is a bare, on-chain transaction output type used for lifting `Lift` outputs. `Bare Connector` is a key-path-only `Operator` single-sig. A series of `Bare Connectors` can be included in a `Pool Transaction` and provided to `Self` by the `Operator`.
                                                             
                                                             
                                 Prevouts                      Outs          
@@ -72,6 +72,13 @@ The `Bitcoin Virtual Machine` advances the rollup state by chaining `Pool Transa
 `VTXO` is a virtual, off-chain transaction output that holds the `Self` funds. `VTXOs` are projected by the `VTXO Projector` and can be unilaterally redeemed on-chain. A `VTXO` expires three months after its creation, or, in other words, three months after its projector `VTXO Projector` hits on-chain. 
 
 Once a `VTXO` expires, it can no longer be redeemed or claimed on-chain; therefore, `Self` must refresh its `VTXOs` into new ones on a monthly basis. It is the client software's job to abstract the refresh UX away for `Self`. At the protocol level, however, refreshes are interpreted differently from regular transfers, and the `Operator` is not allowed to charge liquidity fees when `VTXOs` are refreshed.
+
+`VTXO` carries two spending conditions that are very similar to those of `Lift`:
+`(Self + Operator) or (Self after 3 month)`
+
+-   `Self` and `Operator` sign from the channel path `(Self + Operator)` to establish a `Channel` from which they can sign state updates to send and receive payments.
+    
+-   In case the `Operator` is non-collaborative and does not sign from the channel path, `Self` can trigger the exit path `(Self after 3 month)` to reclaim their funds.
 
 ## VTXO Projector 🎥
 `VTXO Projector` is a bare, on-chain transaction output type contained in each pool transaction.  `Projector` is used for for projecting `VTXOs` and `Connectors` in a pseudo-covenant manner.
