@@ -73,7 +73,7 @@ The `Bitcoin Virtual Machine` advances the rollup state by chaining `Pool Transa
 
 Once a `VTXO` expires, it can no longer be redeemed or claimed on-chain; therefore, `Self` must refresh its `VTXOs` into new ones on a monthly basis. It is the client software's job to abstract the refresh UX away for `Self`. At the protocol level, however, refreshes are interpreted differently from regular transfers, and the `Operator` is not allowed to charge liquidity fees when `VTXOs` are refreshed.
 
-`VTXO` carries two spending conditions that are very similar to those of `Lift`:
+`VTXO` carries two spending conditions:
 `(Self + Operator) or (Self after 3 month)`
 
 -   `Self` and `Operator` sign from the channel path `(Self + Operator)` to establish a `Channel` from which they can sign state updates to send and receive payments.
