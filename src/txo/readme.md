@@ -133,7 +133,7 @@ Once a `VTXO` expires, it can no longer be redeemed or claimed on-chain; therefo
        
 `Channel` completes its lifetime either when its parent `VTXO` expires (in three months) or after 128 state transitions have occurred. When `Channel`completes its lifetime, `Self` refreshes its parent `VTXO` into a new one and establishes a fresh `Channel` from there.
 
-In contrast to the state channel design employed by Lightning Network, `Channel` has no:
+In contrast to the state channel design employed by Lightning Network, `Channel` has:
 -  **No revocation:** Each new channel state overwrites the previous one with higher precedence.
 -  **No basepoints:** It’s always the same key for to_self and to_operator. Keys are re-used without involving any point tweaking.
 -  **No assymetry:** Channel state is symmetric, reproducible, and always descend from the channel root.
