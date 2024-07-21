@@ -1,7 +1,6 @@
 #![allow(dead_code)]
 
 use crate::serialize::with_prefix_compact_size;
-
 use lazy_static::lazy_static;
 use musig2::secp256k1::{self, Parity, PublicKey, Scalar, Secp256k1, XOnlyPublicKey};
 use sha2::Digest as _;
@@ -193,8 +192,10 @@ impl TapRoot {
 
     pub fn tweaked_key(&self) -> Result<PublicKey, secp256k1::Error> {
         if let Some(_) = &self.tree {
-            let scalar = Scalar::from_be_bytes(self.tap_tweak()).map_err(|_| secp256k1::Error::InvalidTweak)?;
-            self.inner_key_lifted().add_exp_tweak(&Secp256k1::new(), &scalar)
+            let scalar = Scalar::from_be_bytes(self.tap_tweak())
+                .map_err(|_| secp256k1::Error::InvalidTweak)?;
+            self.inner_key_lifted()
+                .add_exp_tweak(&Secp256k1::new(), &scalar)
         } else {
             Ok(self.inner_key_lifted())
         }
