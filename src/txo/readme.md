@@ -78,7 +78,7 @@ Once a `VTXO` expires, it can no longer be redeemed or claimed on-chain; therefo
 
 -   `Self` and `Operator` sign from the channel path `(Self + Operator)` to establish a `Channel` from which they can sign state updates to send and receive payments.
     
--   In case the `Operator` is non-collaborative and does not sign from the channel path, `Self` can trigger the exit path `(Self after 3 month)` to reclaim their funds.
+-   In case the `Operator` is non-collaborative and does not sign from the channel path, `Self` can trigger the exit path `(Self after 3 month)` to unilaterally claim the `VTXO`.
 
 ## VTXO Projector 🎥
 `VTXO Projector` is a bare, on-chain transaction output type contained in each pool transaction. `VTXO Projector` projects `VTXOs` into a covenant template.
