@@ -116,9 +116,7 @@ Once a `VTXO` expires, it can no longer be redeemed or claimed on-chain; therefo
     -Lv 7                                       │     Channel TapRoot     │                                  
                                                 └─────────────────────────┘       
 
-
     -Lv 2..6                                 ⋰                              ⋱         
-
 
                     ┌─────────────────────────┐                             ┌─────────────────────────┐
     -Lv 1           │       TapBranch 1       │             ...             │       TapBranch 64      │  
