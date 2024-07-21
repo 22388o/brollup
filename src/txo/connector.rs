@@ -75,7 +75,7 @@ impl Connector {
             ConnectorTag::Bare => {
                 // Push operator key
                 connector_script.push(0x20);
-                connector_script.extend(self.operator_key().serialize().to_vec());
+                connector_script.extend(self.operator_key().serialize());
 
                 // OP_CHECKSIG
                 connector_script.push(0xac);
@@ -83,14 +83,14 @@ impl Connector {
             ConnectorTag::Virtual => {
                 // Push msg.sender key
                 connector_script.push(0x20);
-                connector_script.extend(self.msg_sender_key().unwrap().serialize().to_vec());
+                connector_script.extend(self.msg_sender_key().unwrap().serialize());
 
                 // OP_CHECKSIGVERIFY
                 connector_script.push(0xad);
 
                 // Push operator key
                 connector_script.push(0x20);
-                connector_script.extend(self.operator_key().serialize().to_vec());
+                connector_script.extend(self.operator_key().serialize());
 
                 // OP_CHECKSIG
                 connector_script.push(0xac);
