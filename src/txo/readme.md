@@ -11,8 +11,8 @@
 | Virtual Connector 🔌   | Virtual | `(msg.sender + Operator)`                                 |
 | Connector Projector 🎥 | Bare    | `(msg.senders[] + Operator) or (Operator after 3 months)` |
 | Payload 📦             | Bare    | `(msg.senders[] after 1 day) or (Operator)`               |
-| Self 👨‍💻                | Virtual | `(Self)`                                                    |
-| Operator 🏭            | Virtual | `(Operator)`                                                |
+| Self 👨‍💻                | Virtual | `Self`                                                    |
+| Operator 🏭            | Virtual | `Operator`                                                |
 
 Five of the transaction output types are bare, meaning they are literal, on-chain transaction outputs that consume block space, while the other five are virtual, meaning they are committed but not yet revealed transaction outputs that optimistically consume no block space.
 
