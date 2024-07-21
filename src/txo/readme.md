@@ -50,7 +50,7 @@ The `Bitcoin Virtual Machine` advances the rollup state by chaining `Pool Transa
 `Lift` carries two  spending conditions:
 `(Self + Operator) or (Self after 1 month)`
 
--  **Collaborative Path:** `Self` and `Operator` sign from the collaborative path `(Self + Operator)` to swap the `Lift` output in exchange for a 1:1 `VTXO`. `Self` swaps out the `Lift` output with the provided `Bare Connector` to receive a `VTXO` in return.
+-  **Lift Path:** `Self` and `Operator` sign from the collaborative path `(Self + Operator)` to swap the `Lift` output in exchange for a 1:1 `VTXO`. `Self` swaps out the `Lift` output with the provided `Bare Connector` to receive a `VTXO` in return.
     
 -   **Exit Path:** In case the `Operator` is non-collaborative and does not sign from the collaborative path, `Self` can trigger the exit path `(Self after 1 month)` to reclaim their funds.
 
@@ -173,7 +173,7 @@ In contrast to the state channel design employed by Lightning Network, `Channel`
 `(msg.senders[] + Operator) or (Operator after 3 months)`
 
 -   **Reveal Path:** The aggregated [MuSig2](https://github.com/bitcoin/bips/blob/master/bip-0327.mediawiki) key of msg.senders[] and `Operator` pre-sign from the reveal path `(msg.senders[] + Operator)` to constrain `Virtual Connectors` in a pseudo-covenant manner.
-    
+
 -  **Sweep Path:** `Connector Projector` expires in three months, at which point all `Virtual Connectors` contained within the projector also expire. Upon expiry, the `Operator` triggers the sweep path `(Operator after 3 months)` to reclaim all expired `Virtual Connectors` directly from the projector root, in a footprint-minimal way, without claiming `Virtual Connectors` one by one.          
 
 ## Payload 📦
