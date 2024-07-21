@@ -40,22 +40,22 @@ impl VTXO {
     }
 
     pub fn taproot(&self) -> TapRoot {
-        //// Collab path
-        let mut collab_path = Vec::<u8>::new();
+        //// Channel path
+        let mut channel_path = Vec::<u8>::new();
 
         // Push self key
-        collab_path.push(0x20);
-        collab_path.extend(self.self_key().serialize().to_vec());
+        channel_path.push(0x20);
+        channel_path.extend(self.self_key().serialize().to_vec());
 
         // OP_CHECKSIGVERIFY
-        collab_path.push(0xad);
+        channel_path.push(0xad);
 
         // Push operator key
-        collab_path.push(0x20);
-        collab_path.extend(self.operator_key().serialize().to_vec());
+        channel_path.push(0x20);
+        channel_path.extend(self.operator_key().serialize().to_vec());
 
         // OP_CHECKSIG
-        collab_path.push(0xac);
+        channel_path.push(0xac);
 
         //// Exit path
         let mut exit_path = Vec::<u8>::new();
@@ -70,7 +70,7 @@ impl VTXO {
         // OP_CHECKSIG
         exit_path.push(0xac);
 
-        let leaves = vec![TapLeaf::new(collab_path), TapLeaf::new(exit_path)];
+        let leaves = vec![TapLeaf::new(channel_path), TapLeaf::new(exit_path)];
         TapRoot::script_path_only_multi(leaves)
     }
 
