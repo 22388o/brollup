@@ -48,10 +48,7 @@ impl Connector {
         }
     }
 
-    pub fn new_virtual_operator(
-        msg_sender_key: Key,
-        operator_key: Key,
-    ) -> Connector {
+    pub fn new_virtual_operator(msg_sender_key: Key, operator_key: Key) -> Connector {
         Connector {
             operator_key,
             msg_sender_key: Some(msg_sender_key),
