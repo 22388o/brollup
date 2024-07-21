@@ -103,14 +103,12 @@ Once a `VTXO` expires, it can no longer be redeemed or claimed on-chain; therefo
     
 -  `VTXO Projector` expires in three months, at which point all `VTXOs` contained within the projector also expire. Upon expiry, the `Operator` triggers the sweep path `(Operator after 3 months)` to reclaim all expired `VTXOs` directly from the projector root, in a footprint-minimal way, without claiming `VTXOs` one by one.          
 
-## Payload 📦
-`Payload` is a bare, on-chain transaction output type contained in each pool transaction.  `Payload` stores entries, projector signatures, s commitments, and the fresh operator key of the session.
-
-## Connector 🔌
-`Connector` is a virtual, off-chain transaction output type projected by the `Projector`.  `Connector` connects `VTXOs` into pool transactions.
-
 ## Channel 👥
-`Channel` turns `VTXO` into a virtual channel, with a lifetime of 128 state transitions.
+`Channel` turns its parent `VTXO` into a state channel that operates as a 2-of-2 between `Self` and `Remote`. 
+
+`Self` and `Remote` sign from the 2-of-2 `(Self + Operator)` to update the channel state, where each state update overwrites the previous one with higher precedence. `Channel` uses a degrading relative timelock scheme to ensure that each new channel state takes precedence over the previous one and therefore overwrites the older state. By design `Bitcoin VM` employs 128 degrading periods.
+
+`Channel` is a TapTree with 128 leaves, where each TapLead corresponds to a degrading period. Each period is a 2-of-2 between `Self` and `Operator` with a relative timelock, where the duration starts at 128 days and degrades by one with each subsequent period.
 
                                                 ┌─────────────────────────┐
     -Lv 7                                       │     Channel TapRoot     │                                  
@@ -133,6 +131,19 @@ Once a `VTXO` expires, it can no longer be redeemed or claimed on-chain; therefo
         │  (Self)  │ │(Operator)│ │  (Self)  │ │(Operator)│ │   (Self)   │ │ (Operator) │ │   (Self)   │ │ (Operator) │
         └──────────┘ └──────────┘ └──────────┘ └──────────┘ └────────────┘ └────────────┘ └────────────┘ └────────────┘
        
+`Channel` completes its lifetime either when its parent `VTXO` expires (in three months) or 128 state transitions have occurred.
+
+Compared to the Lightning Network, `Channel` has no:
+-  No revocation: Each new channel state overwrites the previous one with higher precedence.
+-  No basepoints: It’s always the same key for to_self and to_operator. Keys are re-used without involving any point tweaking.
+-  No assymetry: Channel state is symmetric, reproducible, and always descend from the channel root.
+-  No middle-stages: No in-flight HTLCs or PTLCs. It is always about to_self and to_operator. Payments are linked through connectors.
+
+## Payload 📦
+`Payload` is a bare, on-chain transaction output type contained in each pool transaction.  `Payload` stores entries, projector signatures, s commitments, and the fresh operator key of the session.
+
+## Connector 🔌
+`Connector` is a virtual, off-chain transaction output type projected by the `Projector`.  `Connector` connects `VTXOs` into pool transactions.
 
 ## Self 👨‍💻
 `Self` is a virtual P2TR output containing the self inner-key with no script-path involved.
