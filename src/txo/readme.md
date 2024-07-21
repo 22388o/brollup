@@ -71,7 +71,7 @@ The `Bitcoin Virtual Machine` advances the rollup state by chaining `Pool Transa
 ## VTXO 💵
 `VTXO` is a virtual, off-chain transaction output that holds the `Self` funds. `VTXOs` are projected by the `VTXO Projector` and can be unilaterally redeemed on-chain. A `VTXO` expires three months after its creation, or, in other words, three months after its projector `VTXO Projector` hits on-chain. 
 
-Once a `VTXO` expires, it can no longer be redeemed or claimed on-chain; therefore, `Self` must refresh its `VTXOs` into new ones on a monthly basis. It is the client software's job to abstract the refresh UX away for `Self`. At the protocol level, however, refreshes are interpreted differently from regular transfers, and the `Operator` is not allowed to charge liquidity fees when `VTXOs` are refreshed.
+Once a `VTXO` expires, it can no longer be redeemed or claimed on-chain; therefore, `Self` must either spend them entirely or refresh the `VTXOs` into new ones on a monthly basis. It is the client software's job to abstract the refresh UX away for `Self`. At the protocol level, however, refreshes are interpreted differently from regular transfers, and the `Operator` is not allowed to charge liquidity fees when `VTXOs` are refreshed.
 
 `VTXO` carries two spending conditions:
 `(Self + Operator) or (Self after 3 month)`
@@ -86,7 +86,7 @@ Once a `VTXO` expires, it can no longer be redeemed or claimed on-chain; therefo
 `VTXO Projector` carries two spending conditions:
 `(msg.senders[] + Operator) or (Operator after 3 months)`
 
--   The aggregated [MuSig2](https://github.com/bitcoin/bips/blob/master/bip-0327.mediawiki) key of msg.senders[] and `Operator` pre-sign from the projector path `(msg.senders[] + Operator)` to constrain a `VTXOs` in a pseudo-covenant manner.
+-   The aggregated [MuSig2](https://github.com/bitcoin/bips/blob/master/bip-0327.mediawiki) key of msg.senders[] and `Operator` pre-sign from the projector path `(msg.senders[] + Operator)` to constrain `VTXOs` in a pseudo-covenant manner.
     
 -  `VTXO Projector` expires in three months, at which point all `VTXOs` contained within the projector also expire. Upon expiry, the `Operator` triggers the sweep path `(Operator after 3 months)` to reclaim all expired `VTXOs` directly from the projector root, in a footprint-minimal way, without claiming `VTXOs` one by one.
                                                       
