@@ -119,14 +119,14 @@ Once a `VTXO` expires, it can no longer be redeemed or claimed on-chain; therefo
     -Lv 2..6                                    ⋰                              ⋱         
 
                        ┌─────────────────────────┐                          ┌─────────────────────────┐
-    -Lv 1              │       TapBranch 1       │           ...            │       TapBranch 64      │  
+    -Lv 1              │       TapBranch 1       │            ...           │       TapBranch 64      │  
                        └─────────────────────────┘                          └─────────────────────────┘
                        ╱                         ╲                           ╱                       ╲
-    -Lv 0    ┌───────────────────┐     ┌───────────────────┐       ┌───────────────────┐      ┌───────────────────┐
-             │      TapLeaf 1    │     │      TapLeaf 2    │       │    TapLeaf 127    │      │    TapLeaf 128    │
-             │ (Self + Operator) │     │ (Self + Operator) │  ...  │ (Self + Operator) │      │ (Self + Operator) │
-             │   After 128 days  │     │   After 127 days  │       │    After 2 days   │      │    After 1 day    │
-             └───────────────────┘     └───────────────────┘       └───────────────────┘      └───────────────────┘
+    -Lv 0    ┌───────────────────┐     ┌───────────────────┐       ┌───────────────────┐     ┌───────────────────┐
+             │      TapLeaf 1    │     │      TapLeaf 2    │       │    TapLeaf 127    │     │    TapLeaf 128    │
+             │ (Self + Operator) │     │ (Self + Operator) │  ...  │ (Self + Operator) │     │ (Self + Operator) │
+             │   After 128 days  │     │   After 127 days  │       │    After 2 days   │     │    After 1 day    │
+             └───────────────────┘     └───────────────────┘       └───────────────────┘     └───────────────────┘
      
            ┌──────────┐ ┌──────────┐ ┌──────────┐ ┌──────────┐  ┌──────────┐ ┌──────────┐ ┌──────────┐ ┌──────────┐
            │   Self   │ │ Operator │ │   Self   │ │ Operator │  │   Self   │ │ Operator │ │   Self   │ │ Operator │
