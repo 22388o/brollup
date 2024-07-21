@@ -139,11 +139,45 @@ In contrast to the state channel design employed by Lightning Network, `Channel`
 -  **No assymetry:** Channel state is symmetric, reproducible, and always descend from the channel root.
 -  **No middle-stages:** No in-flight HTLCs or PTLCs. It is always about `Self` and `Operator`. Payments are linked by connectors.
 
+## Virtual Connector 🔌
+`Vurtual Connector` is a virtual, off-chain transaction output type used for updating `Channel` state. `Virtual Connector` is a 2-of-2 `(msg.sender + Operator)` between the msg.sender and the `Operator`, and carries dust value 450 sats. A series of `Virtual Connectors` can be included in a `Connector Projector` and provided to `Self` by the `Operator`.                          
+                                                            
+                                        Prevouts                      Outs          
+                                 ┌────────────────────┐      ┌────────────────────┐ 
+                             #0  │       Channel      │   #0 │        Self        │
+                                 └────────────────────┘      └────────────────────┘                    
+      From  Virtual              ┌────────────────────┐      ┌────────────────────┐ 
+      Connector Projector -- #1->│  Virtual Connector │   #1 │      Operator      │
+                                 └────────────────────┘      └────────────────────┘
+      
+                                               Channel State Update 
+
+## Connector Projector 🎥
+`Connector Projector` is the same as `VTXO Projector`, but for `Connectors` instead. `Connector Projector` is a bare, on-chain transaction output type contained in each pool transaction, and projects `Connectors` into a covenant template.
+                                                      
+                                                ⋰ ┌──────────────────┐
+                                              ⋰   │   Connector #0   │
+                                            ⋰     └──────────────────┘
+                                          ⋰       ┌──────────────────┐
+                                        ⋰         │   Connector #1   │
+        ┌───────────────────────┐     ⋰           └──────────────────┘
+        │  Connector Projector  │ 🎥 ⋮                        
+        └───────────────────────┘     ⋱                     ┊
+                                        ⋱                
+                                          ⋱       ┌──────────────────┐
+                                            ⋱     │   Connector #n   │
+                                              ⋱   └──────────────────┘
+                                                ⋱
+
+`Connector Projector` carries two spending conditions:
+`(msg.senders[] + Operator) or (Operator after 3 months)`
+
+-   **Reveal Path:** The aggregated [MuSig2](https://github.com/bitcoin/bips/blob/master/bip-0327.mediawiki) key of msg.senders[] and `Operator` pre-sign from the reveal path `(msg.senders[] + Operator)` to constrain `Connector` in a pseudo-covenant manner.
+    
+-  **Sweep Path:** `Connector Projector` expires in three months, at which point all `Connector` contained within the projector also expire. Upon expiry, the `Operator` triggers the sweep path `(Operator after 3 months)` to reclaim all expired `Connector` directly from the projector root, in a footprint-minimal way, without claiming `Connector` one by one.          
+
 ## Payload 📦
 `Payload` is a bare, on-chain transaction output type contained in each pool transaction.  `Payload` stores entries, projector signatures, s commitments, and the fresh operator key of the session.
-
-## Connector 🔌
-`Connector` is a virtual, off-chain transaction output type projected by the `Projector`.  `Connector` connects `VTXOs` into pool transactions.
 
 ## Self 👨‍💻
 `Self` is a virtual P2TR output containing the self inner-key with no script-path involved.
