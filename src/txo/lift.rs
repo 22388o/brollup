@@ -45,14 +45,14 @@ impl Lift {
 
         // Push self key
         collab_path.push(0x20);
-        collab_path.extend(self.self_key().serialize().to_vec());
+        collab_path.extend(self.self_key().serialize());
 
         // OP_CHECKSIGVERIFY
         collab_path.push(0xad);
 
         // Push operator key
         collab_path.push(0x20);
-        collab_path.extend(self.operator_key().serialize().to_vec());
+        collab_path.extend(self.operator_key().serialize());
 
         // OP_CHECKSIG
         collab_path.push(0xac);
@@ -65,7 +65,7 @@ impl Lift {
 
         // Push self key
         exit_path.push(0x20);
-        exit_path.extend(self.self_key().serialize().to_vec());
+        exit_path.extend(self.self_key().serialize());
 
         // OP_CHECKSIG
         exit_path.push(0xac);
