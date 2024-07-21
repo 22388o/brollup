@@ -134,10 +134,10 @@ Once a `VTXO` expires, it can no longer be redeemed or claimed on-chain; therefo
 `Channel` completes its lifetime either when its parent `VTXO` expires (in three months) or 128 state transitions have occurred.
 
 Compared to the Lightning Network, `Channel` has no:
--  No revocation: Each new channel state overwrites the previous one with higher precedence.
--  No basepoints: It’s always the same key for to_self and to_operator. Keys are re-used without involving any point tweaking.
--  No assymetry: Channel state is symmetric, reproducible, and always descend from the channel root.
--  No middle-stages: No in-flight HTLCs or PTLCs. It is always about to_self and to_operator. Payments are linked through connectors.
+-  **No revocation:** Each new channel state overwrites the previous one with higher precedence.
+-  **No basepoints:** It’s always the same key for to_self and to_operator. Keys are re-used without involving any point tweaking.
+-  **No assymetry:** Channel state is symmetric, reproducible, and always descend from the channel root.
+-  **No middle-stages:** No in-flight HTLCs or PTLCs. It is always about to_self and to_operator. Payments are linked through connectors.
 
 ## Payload 📦
 `Payload` is a bare, on-chain transaction output type contained in each pool transaction.  `Payload` stores entries, projector signatures, s commitments, and the fresh operator key of the session.
