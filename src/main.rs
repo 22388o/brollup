@@ -824,7 +824,7 @@ mod tests {
                 .parse()
                 .unwrap();
 
-        let lift_txo = Connector::new(self_key);
+        let lift_txo = Connector::new_virtual(self_key);
 
         println!("spkis {}", hex::encode(lift_txo.spk().unwrap()));
 
