@@ -11,6 +11,7 @@ use musig2::{
 };
 
 type Bytes = Vec<u8>;
+type Key = XOnlyPublicKey;
 
 #[derive(Clone, Copy)]
 pub enum ProjectorTag {
@@ -20,15 +21,15 @@ pub enum ProjectorTag {
 
 #[derive(Clone)]
 pub struct Projector {
-    operator_key: XOnlyPublicKey,
-    msg_senders: Vec<XOnlyPublicKey>,
+    operator_key: Key,
+    msg_senders: Vec<Key>,
     msg_senders_key_agg_ctx: KeyAggContext,
     tag: ProjectorTag,
 }
 
 impl Projector {
-    pub fn new(msg_senders: Vec<XOnlyPublicKey>, tag: ProjectorTag) -> Projector {
-        let operator_key = XOnlyPublicKey::from_slice(&operator::OPERATOR_KEY_WELL_KNOWN).unwrap();
+    pub fn new(msg_senders: Vec<Key>, tag: ProjectorTag) -> Projector {
+        let operator_key = Key::from_slice(&operator::OPERATOR_KEY_WELL_KNOWN).unwrap();
 
         // Lift msg.sender from their XOnly keys
         let mut msg_senders_lifted = Vec::<PublicKey>::new();
@@ -53,11 +54,11 @@ impl Projector {
         }
     }
 
-    pub fn msg_senders_aggregate_key(&self) -> XOnlyPublicKey {
+    pub fn msg_senders_aggregate_key(&self) -> Key {
         self.msg_senders_key_agg_ctx.aggregated_pubkey()
     }
 
-    pub fn operator_key(&self) -> XOnlyPublicKey {
+    pub fn operator_key(&self) -> Key {
         self.operator_key
     }
 
