@@ -89,6 +89,7 @@ Once a `VTXO` expires, it can no longer be redeemed or claimed on-chain; therefo
 -   The aggregated [MuSig2](https://github.com/bitcoin/bips/blob/master/bip-0327.mediawiki) key of msg.senders[] and `Operator` pre-sign from the projector path `(msg.senders[] + Operator)` to constrain `VTXOs` in a pseudo-covenant manner.
     
 -  `VTXO Projector` expires in three months, at which point all `VTXOs` contained within the projector also expire. Upon expiry, the `Operator` triggers the sweep path `(Operator after 3 months)` to reclaim all expired `VTXOs` directly from the projector root, in a footprint-minimal way, without claiming `VTXOs` one by one.
+
                                                       
                                            ⋰ ┌──────────────────┐
                                          ⋰   │      VTXO #0     │
