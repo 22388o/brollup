@@ -1,5 +1,7 @@
 #![allow(dead_code)]
 
+use crate::serialize::with_prefix_compact_size;
+
 use lazy_static::lazy_static;
 use musig2::secp256k1::{self, Parity, PublicKey, Scalar, Secp256k1, XOnlyPublicKey};
 use sha2::Digest as _;
@@ -443,8 +445,7 @@ pub fn hash_tap_leaf(raw_script_vec: &Bytes, version: u8) -> [u8; 32] {
     let mut data: Bytes = Vec::new();
 
     data.extend_from_slice(&[version]);
-    data.extend_from_slice(&[(&raw_script_vec).len() as u8]);
-    data.extend_from_slice(raw_script_vec);
+    data.extend_from_slice(&with_prefix_compact_size(&raw_script_vec));
 
     tagged_hash(&data, HashTag::TapLeafTag)
 }
