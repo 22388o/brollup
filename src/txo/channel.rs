@@ -47,7 +47,7 @@ impl Channel {
         for i in 0..128 {
             let mut tap_script = Vec::<u8>::new();
 
-            // Degrading timelock period
+            // Add degrading timelock
             let days: u8 = DEGRADING_PERIOD_START_AT - i;
             tap_script.extend(to_csv_script_encode(CSVFlag::Days(days)));
 
