@@ -10,6 +10,8 @@ use musig2::secp256k1::{self, XOnlyPublicKey};
 type Bytes = Vec<u8>;
 type Key = XOnlyPublicKey;
 
+const DEGRADING_PERIOD_START_AT: u8 = 141;
+
 pub struct Channel {
     operator_key: Key,
     self_key: Key,
@@ -46,7 +48,7 @@ impl Channel {
             let mut tap_script = Vec::<u8>::new();
 
             // Degrading timelock period
-            let days: u8 = 141 - i;
+            let days: u8 = DEGRADING_PERIOD_START_AT - i;
             tap_script.extend(to_csv_script_encode(CSVFlag::Days(days)));
 
             // Push self key
