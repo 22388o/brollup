@@ -55,8 +55,7 @@ The `Bitcoin Virtual Machine` advances the rollup state by chaining `Pool Transa
 -   In case the `Operator` is non-collaborative and does not sign from the collaborative path, `Self` can trigger the exit path `(Self after 1 month)` to reclaim their funds.
 
 ## Bare Connector 🔌
-`Bare Connector` is a bare, on-chain transaction output type used for lifting `Lift` outputs. `Bare Connector` is a key-path-only `Operator` single-sig. A series of `Bare Connectors` can be included in a `Pool Transaction` and provided to `Self` by the `Operator`.
-                                                            
+`Bare Connector` is a bare, on-chain transaction output type used for lifting `Lift` outputs. `Bare Connector` is a key-path-only `Operator` single-sig. A series of `Bare Connectors` can be included in a `Pool Transaction` and provided to `Self` by the `Operator`.                                                 
                                                             
                                 Prevouts                      Outs          
                          ┌────────────────────┐      ┌────────────────────┐ 
@@ -89,7 +88,6 @@ Once a `VTXO` expires, it can no longer be redeemed or claimed on-chain; therefo
 -   The aggregated [MuSig2](https://github.com/bitcoin/bips/blob/master/bip-0327.mediawiki) key of msg.senders[] and `Operator` pre-sign from the projector path `(msg.senders[] + Operator)` to constrain `VTXOs` in a pseudo-covenant manner.
     
 -  `VTXO Projector` expires in three months, at which point all `VTXOs` contained within the projector also expire. Upon expiry, the `Operator` triggers the sweep path `(Operator after 3 months)` to reclaim all expired `VTXOs` directly from the projector root, in a footprint-minimal way, without claiming `VTXOs` one by one.
-
                                                       
                                            ⋰ ┌──────────────────┐
                                          ⋰   │      VTXO #0     │
