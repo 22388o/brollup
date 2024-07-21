@@ -57,15 +57,15 @@ The `Bitcoin Virtual Machine` advances the rollup state by chaining `Pool Transa
 ## Bare Connector 🔌
 `Bare Connector` is a bare, on-chain transaction output type used for lifting `Lift` outputs. `Bare Connector` is a key-path-only `Operator` single-sig. A series of `Bare Connectors` can be included in a `Pool Transaction` and provided to `Self` by the `Operator`.                                                 
                                                             
-                                Prevouts                      Outs          
-                         ┌────────────────────┐      ┌────────────────────┐ 
-                     #0  │        Lift        │   #0 │      Operator      │
-                         └────────────────────┘      └────────────────────┘                    
+                                Prevouts                       Outs          
+                         ┌────────────────────┐       ┌────────────────────┐ 
+                     #0  │        Lift        │   #0  │      Operator      │
+                         └────────────────────┘       └────────────────────┘                    
       From  Pool         ┌────────────────────┐
       Transaction -- #1->│   Bare Connector   │ 
                          └────────────────────┘    
       
-                                        Lift Transaction 
+                                         Lift Transaction 
 
 ## VTXO 💵
 `VTXO` is a virtual, off-chain transaction output that holds the `Self` funds. `VTXOs` are projected by the `VTXO Projector` and can be unilaterally redeemed on-chain. A `VTXO` expires three months after its creation, or, in other words, three months after its projector `VTXO Projector` hits on-chain. 
@@ -142,15 +142,15 @@ In contrast to the state channel design employed by Lightning Network, `Channel`
 ## Virtual Connector 🔌
 `Virtual Connector` is a virtual, off-chain transaction output type used for updating `Channel` states. `Virtual Connector` is a 2-of-2 `(msg.sender + Operator)` between the msg.sender and the `Operator`, and carries dust a value of `450 sats`. A series of `Virtual Connectors` can be included in a `Connector Projector` and provided to `Self` by the `Operator`.                          
                                                             
-                                 Prevouts                      Outs          
-                          ┌────────────────────┐      ┌────────────────────┐ 
-                      #0  │       Channel      │   #0 │        Self        │
-                          └────────────────────┘      └────────────────────┘                    
-      From  Connector     ┌────────────────────┐      ┌────────────────────┐ 
-      Projector ----- #1->│  Virtual Connector │   #1 │      Operator      │
-                          └────────────────────┘      └────────────────────┘
+                                 Prevouts                       Outs          
+                          ┌────────────────────┐       ┌────────────────────┐ 
+                      #0  │       Channel      │   #0  │        Self        │
+                          └────────────────────┘       └────────────────────┘                    
+      From  Connector     ┌────────────────────┐       ┌────────────────────┐ 
+      Projector ----- #1->│  Virtual Connector │   #1  │      Operator      │
+                          └────────────────────┘       └────────────────────┘
       
-                                        Channel State Update 
+                                         Channel State Update 
 
 ## Connector Projector 🎥
 `Connector Projector` is the same as `VTXO Projector`, but for `Connectors` instead. `Connector Projector` is a bare, on-chain transaction output type contained in each pool transaction, and projects `Connectors` into a covenant template.
