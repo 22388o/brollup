@@ -45,7 +45,7 @@ The `Bitcoin Virtual Machine` advances the rollup state by chaining `Pool Transa
                         Pool Transaction     
 
 ## Lift 🛗
-`Lift` is a bare, on-chain transaction output type used for onboarding to the Bitcoin VM. When a `Lift` output is funded and has gained two on-chain confirmations, it can be swapped out for a 1:1 `VTXO` in a process known as lifting. In short, `Lift` lifts itself up to a `VTXO`.
+`Lift` is a bare, on-chain transaction output type used for onboarding to the `Bitcoin VM`. When a `Lift` output is funded and has gained two on-chain confirmations, it can be swapped out for a 1:1 `VTXO` in a process known as lifting. In short, `Lift` lifts itself up to a `VTXO`.
 
 `Lift` carries two  spending conditions:
 `(Self + Operator) or (Self after 1 month)`
