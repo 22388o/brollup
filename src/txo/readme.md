@@ -108,7 +108,7 @@ Once a `VTXO` expires, it can no longer be redeemed or claimed on-chain; therefo
 
 `Self` and `Remote` sign from the 2-of-2 `(Self + Operator)` to update the channel state, where each state update overwrites the previous one with higher precedence. `Channel` uses a degrading relative timelock scheme to ensure that each new channel state takes precedence over the previous one and therefore overwrites the older state. By design `Bitcoin VM` employs 128 degrading periods.
 
-`Channel` is a TapTree with 128 leaves, where each TapLead corresponds to a degrading period. Each period is a 2-of-2 between `Self` and `Operator` with a relative timelock, where the duration starts at 128 days and degrades by one with each subsequent period.
+`Channel` is a TapTree with 128 leaves, where each TapLead corresponds to a degrading period. Each period is a 2-of-2 between `Self` and `Operator` with a relative timelock, where the duration starts at 134 days and degrades by one with each subsequent period.
 
                                                     ┌───────────────────┐
     -Lv 7                                           │  Channel TapRoot  │                                  
@@ -123,7 +123,7 @@ Once a `VTXO` expires, it can no longer be redeemed or claimed on-chain; therefo
              ┌─────────────────┐      ┌─────────────────┐           ┌─────────────────┐      ┌─────────────────┐
              │    TapLeaf 1    │      │     TapLeaf 2   │           │   TapLeaf 127   │      │   TapLeaf 128   │
     -Lv 0    │(Self + Operator)│      │(Self + Operator)│     ┄     │(Self + Operator)│      │(Self + Operator)│
-             │  After 128 days │      │  After 127 days │           │   After 2 days  │      │   After 1 day   │
+             │  After 134 days │      │  After 133 days │           │   After 8 days  │      │   After 7 days  │
              └─────────────────┘      └─────────────────┘           └─────────────────┘      └─────────────────┘
                      ⬇                         ⬇                           ⬇                        ⬇
           ┌──────────┐┌──────────┐  ┌──────────┐┌──────────┐     ┌──────────┐┌──────────┐  ┌──────────┐┌──────────┐

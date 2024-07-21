@@ -926,7 +926,7 @@ mod tests {
 
         assert_eq!(n_sequence, n_sequence_expected);
         assert_eq!(csv_script, csv_script_expected);
- 
+
         // 4
         let days = 4;
         let n_sequence = to_n_sequence_encode(CSVFlag::Days(days));
