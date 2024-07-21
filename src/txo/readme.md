@@ -81,7 +81,14 @@ Once a `VTXO` expires, it can no longer be redeemed or claimed on-chain; therefo
 -   In case the `Operator` is non-collaborative and does not sign from the channel path, `Self` can trigger the exit path `(Self after 3 month)` to reclaim their funds.
 
 ## VTXO Projector 🎥
-`VTXO Projector` is a bare, on-chain transaction output type contained in each pool transaction.  `Projector` is used for for projecting `VTXOs` and `Connectors` in a pseudo-covenant manner.
+`VTXO Projector` is a bare, on-chain transaction output type contained in each pool transaction. `VTXO Projector` projects `VTXOs` into a covenant template.
+
+`VTXO Projector` carries two spending conditions:
+`(msg.senders[] + Operator) or (Operator after 3 months)`
+
+-   The aggregated [MuSig2](https://github.com/bitcoin/bips/blob/master/bip-0327.mediawiki) key of msg.senders[] and `Operator` pre-sign from the projector path `(msg.senders[] + Operator)` to constrain a `VTXOs` in a pseudo-covenant manner.
+    
+-  `VTXO Projector` expires in three months, at which point all `VTXOs` contained within the projector also expire. Upon expiry, the `Operator` triggers the sweep path to reclaim all these expired `VTXOs` directly from the projector in a footprint-minimal way.
                                                       
                                            ⋰ ┌──────────────────┐
                                          ⋰   │      VTXO #0     │
