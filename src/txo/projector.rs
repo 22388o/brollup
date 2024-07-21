@@ -68,14 +68,14 @@ impl Projector {
 
         // Push aggregate key
         reveal_path.push(0x20);
-        reveal_path.extend(self.msg_senders_aggregate_key().serialize().to_vec());
+        reveal_path.extend(self.msg_senders_aggregate_key().serialize());
 
         // OP_CHECKSIGVERIFY
         reveal_path.push(0xad);
 
         // Push operator key
         reveal_path.push(0x20);
-        reveal_path.extend(self.operator_key().serialize().to_vec());
+        reveal_path.extend(self.operator_key().serialize());
 
         // OP_CHECKSIG
         reveal_path.push(0xac);
@@ -88,7 +88,7 @@ impl Projector {
 
         // Push operator key
         reclaim_path.push(0x20);
-        reclaim_path.extend(self.operator_key().serialize().to_vec());
+        reclaim_path.extend(self.operator_key().serialize());
 
         // OP_CHECKSIG
         reclaim_path.push(0xac);
