@@ -1,9 +1,9 @@
 #![allow(dead_code)]
 
 use crate::{
-    well_known::operator,
     serialize::{to_csv_script_encode, CSVFlag},
     taproot::{TapLeaf, TapRoot},
+    well_known::operator,
 };
 use musig2::secp256k1::{self, XOnlyPublicKey};
 
