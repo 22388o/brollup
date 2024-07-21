@@ -1,4 +1,5 @@
-pub mod lift;
+pub mod channel;
 pub mod connector;
-pub mod vtxo;
+pub mod lift;
 pub mod projector;
+pub mod vtxo;
