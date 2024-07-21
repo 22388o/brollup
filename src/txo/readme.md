@@ -123,7 +123,7 @@ Once a `VTXO` expires, it can no longer be redeemed or claimed on-chain; therefo
                        └─────────────────────────┘                          └─────────────────────────┘
                        ╱                         ╲                           ╱                       ╲
     -Lv 0    ┌───────────────────┐     ┌───────────────────┐       ┌───────────────────┐     ┌───────────────────┐
-             │      TapLeaf 1    │     │      TapLeaf 2    │       │    TapLeaf 127    │     │    TapLeaf 128    │
+             │  Channel State 1  │     │  Channel State 2  │       │ Channel State 127 │     │ Channel State 128 │
              │ (Self + Operator) │     │ (Self + Operator) │  ...  │ (Self + Operator) │     │ (Self + Operator) │
              │   After 128 days  │     │   After 127 days  │       │    After 2 days   │     │    After 1 day    │
              └───────────────────┘     └───────────────────┘       └───────────────────┘     └───────────────────┘
