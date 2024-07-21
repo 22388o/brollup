@@ -146,7 +146,7 @@ In contrast to the state channel design employed by Lightning Network, `Channel`
                           ┌────────────────────┐       ┌────────────────────┐ 
                       #0  │       Channel      │   #0  │        Self        │
                           └────────────────────┘       └────────────────────┘                    
-      From  Connector     ┌────────────────────┐       ┌────────────────────┐ 
+      From Connector      ┌────────────────────┐       ┌────────────────────┐ 
       Projector ----- #1->│  Virtual Connector │   #1  │      Operator      │
                           └────────────────────┘       └────────────────────┘
       
