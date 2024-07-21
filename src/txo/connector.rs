@@ -7,6 +7,7 @@ use crate::{
 use musig2::secp256k1::{self, XOnlyPublicKey};
 
 type Bytes = Vec<u8>;
+type Key = XOnlyPublicKey;
 
 #[derive(Clone, Copy)]
 pub enum ConnectorTag {
@@ -15,14 +16,14 @@ pub enum ConnectorTag {
 }
 
 pub struct Connector {
-    operator_key: XOnlyPublicKey,
-    msg_sender_key: Option<XOnlyPublicKey>,
+    operator_key: Key,
+    msg_sender_key: Option<Key>,
     tag: ConnectorTag,
 }
 
 impl Connector {
     pub fn new_bare() -> Connector {
-        let operator_key = XOnlyPublicKey::from_slice(&operator::OPERATOR_KEY_WELL_KNOWN).unwrap();
+        let operator_key = Key::from_slice(&operator::OPERATOR_KEY_WELL_KNOWN).unwrap();
         Connector {
             operator_key,
             msg_sender_key: None,
@@ -30,7 +31,7 @@ impl Connector {
         }
     }
 
-    pub fn new_bare_with_operator(operator_key: XOnlyPublicKey) -> Connector {
+    pub fn new_bare_with_operator(operator_key: Key) -> Connector {
         Connector {
             operator_key,
             msg_sender_key: None,
@@ -38,8 +39,8 @@ impl Connector {
         }
     }
 
-    pub fn new_virtual(msg_sender_key: XOnlyPublicKey) -> Connector {
-        let operator_key = XOnlyPublicKey::from_slice(&operator::OPERATOR_KEY_WELL_KNOWN).unwrap();
+    pub fn new_virtual(msg_sender_key: Key) -> Connector {
+        let operator_key = Key::from_slice(&operator::OPERATOR_KEY_WELL_KNOWN).unwrap();
         Connector {
             operator_key,
             msg_sender_key: Some(msg_sender_key),
@@ -47,9 +48,9 @@ impl Connector {
         }
     }
 
-    pub fn new_virtual_with_operator(
-        msg_sender_key: XOnlyPublicKey,
-        operator_key: XOnlyPublicKey,
+    pub fn new_virtual_operator(
+        msg_sender_key: Key,
+        operator_key: Key,
     ) -> Connector {
         Connector {
             operator_key,
@@ -58,11 +59,11 @@ impl Connector {
         }
     }
 
-    pub fn msg_sender_key(&self) -> Option<XOnlyPublicKey> {
+    pub fn msg_sender_key(&self) -> Option<Key> {
         self.msg_sender_key
     }
 
-    pub fn operator_key(&self) -> XOnlyPublicKey {
+    pub fn operator_key(&self) -> Key {
         self.operator_key
     }
 
