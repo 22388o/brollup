@@ -121,13 +121,13 @@ Once a `VTXO` expires, it can no longer be redeemed or claimed on-chain; therefo
                     ┌─────────────────────────┐                             ┌─────────────────────────┐
     -Lv 1           │       TapBranch 1       │             ...             │       TapBranch 64      │  
                     └─────────────────────────┘                             └─────────────────────────┘
-                     ╱                       ╲                               ╱                       ╲
+                    ┌─────┘              └─────┐                            ┌─────┘             └─────┐
           ┌───────────────────┐      ┌───────────────────┐       ┌───────────────────┐       ┌───────────────────┐
           │      TapLeaf 1    │      │      TapLeaf 2    │       │    TapLeaf 127    │       │    TapLeaf 128    │
     -Lv 0 │ (Self + Operator) │      │ (Self + Operator) │  ...  │ (Self + Operator) │       │ (Self + Operator) │
           │   After 128 days  │      │   After 127 days  │       │    After 2 days   │       │    After 1 day    │
           └───────────────────┘      └───────────────────┘       └───────────────────┘       └───────────────────┘
-              ┌──┘     └──┐             ┌──┘     └──┐               ┌──┘     └──┐                 ┌──┘     └──┐
+                    ⬇                        ⬇                           ⬇                            ⬇
         ┌──────────┐ ┌──────────┐ ┌──────────┐ ┌──────────┐ ┌────────────┐ ┌────────────┐ ┌────────────┐ ┌────────────┐
         │  State 1 │ │  State 1 │ │  State 2 │ │  State 2 │ │  State 127 │ │  State 127 │ │  State 128 │ │  State 128 │
         │  (Self)  │ │(Operator)│ │  (Self)  │ │(Operator)│ │   (Self)   │ │ (Operator) │ │   (Self)   │ │ (Operator) │
