@@ -1,9 +1,9 @@
 #![allow(dead_code)]
 
 use crate::{
-    well_known::operator,
     serialize::{to_csv_script_encode, CSVFlag},
     taproot::{TapLeaf, TapRoot},
+    well_known::operator,
 };
 use musig2::secp256k1::{self, XOnlyPublicKey};
 
@@ -11,23 +11,23 @@ type Bytes = Vec<u8>;
 type Key = XOnlyPublicKey;
 
 pub struct Lift {
-    operator_key: Key,
     self_key: Key,
+    operator_key_well_known: Key,
 }
 
 impl Lift {
     pub fn new(self_key: Key) -> Lift {
-        let operator_key = Key::from_slice(&operator::OPERATOR_KEY_WELL_KNOWN).unwrap();
+        let operator_key_well_known = Key::from_slice(&operator::OPERATOR_KEY_WELL_KNOWN).unwrap();
         Lift {
-            operator_key,
             self_key,
+            operator_key_well_known,
         }
     }
 
-    pub fn new_with_operator(self_key: Key, operator_key: Key) -> Lift {
+    pub fn new_with_operator(self_key: Key, operator_key_well_known: Key) -> Lift {
         Lift {
-            operator_key,
             self_key,
+            operator_key_well_known,
         }
     }
 
@@ -36,7 +36,7 @@ impl Lift {
     }
 
     pub fn operator_key(&self) -> Key {
-        self.operator_key
+        self.operator_key_well_known
     }
 
     pub fn taproot(&self) -> TapRoot {

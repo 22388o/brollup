@@ -21,20 +21,20 @@ pub enum ProjectorTag {
 
 #[derive(Clone)]
 pub struct Projector {
-    operator_key: Key,
-    msg_senders: Vec<Key>,
+    msg_sender_keys: Vec<Key>,
+    operator_key_well_known: Key,
     msg_senders_key_agg_ctx: KeyAggContext,
     tag: ProjectorTag,
 }
 
 impl Projector {
-    pub fn new(msg_senders: Vec<Key>, tag: ProjectorTag) -> Projector {
-        let operator_key = Key::from_slice(&operator::OPERATOR_KEY_WELL_KNOWN).unwrap();
+    pub fn new(msg_sender_keys: Vec<Key>, tag: ProjectorTag) -> Projector {
+        let operator_key_well_known = Key::from_slice(&operator::OPERATOR_KEY_WELL_KNOWN).unwrap();
 
         // Lift msg.sender from their XOnly keys
         let mut msg_senders_lifted = Vec::<PublicKey>::new();
 
-        for sender in &msg_senders {
+        for sender in &msg_sender_keys {
             msg_senders_lifted.push(sender.public_key(secp256k1::Parity::Even));
         }
 
@@ -47,8 +47,8 @@ impl Projector {
         let msg_senders_key_agg_ctx: KeyAggContext = KeyAggContext::new(msg_senders_iter).unwrap();
 
         Projector {
-            operator_key,
-            msg_senders,
+            msg_sender_keys,
+            operator_key_well_known,
             msg_senders_key_agg_ctx,
             tag,
         }
@@ -59,7 +59,7 @@ impl Projector {
     }
 
     pub fn operator_key(&self) -> Key {
-        self.operator_key
+        self.operator_key_well_known
     }
 
     pub fn taproot(&self) -> TapRoot {

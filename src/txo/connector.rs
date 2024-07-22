@@ -16,42 +16,42 @@ pub enum ConnectorTag {
 }
 
 pub struct Connector {
-    operator_key: Key,
     msg_sender_key: Option<Key>,
+    operator_key_well_known: Key,
     tag: ConnectorTag,
 }
 
 impl Connector {
     pub fn new_bare() -> Connector {
-        let operator_key = Key::from_slice(&operator::OPERATOR_KEY_WELL_KNOWN).unwrap();
+        let operator_key_well_known = Key::from_slice(&operator::OPERATOR_KEY_WELL_KNOWN).unwrap();
         Connector {
-            operator_key,
             msg_sender_key: None,
+            operator_key_well_known,
             tag: ConnectorTag::Bare,
         }
     }
 
-    pub fn new_bare_with_operator(operator_key: Key) -> Connector {
+    pub fn new_bare_with_operator(operator_key_well_known: Key) -> Connector {
         Connector {
-            operator_key,
             msg_sender_key: None,
+            operator_key_well_known,
             tag: ConnectorTag::Bare,
         }
     }
 
     pub fn new_virtual(msg_sender_key: Key) -> Connector {
-        let operator_key = Key::from_slice(&operator::OPERATOR_KEY_WELL_KNOWN).unwrap();
+        let operator_key_well_known = Key::from_slice(&operator::OPERATOR_KEY_WELL_KNOWN).unwrap();
         Connector {
-            operator_key,
             msg_sender_key: Some(msg_sender_key),
+            operator_key_well_known,
             tag: ConnectorTag::Virtual,
         }
     }
 
-    pub fn new_virtual_operator(msg_sender_key: Key, operator_key: Key) -> Connector {
+    pub fn new_virtual_operator(msg_sender_key: Key, operator_key_well_known: Key) -> Connector {
         Connector {
-            operator_key,
             msg_sender_key: Some(msg_sender_key),
+            operator_key_well_known,
             tag: ConnectorTag::Virtual,
         }
     }
@@ -61,7 +61,7 @@ impl Connector {
     }
 
     pub fn operator_key(&self) -> Key {
-        self.operator_key
+        self.operator_key_well_known
     }
 
     pub fn tag(&self) -> ConnectorTag {

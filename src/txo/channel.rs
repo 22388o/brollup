@@ -3,7 +3,6 @@
 use crate::{
     serialize::{to_csv_script_encode, CSVFlag},
     taproot::{TapLeaf, TapRoot},
-    well_known::operator,
 };
 use musig2::secp256k1::{self, XOnlyPublicKey};
 
@@ -13,32 +12,24 @@ type Key = XOnlyPublicKey;
 const DEGRADING_PERIOD_START_AT: u8 = 141;
 
 pub struct Channel {
-    operator_key: Key,
     self_key: Key,
+    operator_key_dynamic: Key,
 }
 
 impl Channel {
-    pub fn new(self_key: Key) -> Channel {
-        let operator_key = Key::from_slice(&operator::OPERATOR_KEY_WELL_KNOWN).unwrap();
+    pub fn new(self_key: Key, operator_key_dynamic: Key) -> Channel {
         Channel {
-            operator_key,
             self_key,
+            operator_key_dynamic,
         }
     }
 
-    pub fn new_with_operator(self_key: Key, operator_key: Key) -> Channel {
-        Channel {
-            operator_key,
-            self_key,
-        }
-    }
-
-    pub fn self_key(&self) -> Key {
+    pub fn to_self_key(&self) -> Key {
         self.self_key
     }
 
-    pub fn operator_key(&self) -> Key {
-        self.operator_key
+    pub fn to_operator_key(&self) -> Key {
+        self.operator_key_dynamic
     }
 
     pub fn taproot(&self) -> TapRoot {
@@ -51,16 +42,16 @@ impl Channel {
             let days: u8 = DEGRADING_PERIOD_START_AT - i;
             tap_script.extend(to_csv_script_encode(CSVFlag::Days(days)));
 
-            // Push self key
+            // Push to_self key
             tap_script.push(0x20);
-            tap_script.extend(self.self_key().serialize());
+            tap_script.extend(self.to_self_key().serialize());
 
             // OP_CHECKSIGVERIFY
             tap_script.push(0xad);
 
-            // Push operator key
+            // Push to_operator key
             tap_script.push(0x20);
-            tap_script.extend(self.operator_key().serialize());
+            tap_script.extend(self.to_operator_key().serialize());
 
             // OP_CHECKSIG
             tap_script.push(0xac);
