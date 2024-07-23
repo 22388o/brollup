@@ -1,3 +1,5 @@
+#![allow(dead_code)]
+
 use ripemd::Ripemd160;
 use sha2::Digest as _;
 use sha2::Sha256;
@@ -6,36 +8,36 @@ use sha2::Sha512;
 type Bytes = Vec<u8>;
 
 pub fn sha_256(data: impl AsRef<[u8]>) -> [u8; 32] {
-    let result: [u8; 32] = Sha256::new().chain_update(&data).finalize().into();
-    result
+    let hash: [u8; 32] = Sha256::new().chain_update(&data).finalize().into();
+    hash
 }
 
 pub fn hash_256(data: impl AsRef<[u8]>) -> [u8; 32] {
-    let result: [u8; 32] = sha_256(sha_256(data));
-    result
+    let hash: [u8; 32] = sha_256(sha_256(data));
+    hash
 }
 
 pub fn sha_512(data: impl AsRef<[u8]>) -> [u8; 64] {
-    let result: [u8; 64] = Sha512::new().chain_update(&data).finalize().into();
-    result
+    let hash: [u8; 64] = Sha512::new().chain_update(&data).finalize().into();
+    hash
 }
 
 pub fn hash_512(data: impl AsRef<[u8]>) -> [u8; 64] {
-    let result: [u8; 64] = sha_512(sha_512(data));
-    result
+    let hash: [u8; 64] = sha_512(sha_512(data));
+    hash
 }
 
 pub fn ripemd_160(data: impl AsRef<[u8]>) -> [u8; 20] {
     let mut ripemd_160_hash = Ripemd160::new();
     ripemd_160_hash.update(data);
 
-    let result: [u8; 20] = ripemd_160_hash.finalize().into();
-    result
+    let hash: [u8; 20] = ripemd_160_hash.finalize().into();
+    hash
 }
 
 pub fn hash_160(data: impl AsRef<[u8]>) -> [u8; 20] {
-    let result = ripemd_160(sha_256(data));
-    result
+    let hash: [u8; 20] = ripemd_160(sha_256(data));
+    hash
 }
 
 pub enum HashTag {
@@ -46,7 +48,7 @@ pub enum HashTag {
 }
 
 pub fn tagged_hash(data: Bytes, tag: HashTag) -> [u8; 32] {
-    let mut full = Vec::<u8>::new();
+    let mut preimage = Vec::<u8>::new();
 
     let tag_digest = match tag {
         HashTag::TapLeafTag => Sha256::digest("TapLeaf"),
@@ -55,9 +57,9 @@ pub fn tagged_hash(data: Bytes, tag: HashTag) -> [u8; 32] {
         HashTag::CustomTag(tag) => Sha256::digest(tag),
     };
 
-    full.extend(tag_digest);
-    full.extend(tag_digest);
-    full.extend(data);
+    preimage.extend(tag_digest);
+    preimage.extend(tag_digest);
+    preimage.extend(data);
 
-    sha_256(full)
+    sha_256(preimage)
 }
