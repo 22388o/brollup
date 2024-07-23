@@ -1,9 +1,4 @@
-use std::result;
-
 use bit_vec::BitVec;
-use ripemd::Ripemd160;
-use sha2::Digest as _;
-use sha2::Sha256;
 
 use crate::{
     serialize::{to_csv_script_encode, CSVFlag},
@@ -85,16 +80,4 @@ impl Payload {
 
         data
     }
-}
-
-fn hash_160(data: impl AsRef<[u8]>) -> [u8; 20] {
-    let sha_256_hash: [u8; 32] = { Sha256::new().chain_update(&data).finalize().into() };
-
-    let mut ripemd_160_hash = Ripemd160::new();
-    
-    ripemd_160_hash.update(sha_256_hash);
-
-    let result: [u8; 20] = ripemd_160_hash.finalize().into();
-
-    result
 }

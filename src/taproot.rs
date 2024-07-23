@@ -1,5 +1,6 @@
 #![allow(dead_code)]
 
+use crate::hash::sha_256;
 use crate::serialize::with_prefix_compact_size;
 use lazy_static::lazy_static;
 use musig2::secp256k1::{self, Parity, PublicKey, Scalar, Secp256k1, XOnlyPublicKey};
@@ -422,7 +423,10 @@ impl ControlBlock {
     }
 }
 
-pub fn tagged_hash(data: impl AsRef<[u8]>, tag: HashTag) -> [u8; 32] {
+pub fn tagged_hash(data: Bytes, tag: HashTag) -> [u8; 32] {
+
+    let mut full = Vec::<u8>::new();
+
     let tag_digest = match tag {
         HashTag::TapLeafTag => Sha256::digest("TapLeaf"),
         HashTag::TapBranchTag => Sha256::digest("TapBranch"),
@@ -430,16 +434,11 @@ pub fn tagged_hash(data: impl AsRef<[u8]>, tag: HashTag) -> [u8; 32] {
         HashTag::CustomTag(tag) => Sha256::digest(tag),
     };
 
-    let hash: [u8; 32] = {
-        Sha256::new()
-            .chain_update(&tag_digest)
-            .chain_update(&tag_digest)
-            .chain_update(&data)
-            .finalize()
-            .into()
-    };
+    full.extend(tag_digest);
+    full.extend(tag_digest);
+    full.extend(data);
 
-    hash
+    sha_256(full)
 }
 
 pub fn hash_tap_leaf(raw_script_vec: &Bytes, version: u8) -> [u8; 32] {
@@ -448,7 +447,7 @@ pub fn hash_tap_leaf(raw_script_vec: &Bytes, version: u8) -> [u8; 32] {
     data.extend_from_slice(&[version]);
     data.extend_from_slice(&with_prefix_compact_size(&raw_script_vec));
 
-    tagged_hash(&data, HashTag::TapLeafTag)
+    tagged_hash(data, HashTag::TapLeafTag)
 }
 
 pub fn hash_tap_branch(left_branch_vec: &Bytes, right_branch_vec: &Bytes) -> [u8; 32] {
@@ -457,7 +456,7 @@ pub fn hash_tap_branch(left_branch_vec: &Bytes, right_branch_vec: &Bytes) -> [u8
     data.extend_from_slice(left_branch_vec);
     data.extend_from_slice(right_branch_vec);
 
-    tagged_hash(&data, HashTag::TapBranchTag)
+    tagged_hash(data, HashTag::TapBranchTag)
 }
 
 pub fn hash_tap_tweak(inner_key_vec: &Bytes, tweak_vec: &Bytes) -> [u8; 32] {
@@ -466,5 +465,5 @@ pub fn hash_tap_tweak(inner_key_vec: &Bytes, tweak_vec: &Bytes) -> [u8; 32] {
     data.extend_from_slice(inner_key_vec);
     data.extend_from_slice(tweak_vec);
 
-    tagged_hash(&data, HashTag::TapTweakTag)
+    tagged_hash(data, HashTag::TapTweakTag)
 }

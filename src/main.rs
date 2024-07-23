@@ -2,6 +2,7 @@ mod serialize;
 mod taproot;
 mod txo;
 mod well_known;
+mod hash;
 
 #[cfg(test)]
 mod tests {
