@@ -1,5 +1,3 @@
-use sha2::digest::consts::True;
-
 type Bytes = Vec<u8>;
 
 // https://en.bitcoin.it/wiki/Protocol_documentation#Variable_length_integer
