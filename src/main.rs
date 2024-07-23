@@ -17,36 +17,6 @@ mod tests {
     use std::error::Error;
 
     #[test]
-    fn test_key_aggregation() -> Result<(), Box<dyn Error>> {
-        let public_key_1: PublicKey =
-            "022b1a426e4e68cf052240da0ef9256e6cb2c713adf5f9d1a6b51349d90fb00ca3".parse()?;
-        let public_key_2: PublicKey =
-            "020982a79762a6e6c4fee6e166708147627bb7a90cd071ffd9dfc951feac871642".parse()?;
-        let public_key_3: PublicKey =
-            "02963f498fc5e07c1c9c972608540933f56864c2aaf9166e9de2cbb50df0e153dd".parse()?;
-
-        let mut pubkeys: [PublicKey; 3] = [public_key_1, public_key_2, public_key_3];
-        pubkeys.sort();
-
-        let tap_script: Vec<u8> = vec![0x93, 0x93];
-        let tap_leaf: TapLeaf = TapLeaf::new(tap_script);
-
-        let key_agg_ctx: KeyAggContext =
-            KeyAggContext::new(pubkeys)?.with_taproot_tweak(&tap_leaf.hash())?;
-
-        let agg_pubkey: PublicKey = key_agg_ctx.aggregated_pubkey();
-        let agg_pubkey_without_tweak: PublicKey = key_agg_ctx.aggregated_pubkey_untweaked();
-
-        println!(
-            "aggregate pubkey without tweak: {} ",
-            agg_pubkey_without_tweak.to_string()
-        );
-        println!("aggregate pubkey with tweak: {} ", agg_pubkey.to_string());
-
-        Ok(())
-    }
-
-    #[test]
     fn test_tap_branch() -> Result<(), Box<dyn Error>> {
         // Test - Branch two TapLeaves
 
@@ -797,8 +767,6 @@ mod tests {
 
         let lift_txo = Lift::new(self_key);
 
-        println!("spkis {}", hex::encode(lift_txo.spk().unwrap()));
-
         let tree = lift_txo.taproot().tree();
 
         if let Some(tree) = tree {
@@ -824,8 +792,6 @@ mod tests {
                 .unwrap();
 
         let lift_txo = Connector::new_virtual(self_key);
-
-        println!("spkis {}", hex::encode(lift_txo.spk().unwrap()));
 
         let tree = lift_txo.taproot().tree();
 
