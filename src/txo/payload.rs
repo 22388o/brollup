@@ -61,16 +61,16 @@ impl Payload {
         // Add connector_projector_operator_s_commitment (32 bytes)
         data.extend(self.connector_projector_operator_s_commitment);
 
-        let mut entries = BitVec::new();
+        let mut entries_whole = BitVec::new();
 
         for entry in self.entries.iter() {
-            entries.extend(entry);
+            entries_whole.extend(entry);
         }
 
-        let zero_bits_padded: u8 = 8 - (entries.len() % 8) as u8;
+        let zero_bits_padded: u8 = 8 - (entries_whole.len() % 8) as u8;
         data.push(zero_bits_padded);
 
-        data.extend(entries.to_bytes());
+        data.extend(entries_whole.to_bytes());
 
         data
     }
