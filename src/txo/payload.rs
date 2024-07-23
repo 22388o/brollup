@@ -1,10 +1,8 @@
+#![allow(dead_code)]
+
 use bit_vec::BitVec;
 
-use crate::{
-    serialize::{to_csv_script_encode, CSVFlag},
-    taproot::{TapLeaf, TapRoot},
-};
-use musig2::secp256k1::{self, XOnlyPublicKey};
+use musig2::secp256k1::XOnlyPublicKey;
 
 type Bytes = Vec<u8>;
 type Key = XOnlyPublicKey;
