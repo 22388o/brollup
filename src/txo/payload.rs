@@ -1,8 +1,9 @@
 #![allow(dead_code)]
 
 use bit_vec::BitVec;
-
 use musig2::secp256k1::XOnlyPublicKey;
+
+use crate::hash::hash_160;
 
 type Bytes = Vec<u8>;
 type Key = XOnlyPublicKey;
@@ -44,7 +45,51 @@ impl Payload {
         }
     }
 
-    pub fn data_to_be_pushed(&self) -> Bytes {
+    fn group_s_commitments_by_two(&self) -> Vec<([u8; 32], Option<[u8; 32]>)> {
+        let s_commitments = self.s_commitments.clone();
+        let mut tuples: Vec<([u8; 32], Option<[u8; 32]>)> = Vec::new();
+
+        let iterations = match s_commitments.len() {
+            0 => 0,
+            1 => 1,
+            _ => s_commitments.len() / 2 + s_commitments.len() % 2,
+        };
+
+        for i in 0..iterations {
+            let is_last:bool = i + 1 == iterations;
+
+            match is_last {
+                false => tuples.push((s_commitments[i * 2], Some(s_commitments[i * 2 + 1]))),
+                true => match s_commitments.len() % 2 {
+                    0 => tuples.push((s_commitments[i * 2], Some(s_commitments[i * 2 + 1]))),
+                    1 => tuples.push((s_commitments[i * 2], None)),
+                    _ => (),
+                },
+            }
+
+        }
+
+        tuples
+    }
+
+    fn hashlocks(&self) -> Vec<[u8; 20]> {
+        let s_commitments_grouped = self.group_s_commitments_by_two();
+        let mut hashes = Vec::<[u8; 20]>::new();
+
+        for group in s_commitments_grouped {
+            let mut full = Vec::<u8>::new();
+
+            full.extend(group.0);
+
+            if let Some(s_com) = group.1 {
+                full.extend(s_com);
+            }
+            hashes.push(hash_160(full));
+        }
+        hashes
+    }
+
+    fn data_to_be_pushed(&self) -> Bytes {
         let mut data = Vec::<u8>::new();
 
         // Start with adding the fresh operator key
