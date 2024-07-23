@@ -1,11 +1,9 @@
 #![allow(dead_code)]
 
-use crate::hash::sha_256;
+use crate::hash::{tagged_hash, HashTag};
 use crate::serialize::with_prefix_compact_size;
 use lazy_static::lazy_static;
 use musig2::secp256k1::{self, Parity, PublicKey, Scalar, Secp256k1, XOnlyPublicKey};
-use sha2::Digest as _;
-use sha2::Sha256;
 use std::cmp::Ordering;
 use std::vec;
 
@@ -19,13 +17,6 @@ lazy_static! {
         0x5e, 0x07, 0x8a, 0x5a, 0x0f, 0x28, 0xec, 0x96, 0xd5, 0x47, 0xbf, 0xee, 0x9a, 0xce, 0x80,
         0x3a, 0xc0
     ];
-}
-
-pub enum HashTag {
-    TapLeafTag,
-    TapBranchTag,
-    TapTweakTag,
-    CustomTag(String),
 }
 
 #[derive(Clone)]
@@ -421,24 +412,6 @@ impl ControlBlock {
         vec.extend(self.path.clone());
         vec
     }
-}
-
-pub fn tagged_hash(data: Bytes, tag: HashTag) -> [u8; 32] {
-
-    let mut full = Vec::<u8>::new();
-
-    let tag_digest = match tag {
-        HashTag::TapLeafTag => Sha256::digest("TapLeaf"),
-        HashTag::TapBranchTag => Sha256::digest("TapBranch"),
-        HashTag::TapTweakTag => Sha256::digest("TapTweak"),
-        HashTag::CustomTag(tag) => Sha256::digest(tag),
-    };
-
-    full.extend(tag_digest);
-    full.extend(tag_digest);
-    full.extend(data);
-
-    sha_256(full)
 }
 
 pub fn hash_tap_leaf(raw_script_vec: &Bytes, version: u8) -> [u8; 32] {
