@@ -71,8 +71,11 @@ impl Payload {
         }
 
         let zero_bits_padded: u8 = 8 - (entries_whole.len() % 8) as u8;
+
+        // Add padded zero-bits
         data.push(zero_bits_padded);
 
+        // Add entries
         data.extend(entries_whole.to_bytes());
 
         data
