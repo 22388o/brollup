@@ -417,8 +417,8 @@ impl ControlBlock {
 pub fn hash_tap_leaf(raw_script_vec: &Bytes, version: u8) -> [u8; 32] {
     let mut data: Bytes = Vec::new();
 
-    data.extend_from_slice(&[version]);
-    data.extend_from_slice(&with_prefix_compact_size(&raw_script_vec));
+    data.extend(&[version]);
+    data.extend(with_prefix_compact_size(raw_script_vec));
 
     tagged_hash(data, HashTag::TapLeafTag)
 }
@@ -426,8 +426,8 @@ pub fn hash_tap_leaf(raw_script_vec: &Bytes, version: u8) -> [u8; 32] {
 pub fn hash_tap_branch(left_branch_vec: &Bytes, right_branch_vec: &Bytes) -> [u8; 32] {
     let mut data: Bytes = Vec::new();
 
-    data.extend_from_slice(left_branch_vec);
-    data.extend_from_slice(right_branch_vec);
+    data.extend(left_branch_vec);
+    data.extend(right_branch_vec);
 
     tagged_hash(data, HashTag::TapBranchTag)
 }
@@ -435,8 +435,8 @@ pub fn hash_tap_branch(left_branch_vec: &Bytes, right_branch_vec: &Bytes) -> [u8
 pub fn hash_tap_tweak(inner_key_vec: &Bytes, tweak_vec: &Bytes) -> [u8; 32] {
     let mut data: Bytes = Vec::new();
 
-    data.extend_from_slice(inner_key_vec);
-    data.extend_from_slice(tweak_vec);
+    data.extend(inner_key_vec);
+    data.extend(tweak_vec);
 
     tagged_hash(data, HashTag::TapTweakTag)
 }
