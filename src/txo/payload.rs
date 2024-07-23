@@ -10,19 +10,13 @@ type Bytes = Vec<u8>;
 type Key = XOnlyPublicKey;
 
 pub struct Payload {
-    // msg.sender keys
     msg_senders: Vec<Key>,
-    // s commitments
     s_commitments: Vec<[u8; 32]>,
-    // Fresh operator key 🔑
     fresh_operator_key_dynamic: Key,
-    // VTXO projector signatures 🎥
     vtxo_projector_msg_senders_agg_sig: [u8; 64],
     vtxo_projector_operator_s_commitment: [u8; 32],
-    // Connector projector signatures 🎥
     connector_projector_msg_senders_agg_sig: [u8; 64],
     connector_projector_operator_s_commitment: [u8; 32],
-    // Entries
     entries: Vec<BitVec>,
 }
 
@@ -52,7 +46,7 @@ impl Payload {
     pub fn data_to_be_pushed(&self) -> Bytes {
         let mut data = Vec::<u8>::new();
 
-        // Start with adding the fresh operator key 🔑
+        // Start with adding the fresh operator key
         data.extend(self.fresh_operator_key_dynamic.serialize().to_vec());
 
         // Add vtxo_projector_msg_senders_agg_sig (64 bytes)
