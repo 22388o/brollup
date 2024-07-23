@@ -11,6 +11,7 @@ type Key = XOnlyPublicKey;
 
 pub struct Payload {
     msg_senders: Vec<Key>,
+    operator_key_well_known: Key,
     s_commitments: Vec<[u8; 32]>,
     fresh_operator_key_dynamic: Key,
     vtxo_projector_msg_senders_agg_sig: [u8; 64],
@@ -23,6 +24,7 @@ pub struct Payload {
 impl Payload {
     pub fn new(
         msg_senders: Vec<Key>,
+        operator_key_well_known: Key,
         s_commitments: Vec<[u8; 32]>,
         fresh_operator_key_dynamic: Key,
         vtxo_projector_msg_senders_agg_sig: [u8; 64],
@@ -33,6 +35,7 @@ impl Payload {
     ) -> Payload {
         Payload {
             msg_senders,
+            operator_key_well_known,
             s_commitments,
             fresh_operator_key_dynamic,
             vtxo_projector_msg_senders_agg_sig,
