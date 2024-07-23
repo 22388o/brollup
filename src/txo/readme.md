@@ -1,18 +1,18 @@
 # Transaction Outputs
 `Bitcoin Virtual Machine` employs of ten types of transaction outputs (TXOs):
 
-| TXO Type               | Kind    |  Spending Condition                                       |
-|:-----------------------|:--------|:----------------------------------------------------------|
-| Lift 🛗                | Bare    | `(Self + Operator) or (Self after 1 month)`               | 
-| Bare Connector 🔌      | Bare    | `Operator`                                                |
-| VTXO 💵                | Virtual | `(Self + Operator) or (Self after 3 months)`              |
-| VTXO Projector 🎥      | Bare    | `(msg.senders[] + Operator) or (Operator after 3 months)` |
-| Channel 👥             | Virtual | `(Self + Operator) after degrading timelock`              |
-| Virtual Connector 🔌   | Virtual | `(msg.sender + Operator)`                                 |
-| Connector Projector 🎥 | Bare    | `(msg.senders[] + Operator) or (Operator after 3 months)` |
-| Payload 📦             | Bare    | `(msg.senders[] after 1 day) or (Operator)`               |
-| Self 👨‍💻                | Virtual | `Self`                                                    |
-| Operator 🏭            | Virtual | `Operator`                                                |
+| TXO Type               | Kind    |  Spending Condition                                        |
+|:-----------------------|:--------|:-----------------------------------------------------------|
+| Lift 🛗                | Bare    | `(Self + Operator) or (Self after 1 month)`                | 
+| Bare Connector 🔌      | Bare    | `Operator`                                                 |
+| VTXO 💵                | Virtual | `(Self + Operator) or (Self after 3 months)`               |
+| VTXO Projector 🎥      | Bare    | `(msg.senders[] + Operator) or (Operator after 3 months)`  |
+| Channel 👥             | Virtual | `(Self + Operator) after degrading timelock`               |
+| Virtual Connector 🔌   | Virtual | `(msg.sender + Operator)`                                  |
+| Connector Projector 🎥 | Bare    | `(msg.senders[] + Operator) or (Operator after 3 months)`  |
+| Payload 📦             | Bare    | `(msg.senders[] after 7 days) or (Operator with hashlocks)`|
+| Self 👨‍💻                | Virtual | `Self`                                                     |
+| Operator 🏭            | Virtual | `Operator`                                                 |
 
 Five of the transaction output types are bare, meaning they are literal, on-chain transaction outputs that consume block space, while the other five are virtual, meaning they are committed but not yet revealed transaction outputs that optimistically consume no block space.
 
