@@ -22,11 +22,6 @@ pub fn sha_512(data: impl AsRef<[u8]>) -> [u8; 64] {
     hash
 }
 
-pub fn hash_512(data: impl AsRef<[u8]>) -> [u8; 64] {
-    let hash: [u8; 64] = sha_512(sha_512(data));
-    hash
-}
-
 pub fn ripemd_160(data: impl AsRef<[u8]>) -> [u8; 20] {
     let mut ripemd_160_hash = Ripemd160::new();
     ripemd_160_hash.update(data);
