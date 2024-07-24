@@ -1,9 +1,13 @@
 #![allow(dead_code)]
 
 use bit_vec::BitVec;
-use musig2::secp256k1::XOnlyPublicKey;
+use musig2::secp256k1::{self, XOnlyPublicKey};
 
-use crate::hash::hash_160;
+use crate::musig2::keys_to_key_agg_ctx;
+use crate::serialize::{encode_multi_push, CSVFlag};
+use crate::taproot::TapLeaf;
+use crate::{hash::hash_160, serialize::to_csv_script_encode, taproot::TapRoot};
+use crate::serialize::PushFlag;
 
 type Bytes = Vec<u8>;
 type Key = XOnlyPublicKey;
@@ -56,7 +60,7 @@ impl Payload {
         };
 
         for i in 0..iterations {
-            let is_last:bool = i + 1 == iterations;
+            let is_last: bool = i + 1 == iterations;
 
             match is_last {
                 false => tuples.push((s_commitments[i * 2], Some(s_commitments[i * 2 + 1]))),
@@ -66,7 +70,6 @@ impl Payload {
                     _ => (),
                 },
             }
-
         }
 
         tuples
@@ -89,7 +92,7 @@ impl Payload {
         hashes
     }
 
-    fn data_to_be_pushed(&self) -> Bytes {
+    fn payload(&self) -> Bytes {
         let mut data = Vec::<u8>::new();
 
         // Start with adding the fresh operator key
@@ -122,5 +125,68 @@ impl Payload {
         data.extend(entries_whole.to_bytes());
 
         data
+    }
+
+    fn msg_senders_aggregate_key(&self) -> XOnlyPublicKey {
+
+        let key_agg_ctx = keys_to_key_agg_ctx(&self.msg_senders);
+
+        // consider removing unwrap here
+        key_agg_ctx.unwrap().aggregated_pubkey()
+    }
+
+    pub fn taproot(&self) -> TapRoot {
+        let mut tap_script = Vec::<u8>::new();
+
+        // OP_IF
+        tap_script.push(0x63);
+
+        // Haslocks
+        let hashlocks = self.hashlocks();
+        for hashlock in hashlocks {
+            // OP_HASH160
+            tap_script.push(0xa9);
+
+            // Push hash into stack
+            tap_script.push(0x14);
+            tap_script.extend(hashlock);
+
+            // OP_EQUALVERIFY
+            tap_script.push(0x88);
+        }
+
+        // Push operator key into stack
+        tap_script.push(0x20);
+        tap_script.extend(self.operator_key_well_known.serialize());
+
+        // OP_CHECKSIG
+        tap_script.push(0xac);
+
+        // OP_ELSE
+        tap_script.push(0x67);
+
+        tap_script.extend(to_csv_script_encode(CSVFlag::CSVWeek));
+
+        // Push msg.senders aggregate key into stack
+        tap_script.push(0x20);
+        tap_script.extend(self.msg_senders_aggregate_key().serialize());
+
+        // OP_CHECKSIG
+        tap_script.push(0xac);
+
+        // OP_ENDIF
+        tap_script.push(0x68);
+
+        // Push payload
+        tap_script.extend(encode_multi_push(&self.payload(), PushFlag::ScriptPush));
+
+        let tap_leaf = TapLeaf::new(tap_script);
+        let tap_root = TapRoot::script_path_only_single(tap_leaf);
+
+        tap_root
+    }
+
+    pub fn spk(&self) -> Result<Bytes, secp256k1::Error> {
+        self.taproot().spk()
     }
 }
