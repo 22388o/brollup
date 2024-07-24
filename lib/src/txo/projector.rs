@@ -1,12 +1,10 @@
 #![allow(dead_code)]
 
 use crate::{
-    serialize::{to_csv_script_encode, CSVFlag},
-    taproot::{TapLeaf, TapRoot},
-    well_known::operator,
+    musig2::keys_to_key_agg_ctx, serialize::{to_csv_script_encode, CSVFlag}, taproot::{TapLeaf, TapRoot}, well_known::operator
 };
 use musig2::{
-    secp256k1::{self, PublicKey, XOnlyPublicKey},
+    secp256k1::{self, XOnlyPublicKey},
     KeyAggContext,
 };
 
@@ -29,22 +27,11 @@ pub struct Projector {
 
 impl Projector {
     pub fn new(msg_sender_keys: Vec<Key>, tag: ProjectorTag) -> Projector {
+        
         let operator_key_well_known = Key::from_slice(&operator::OPERATOR_KEY_WELL_KNOWN).unwrap();
 
-        // Lift msg.sender from their XOnly keys
-        let mut msg_senders_lifted = Vec::<PublicKey>::new();
-
-        for sender in &msg_sender_keys {
-            msg_senders_lifted.push(sender.public_key(secp256k1::Parity::Even));
-        }
-
-        // Sort the keys
-        msg_senders_lifted.sort();
-
-        let msg_senders_iter = msg_senders_lifted.into_iter();
-
-        // Create Key Aggregation Context from the the msg.sender keys
-        let msg_senders_key_agg_ctx: KeyAggContext = KeyAggContext::new(msg_senders_iter).unwrap();
+        // consider removing unwrap here
+        let msg_senders_key_agg_ctx = keys_to_key_agg_ctx(&msg_sender_keys).unwrap();
 
         Projector {
             msg_sender_keys,
