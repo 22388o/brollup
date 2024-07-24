@@ -139,7 +139,13 @@ pub fn chunkify(data: &Bytes, flag: PushFlag) -> Vec<Bytes> {
 
         let to_cover = match is_last {
             false => chunk_size,
-            true => data_len % chunk_size,
+            true => {
+                if data_len % chunk_size == 0 {
+                    chunk_size
+                } else {
+                    data_len % chunk_size
+                }
+            }
         };
 
         let chunk: Bytes = data[covered..(covered + to_cover)].to_vec();
