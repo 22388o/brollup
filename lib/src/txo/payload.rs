@@ -16,6 +16,8 @@ pub struct Payload {
     msg_senders: Vec<Key>,
     operator_key_well_known: Key,
     s_commitments: Vec<[u8; 32]>,
+    sat_per_vbyte: u8,
+    liquidity_basis_points: u8,
     fresh_operator_key_dynamic: Key,
     vtxo_projector_msg_senders_agg_sig: [u8; 64],
     vtxo_projector_operator_s_commitment: [u8; 32],
@@ -29,6 +31,8 @@ impl Payload {
         msg_senders: Vec<Key>,
         operator_key_well_known: Key,
         s_commitments: Vec<[u8; 32]>,
+        sat_per_vbyte: u8,
+        liquidity_basis_points: u8,
         fresh_operator_key_dynamic: Key,
         vtxo_projector_msg_senders_agg_sig: [u8; 64],
         vtxo_projector_operator_s_commitment: [u8; 32],
@@ -40,6 +44,8 @@ impl Payload {
             msg_senders,
             operator_key_well_known,
             s_commitments,
+            sat_per_vbyte,
+            liquidity_basis_points,
             fresh_operator_key_dynamic,
             vtxo_projector_msg_senders_agg_sig,
             vtxo_projector_operator_s_commitment,
@@ -95,7 +101,13 @@ impl Payload {
     fn payload(&self) -> Bytes {
         let mut data = Vec::<u8>::new();
 
-        // Start with adding the fresh operator key
+        // Start with feerate
+        data.push(self.sat_per_vbyte);
+
+        // Add basis points
+        data.push(self.liquidity_basis_points);
+
+        // Add the fresh operator key
         data.extend(self.fresh_operator_key_dynamic.serialize().to_vec());
 
         // Add vtxo_projector_msg_senders_agg_sig (64 bytes)
