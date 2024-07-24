@@ -111,11 +111,13 @@ pub enum PushFlag {
     ScriptPush,
 }
 
-// Chunk bytes as evenly as possible
+// Put data in chunks 520/80 byte-long each
 pub fn chunkify(data: &Bytes, flag: PushFlag) -> Vec<Bytes> {
     let mut chunks: Vec<Bytes> = Vec::<Bytes>::new();
 
-    let chunk_size_max: usize = match flag {
+    let data_len = data.len();
+
+    let chunk_size: usize = match flag {
         // https://github.com/bitcoin/bitcoin/blob/master/src/policy/policy.h#L45
         PushFlag::StandardWitnessPush => 80,
         // https://github.com/bitcoin/bitcoin/blob/master/src/script/script.h#L27
@@ -124,37 +126,30 @@ pub fn chunkify(data: &Bytes, flag: PushFlag) -> Vec<Bytes> {
         PushFlag::ScriptPush => 520,
     };
 
-    let mut num_chunks = data.len() / chunk_size_max;
-
-    if data.len() % chunk_size_max != 0 {
-        num_chunks = num_chunks + 1;
-    }
-
-    if data.len() == 0 {
-        num_chunks = 1;
-    }
-
-    let (chunk_size, mut chunk_leftover) = (data.len() / num_chunks, data.len() % num_chunks);
+    let num_chunks = match data_len % chunk_size {
+        x if x == 0 => data_len / chunk_size,
+        x if x != 0 => data_len / chunk_size + 1,
+        _ => panic!(),
+    };
 
     let mut covered = 0;
 
-    for _ in 0..num_chunks {
-        let mut to_cover = chunk_size;
+    for i in 0..num_chunks {
+        let is_last: bool = i + 1 == num_chunks;
 
-        // Distribute leftovers by one
-        if chunk_leftover > 0 {
-            to_cover = to_cover + 1;
-            chunk_leftover = chunk_leftover - 1;
-        }
+        let to_cover = match is_last {
+            false => chunk_size,
+            true => data_len % chunk_size,
+        };
 
         let chunk: Bytes = data[covered..(covered + to_cover)].to_vec();
-        covered = covered + to_cover;
-
         chunks.push(chunk);
+
+        covered = covered + to_cover;
     }
 
     // At the end, all bytes must have covered
-    assert_eq!(data.len(), covered);
+    assert_eq!(data_len, covered);
 
     chunks
 }
