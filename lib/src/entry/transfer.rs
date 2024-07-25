@@ -3,7 +3,7 @@
 use bit_vec::BitVec;
 use musig2::secp256k1::XOnlyPublicKey;
 
-use super::value_to_compact_bit_vec;
+use crate::value::amount::{ShortAmount, ToBitVec};
 
 type Account = XOnlyPublicKey;
 
@@ -15,25 +15,25 @@ pub enum Fallback {
 pub struct Transfer {
     from: Account,
     to: Account,
-    value: u32,
+    amount: ShortAmount,
     fallback: Fallback,
 }
 
 impl Transfer {
-    pub fn new_with_bare_fallback(from: Account, to: Account, value: u32) -> Transfer {
+    pub fn new_with_bare_fallback(from: Account, to: Account, amount: u32) -> Transfer {
         Transfer {
             from,
             to,
-            value,
+            amount: ShortAmount(amount),
             fallback: Fallback::Bare,
         }
     }
 
-    pub fn new_with_virtual_fallback(from: Account, to: Account, value: u32) -> Transfer {
+    pub fn new_with_virtual_fallback(from: Account, to: Account, amount: u32) -> Transfer {
         Transfer {
             from,
             to,
-            value,
+            amount: ShortAmount(amount),
             fallback: Fallback::Virtual,
         }
     }
@@ -66,7 +66,7 @@ impl Transfer {
         bit_vec.extend(to_key_bits);
 
         // Value
-        bit_vec.extend(value_to_compact_bit_vec(self.value));
+        bit_vec.extend(self.amount.to_bit_vec());
 
         bit_vec
     }
