@@ -1,5 +1,5 @@
 # Entries
-`Bitcoin Virtual Machine` employs of six types of entries.
+`Bitcoin Virtual Machine` employs of six types of entries:
 
 | Entry Type       |  Description                                                                                      |
 |:-----------------|:--------------------------------------------------------------------------------------------------|
