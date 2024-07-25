@@ -6,34 +6,36 @@ type Bytes = Vec<u8>;
 pub fn with_prefix_compact_size(data: &Bytes) -> Bytes {
     let mut return_vec: Bytes = Vec::<u8>::new();
 
-    match data.len() {
-        x if x < 0xFD => return_vec.extend(vec![x as u8]),
-        x if x <= 0xFFFF => {
+    let data_len = data.len();
+
+    match data_len {
+        0..=252 => return_vec.extend(vec![data_len as u8]),
+        253..=65535 => {
             return_vec.extend(vec![0xfd]);
-            let vec_u8: Bytes = vec![(x & 0xFF) as u8, (x >> 8 & 0xFF) as u8];
+            let vec_u8: Bytes = vec![(data_len & 0xFF) as u8, (data_len >> 8 & 0xFF) as u8];
             return_vec.extend(vec_u8)
         }
-        x if x <= 0xFFFFFFFF => {
+        65536..=4294967295 => {
             return_vec.extend(vec![0xfe]);
             let vec_u8: Bytes = vec![
-                (x & 0xFF) as u8,
-                ((x >> 8) & 0xFF) as u8,
-                ((x >> 16) & 0xFF) as u8,
-                ((x >> 24) & 0xFF) as u8,
+                (data_len & 0xFF) as u8,
+                ((data_len >> 8) & 0xFF) as u8,
+                ((data_len >> 16) & 0xFF) as u8,
+                ((data_len >> 24) & 0xFF) as u8,
             ];
             return_vec.extend(vec_u8)
         }
-        x if x < 0xFFFFFFFFFFFFFFFF => {
+        4294967296..=0xFFFFFFFFFFFFFFFF => {
             return_vec.extend(vec![0xff]);
             let vec_u8: Bytes = vec![
-                (x & 0xFF) as u8,
-                ((x >> 8) & 0xFF) as u8,
-                ((x >> 16) & 0xFF) as u8,
-                ((x >> 24) & 0xFF) as u8,
-                ((x >> 32) & 0xFF) as u8,
-                ((x >> 40) & 0xFF) as u8,
-                ((x >> 48) & 0xFF) as u8,
-                ((x >> 56) & 0xFF) as u8,
+                (data_len & 0xFF) as u8,
+                ((data_len >> 8) & 0xFF) as u8,
+                ((data_len >> 16) & 0xFF) as u8,
+                ((data_len >> 24) & 0xFF) as u8,
+                ((data_len >> 32) & 0xFF) as u8,
+                ((data_len >> 40) & 0xFF) as u8,
+                ((data_len >> 48) & 0xFF) as u8,
+                ((data_len >> 56) & 0xFF) as u8,
             ];
             return_vec.extend(vec_u8)
         }
