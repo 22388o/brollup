@@ -6,10 +6,6 @@ pub struct ShortAmount(pub u32);
 
 pub struct LongAmount(pub u64);
 
-pub trait ToBitVec {
-    fn to_bit_vec(&self) -> BitVec;
-}
-
 impl ShortAmount {
     pub fn new(value: u32) -> ShortAmount {
         ShortAmount(value)
@@ -20,6 +16,10 @@ impl LongAmount {
     pub fn new(value: u64) -> LongAmount {
         LongAmount(value)
     }
+}
+
+pub trait ToBitVec {
+    fn to_bit_vec(&self) -> BitVec;
 }
 
 impl ToBitVec for ShortAmount {
