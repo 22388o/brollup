@@ -8,4 +8,4 @@
 | Liftup ⬆️        | Turns a `Lift` output into a `VTXO`.             |
 | Liftdown ⬇️      | Turns a `VTXO` output into a bare `Self` output. |
 | Recharge 🔋      | Refreshes a `VTXO` into a new `VTXO Projector`.  |
-| Reserved 📁      | Fails the entry. Reserved for future upgrade.    |
+| Reserved 📁      | Reserved for future upgrade.                     |
