@@ -1,12 +1,12 @@
 #![allow(dead_code)]
 
-use musig2::{errors::KeyAggError, secp256k1::{self, PublicKey, XOnlyPublicKey}, KeyAggContext};
+use musig2::{
+    errors::KeyAggError,
+    secp256k1::{self, PublicKey, XOnlyPublicKey},
+    KeyAggContext,
+};
 
-type Bytes = Vec<u8>;
-type Key = XOnlyPublicKey;
-
-pub fn keys_to_key_agg_ctx(keys: &Vec<Key>) -> Result<KeyAggContext, KeyAggError>{
-
+pub fn keys_to_key_agg_ctx(keys: &Vec<XOnlyPublicKey>) -> Result<KeyAggContext, KeyAggError> {
     // Lift keys
     let mut keys_lifted = Vec::<PublicKey>::new();
 
@@ -21,6 +21,6 @@ pub fn keys_to_key_agg_ctx(keys: &Vec<Key>) -> Result<KeyAggContext, KeyAggError
 
     // Create Key Aggregation Context
     let key_agg_ctx: KeyAggContext = KeyAggContext::new(keys_iter)?;
-    
+
     Ok(key_agg_ctx)
 }
