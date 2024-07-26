@@ -3,7 +3,7 @@
 use bit_vec::BitVec;
 use musig2::secp256k1::XOnlyPublicKey;
 
-use crate::value::amount::{ShortAmount, ToBitVec};
+use crate::value::{amount::ShortAmount, ToBitVec};
 
 type Account = XOnlyPublicKey;
 

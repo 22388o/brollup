@@ -1,6 +1,6 @@
 #![allow(dead_code)]
 
-use bit_vec::BitVec;
+use super::{BitVec, ToBitVec};
 
 pub struct ShortAmount(pub u32);
 
@@ -16,10 +16,6 @@ impl LongAmount {
     pub fn new(value: u64) -> LongAmount {
         LongAmount(value)
     }
-}
-
-pub trait ToBitVec {
-    fn to_bit_vec(&self) -> BitVec;
 }
 
 impl ToBitVec for ShortAmount {
