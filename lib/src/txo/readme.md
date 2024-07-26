@@ -3,7 +3,7 @@
 
 | TXO Type               | Kind    |  Spending Condition                                        |
 |:-----------------------|:--------|:-----------------------------------------------------------|
-| Lift 🛗                | Bare    | `(Self + Operator) or (Self after 1 month)`                | 
+| Lift 🛗                | Bare    | `(Self + Operator) or (Self after 3 month)`                | 
 | Bare Connector 🔌      | Bare    | `(Operator)`                                               |
 | VTXO 💵                | Virtual | `(Self + Operator) or (Self after 3 months)`               |
 | VTXO Projector 🎥      | Bare    | `(msg.senders[] + Operator) or (Operator after 3 months)`  |
@@ -45,14 +45,14 @@ The `Bitcoin Virtual Machine` advances the rollup state by chaining `Pool Transa
                         Pool Transaction     
 
 ## Lift 🛗
-`Lift` is a bare, on-chain transaction output type used for onboarding to the `Bitcoin VM`. When a `Lift` output is funded and has gained two on-chain confirmations, it can be swapped out for a 1:1 `VTXO` in a process known as lifting. In short, `Lift` lifts itself up to a `VTXO`.
+`Lift` is a bare, on-chain transaction output type used for onboarding to the `Bitcoin VM`. When a `Lift` output is funded, it can be swapped out for a 1:1 `VTXO` in a process known as lifting. In short, `Lift` lifts itself up to a `VTXO`.
 
 `Lift` carries two  spending conditions:
-`(Self + Operator) or (Self after 1 month)`
+`(Self + Operator) or (Self after 3 months)`
 
 -  **Lift Path:** `Self` and `Operator` sign from the collaborative path `(Self + Operator)` to swap the `Lift` output in exchange for a 1:1 `VTXO`. `Self` swaps out the `Lift` output with the provided `Bare Connector` to receive a `VTXO` in return.
     
--   **Exit Path:** In case the `Operator` is non-collaborative and does not sign from the collaborative path, `Self` can trigger the exit path `(Self after 1 month)` to reclaim their funds.
+-   **Exit Path:** In case the `Operator` is non-collaborative and does not sign from the collaborative path, `Self` can trigger the exit path `(Self after 3 months)` to reclaim their funds.
 
 ## Bare Connector 🔌
 `Bare Connector` is a bare, on-chain transaction output type used for lifting `Lift` outputs. `Bare Connector` is a key-path-only `Operator` single-sig. A series of `Bare Connectors` can be included in a `Pool Transaction` and provided to `Self` by the `Operator`.                                                 

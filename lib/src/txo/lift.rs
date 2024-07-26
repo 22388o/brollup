@@ -61,7 +61,7 @@ impl Lift {
         let mut exit_path = Vec::<u8>::new();
 
         // Relative timelock
-        exit_path.extend(to_csv_script_encode(CSVFlag::CSVMonth));
+        exit_path.extend(to_csv_script_encode(CSVFlag::CSVThreeMonths));
 
         // Push self key
         exit_path.push(0x20);

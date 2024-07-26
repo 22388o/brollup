@@ -27,7 +27,7 @@ mod txo_tests {
 
             let collab_path_expected = hex::decode("20b2d9fb51db445564f1d4e754f644597b11ff191d12c2a582fb598e509cd72421ad20fe44f87e8dcf65392e213f304bee1e3a31e562bc1061830d6f2e9539496c46f2ac").unwrap();
             let exit_path_expected = hex::decode(
-                "02e010b27520b2d9fb51db445564f1d4e754f644597b11ff191d12c2a582fb598e509cd72421ac",
+                "02a032b27520b2d9fb51db445564f1d4e754f644597b11ff191d12c2a582fb598e509cd72421ac",
             )
             .unwrap();
 
