@@ -5,4 +5,4 @@ pub mod well_known;
 pub mod hash;
 pub mod musig2;
 pub mod entry;
-pub mod value;
+pub mod valtype;

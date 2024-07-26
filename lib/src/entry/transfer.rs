@@ -1,6 +1,6 @@
 #![allow(dead_code)]
 
-use crate::value::{account::Account, amount::ShortAmount, ToBitVec};
+use crate::valtype::{account::Account, amount::ShortAmount, ToBitVec};
 
 use bit_vec::BitVec;
 
