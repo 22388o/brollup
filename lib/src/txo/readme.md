@@ -3,7 +3,7 @@
 
 | TXO Type               | Kind    |  Spending Condition                                        |
 |:-----------------------|:--------|:-----------------------------------------------------------|
-| Lift 🛗                | Bare    | `(Self + Operator) or (Self after 3 month)`                | 
+| Lift 🛗                | Bare    | `(Self + Operator) or (Self after 3 months)`                | 
 | Bare Connector 🔌      | Bare    | `(Operator)`                                               |
 | VTXO 💵                | Virtual | `(Self + Operator) or (Self after 3 months)`               |
 | VTXO Projector 🎥      | Bare    | `(msg.senders[] + Operator) or (Operator after 3 months)`  |
