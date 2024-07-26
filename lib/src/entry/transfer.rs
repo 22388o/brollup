@@ -25,6 +25,10 @@ impl Transfer {
             fallback: None,
         }
     }
+
+    pub fn set_fallback(&mut self, fallback: Fallback) {
+        self.fallback = Some(fallback);
+    }
 }
 
 impl ToBitVec for Transfer {
