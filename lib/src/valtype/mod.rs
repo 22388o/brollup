@@ -1,5 +1,6 @@
 pub mod account;
 pub mod amount;
+pub mod contract;
 
 use bit_vec::BitVec;
 
