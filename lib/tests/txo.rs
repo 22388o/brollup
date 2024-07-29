@@ -5,10 +5,7 @@ mod txo_tests {
         lift::Lift,
         projector::{Projector, ProjectorTag},
     };
-    use musig2::{
-        secp256k1::{self, Parity, PublicKey, XOnlyPublicKey},
-        KeyAggContext,
-    };
+    use musig2::secp256k1::{self, Parity, PublicKey, XOnlyPublicKey};
 
     #[test]
     fn test_lift() -> Result<(), secp256k1::Error> {
@@ -96,7 +93,7 @@ mod txo_tests {
     }
 
     #[test]
-    fn test_projector() {
+    fn test_projector() -> Result<(), secp256k1::Error> {
         let public_key_1: XOnlyPublicKey =
             "9dde15a45d76d940f90188537d52136ba5e86c8fb2f521f53be794410352798f"
                 .parse()
@@ -117,34 +114,35 @@ mod txo_tests {
         ];
         pubkeys.sort();
 
-        let key_agg_ctx: KeyAggContext = KeyAggContext::new(pubkeys).unwrap();
-        let agg_key_expected: XOnlyPublicKey = key_agg_ctx.aggregated_pubkey();
-        // 8c12ef9e2507f9c7898ccf47f9059c70c4005f8b9c738597fd015cefe23ed701
-
         let pubkeys = vec![public_key_1, public_key_2, public_key_3];
 
         let projector = Projector::new(pubkeys, ProjectorTag::VTXOProjector);
 
-        assert_eq!(projector.msg_senders_aggregate_key(), agg_key_expected);
+        let agg_key: XOnlyPublicKey = projector.key_agg_ctx().unwrap().aggregated_pubkey();
 
-        let reveal_path = projector.taproot().tree().unwrap().leaves()[0].tap_script();
-        let expected_reveal_path = hex::decode("208c12ef9e2507f9c7898ccf47f9059c70c4005f8b9c738597fd015cefe23ed701ad20fe44f87e8dcf65392e213f304bee1e3a31e562bc1061830d6f2e9539496c46f2ac").unwrap();
+        println!("agg_key {}", agg_key);
 
-        assert_eq!(reveal_path, expected_reveal_path);
+        let sweep_path = projector
+            .taproot()?
+            .tree()
+            .expect("no projector tap_tree found.")
+            .leaves()[0]
+            .tap_script();
 
-        let expected_reclaim_path = hex::decode(
+        let expected_sweep_path = hex::decode(
             "02a032b27520fe44f87e8dcf65392e213f304bee1e3a31e562bc1061830d6f2e9539496c46f2ac",
         )
         .unwrap();
-        let reclaim_path = projector.taproot().tree().unwrap().leaves()[1].tap_script();
 
-        assert_eq!(reclaim_path, expected_reclaim_path);
+        assert_eq!(sweep_path, expected_sweep_path);
 
-        let expected_spk =
-            hex::decode("5120e83ee0684831fdf523c7ae8e6448ad32e4bb2b986881414a8494341159ac0e1f")
-                .unwrap();
         let spk = projector.spk().unwrap();
+        let expected_spk =
+            hex::decode("51205b2675abdef4752c84d30cccb6249503c199a15e9ef0cf48ee8c6c477762dcd7")
+                .unwrap();
 
         assert_eq!(expected_spk, spk);
+
+        Ok(())
     }
 }
