@@ -7,7 +7,7 @@
 | VTXO 💵                | Virtual | `(Self + Operator) or (Self after 3 months)`               |
 | VTXO Projector 🎥      | Bare    | `(msg.senders[] + Operator) or (Operator after 3 months)`  |
 | Channel 👥             | Virtual | `(Self + Operator) after degrading timelock`               |
-| Connector 🔌           | Virtual | `(msg.sender + Operator)`                                  |
+| Connector 🔌           | Virtual | `(Self + Operator)`                                        |
 | Connector Projector 🎥 | Bare    | `(msg.senders[] + Operator) or (Operator after 3 months)`  |
 | Payload 📦             | Bare    | `(msg.senders[] after 1 week) or (Operator with hashlocks)`|
 | Self 👨‍💻                | Virtual | `(Self)`                                                   |
@@ -156,33 +156,33 @@ In contrast to the state channel design employed by Lightning Network, `Channel`
 -  **No assymetry:** Channel state is symmetric, reproducible, and always descend from the channel root.
 -  **No middle-stages:** No in-flight HTLCs or PTLCs. It is always about `Self` and `Operator`. Payments are linked by connectors.
 
-## Virtual Connector 🔌
-`Virtual Connector` is a virtual, off-chain transaction output type used for updating `Channel` states. `Virtual Connector` is a 2-of-2 `(msg.sender + Operator)` between the msg.sender and the `Operator`, and carries dust a value of `450 sats`. A series of `Virtual Connectors` can be included in a `Connector Projector` and provided to `Self` by the `Operator`.                          
+## Connector 🔌
+`Connector` is a virtual, off-chain transaction output type used for updating `Channel` states. `Connector` is a 2-of-2 `(Self + Operator)` between `Self` and the `Operator`, and carries dust a value of `450 sats`. A series of `Connectors` can be included in a `Connector Projector` and provided to `Self` by the `Operator`.                          
                                                             
                                 Prevouts                        Outs          
                          ┌─────────────────────┐       ┌─────────────────────┐ 
                      #0  │       Channel       │   #0  │        Self         │
                          └─────────────────────┘       └─────────────────────┘                    
       From Connector     ┌─────────────────────┐       ┌─────────────────────┐ 
-      Projector ---- #1->│  Virtual Connector  │   #1  │       Operator      │
+      Projector ---- #1->│      Connector      │   #1  │       Operator      │
                          └─────────────────────┘       └─────────────────────┘
       
                                        Channel State Update 
 
 ## Connector Projector 🎥
-`Connector Projector` is the same as `VTXO Projector`, but for `Virtual Connectors` instead. `Connector Projector` is a bare, on-chain transaction output type contained in each pool transaction, and projects `Virtual Connectors` into a covenant template.
+`Connector Projector` is the same as `VTXO Projector`, but for `Connectors` instead. `Connector Projector` is a bare, on-chain transaction output type contained in each pool transaction, and projects `Connectors` into a covenant template.
                                                       
                                                 ⋰ ┌────────────────────────┐
-                                              ⋰   │  Virtual Connector #0  │
+                                              ⋰   │      Connector #0      │
                                             ⋰     └────────────────────────┘
                                           ⋰       ┌────────────────────────┐
-                                        ⋰         │  Virtual Connector #1  │
+                                        ⋰         │      Connector #1      │
         ┌───────────────────────┐     ⋰           └────────────────────────┘
         │  Connector Projector  │ 🎥 ⋮                        
         └───────────────────────┘     ⋱                        ┊
                                         ⋱                
                                           ⋱       ┌────────────────────────┐
-                                            ⋱     │  Virtual Connector #n  │
+                                            ⋱     │      Connector #n      │
                                               ⋱   └────────────────────────┘
                                                 ⋱
 
