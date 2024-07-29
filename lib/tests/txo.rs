@@ -77,23 +77,22 @@ mod txo_tests {
     }
 
     #[test]
-    fn test_connector() {
+    fn test_connector() -> Result<(), secp256k1::Error> {
         let self_key: XOnlyPublicKey =
-            "b2d9fb51db445564f1d4e754f644597b11ff191d12c2a582fb598e509cd72421"
+            "f28c4676022feba41258aeebcd82ec67c73e7b391fae3b702a61cc28ef3a541d"
                 .parse()
                 .unwrap();
 
-        let lift_txo = Connector::new_virtual(self_key);
+        let connector_txo = Connector::new(self_key);
 
-        let tree = lift_txo.taproot().tree();
+        let spk = connector_txo.taproot()?.spk()?;
+        let spk_expected =
+            hex::decode("5120ac55373c7c33dd80720b58440c1f957717585a423e467373dbabfc77cff21e4b")
+                .unwrap();
 
-        if let Some(tree) = tree {
-            let connector = tree.leaves()[0].tap_script();
+        assert_eq!(spk, spk_expected);
 
-            let connector_expected = hex::decode("20b2d9fb51db445564f1d4e754f644597b11ff191d12c2a582fb598e509cd72421ad20fe44f87e8dcf65392e213f304bee1e3a31e562bc1061830d6f2e9539496c46f2ac").unwrap();
-
-            assert_eq!(connector, connector_expected);
-        }
+        Ok(())
     }
 
     #[test]
