@@ -16,13 +16,11 @@ pub struct Payload {
     msg_senders: Vec<Key>,
     operator_key_well_known: Key,
     s_commitments: Vec<[u8; 32]>,
-    sat_per_vbyte: u8,
+    sats_per_vbyte: u8,
     liquidity_basis_points: u8,
     fresh_operator_key_dynamic: Key,
-    vtxo_projector_msg_senders_agg_sig: [u8; 64],
-    vtxo_projector_operator_s_commitment: [u8; 32],
-    connector_projector_msg_senders_agg_sig: [u8; 64],
-    connector_projector_operator_s_commitment: [u8; 32],
+    vtxo_projector_agg_sig: [u8; 64],
+    connector_projector_agg_sig: [u8; 64],
     entries: Vec<BitVec>,
 }
 
@@ -31,26 +29,22 @@ impl Payload {
         msg_senders: Vec<Key>,
         operator_key_well_known: Key,
         s_commitments: Vec<[u8; 32]>,
-        sat_per_vbyte: u8,
+        sats_per_vbyte: u8,
         liquidity_basis_points: u8,
         fresh_operator_key_dynamic: Key,
-        vtxo_projector_msg_senders_agg_sig: [u8; 64],
-        vtxo_projector_operator_s_commitment: [u8; 32],
-        connector_projector_msg_senders_agg_sig: [u8; 64],
-        connector_projector_operator_s_commitment: [u8; 32],
+        vtxo_projector_agg_sig: [u8; 64],
+        connector_projector_agg_sig: [u8; 64],
         entries: Vec<BitVec>,
     ) -> Payload {
         Payload {
             msg_senders,
             operator_key_well_known,
             s_commitments,
-            sat_per_vbyte,
+            sats_per_vbyte,
             liquidity_basis_points,
             fresh_operator_key_dynamic,
-            vtxo_projector_msg_senders_agg_sig,
-            vtxo_projector_operator_s_commitment,
-            connector_projector_msg_senders_agg_sig,
-            connector_projector_operator_s_commitment,
+            vtxo_projector_agg_sig,
+            connector_projector_agg_sig,
             entries,
         }
     }
@@ -102,7 +96,7 @@ impl Payload {
         let mut data = Vec::<u8>::new();
 
         // Start with feerate
-        data.push(self.sat_per_vbyte);
+        data.push(self.sats_per_vbyte);
 
         // Add basis points
         data.push(self.liquidity_basis_points);
@@ -110,17 +104,11 @@ impl Payload {
         // Add the fresh operator key
         data.extend(self.fresh_operator_key_dynamic.serialize().to_vec());
 
-        // Add vtxo_projector_msg_senders_agg_sig (64 bytes)
-        data.extend(self.vtxo_projector_msg_senders_agg_sig);
+        // Add vtxo_projector_agg_sig (64 bytes)
+        data.extend(self.vtxo_projector_agg_sig);
 
-        // Add vtxo_projector_operator_s_commitment (32 bytes)
-        data.extend(self.vtxo_projector_operator_s_commitment);
-
-        // Add connector_projector_msg_senders_agg_sig (64 bytes)
-        data.extend(self.connector_projector_msg_senders_agg_sig);
-
-        // Add connector_projector_operator_s_commitment (32 bytes)
-        data.extend(self.connector_projector_operator_s_commitment);
+        // Add connector_projector_agg_sig (64 bytes)
+        data.extend(self.connector_projector_agg_sig);
 
         let mut entries_whole = BitVec::new();
 
