@@ -1,6 +1,6 @@
 #![allow(dead_code)]
 
-use crate::valtype::{account::Account, amount::ShortAmount, ToBitVec};
+use crate::valtype::{account::Account, value::ShortVal, ToBitVec};
 
 use bit_vec::BitVec;
 
@@ -12,7 +12,7 @@ pub enum Fallback {
 pub struct Transfer {
     from: Account,
     to: Account,
-    amount: ShortAmount,
+    amount: ShortVal,
     fallback: Option<Fallback>,
 }
 
@@ -21,7 +21,7 @@ impl Transfer {
         Transfer {
             from,
             to,
-            amount: ShortAmount(amount),
+            amount: ShortVal(amount),
             fallback: None,
         }
     }

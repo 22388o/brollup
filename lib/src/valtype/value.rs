@@ -2,23 +2,23 @@
 
 use super::{BitVec, ToBitVec};
 
-pub struct ShortAmount(pub u32);
+pub struct ShortVal(pub u32);
 
-pub struct LongAmount(pub u64);
+pub struct LongVal(pub u64);
 
-impl ShortAmount {
-    pub fn new(value: u32) -> ShortAmount {
-        ShortAmount(value)
+impl ShortVal {
+    pub fn new(value: u32) -> ShortVal {
+        ShortVal(value)
     }
 }
 
-impl LongAmount {
-    pub fn new(value: u64) -> LongAmount {
-        LongAmount(value)
+impl LongVal {
+    pub fn new(value: u64) -> LongVal {
+        LongVal(value)
     }
 }
 
-impl ToBitVec for ShortAmount {
+impl ToBitVec for ShortVal {
     fn to_bit_vec(&self) -> BitVec {
         let value = self.0;
         let mut bit_vec = BitVec::new();
@@ -80,16 +80,16 @@ impl ToBitVec for ShortAmount {
     }
 }
 
-impl ToBitVec for LongAmount {
+impl ToBitVec for LongVal {
     fn to_bit_vec(&self) -> BitVec {
         let value = self.0;
         let mut bit_vec = BitVec::new();
 
         match value {
             0..=4294967295 => {
-                // Interpet as Short Amount and cast to Long Amount by appending a zero-bit prefix
+                // Interpet as Short Val and cast to Long Val by appending a zero-bit prefix
                 bit_vec.push(false);
-                bit_vec.extend(ShortAmount(value as u32).to_bit_vec());
+                bit_vec.extend(ShortVal(value as u32).to_bit_vec());
             }
 
             4294967296..=1099511627775 => {

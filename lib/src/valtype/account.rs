@@ -2,7 +2,7 @@
 
 use musig2::secp256k1::XOnlyPublicKey;
 
-use super::{amount::ShortAmount, BitVec, ToBitVec};
+use super::{value::ShortVal, BitVec, ToBitVec};
 
 type Key = XOnlyPublicKey;
 
@@ -42,8 +42,8 @@ impl ToBitVec for Account {
                 // Compact form
                 bit_vec.push(true);
 
-                // ShortAmount represents compact integer forms
-                let index_compact = ShortAmount(index);
+                // ShortVal represents compact integer forms
+                let index_compact = ShortVal(index);
 
                 bit_vec.extend(index_compact.to_bit_vec());
             }

@@ -1,6 +1,6 @@
 #![allow(dead_code)]
 
-use super::{amount::ShortAmount, BitVec, ToBitVec};
+use super::{value::ShortVal, BitVec, ToBitVec};
 
 pub struct Contract {
     id: [u8; 32],
@@ -39,7 +39,7 @@ impl ToBitVec for Contract {
                 bit_vec.push(true);
 
                 // ShortAmount represents compact integer forms
-                let index_compact = ShortAmount(index);
+                let index_compact = ShortVal(index);
 
                 bit_vec.extend(index_compact.to_bit_vec());
             }
