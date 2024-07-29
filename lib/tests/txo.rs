@@ -6,12 +6,12 @@ mod txo_tests {
         projector::{Projector, ProjectorTag},
     };
     use musig2::{
-        secp256k1::{Parity, PublicKey, XOnlyPublicKey},
+        secp256k1::{self, Parity, PublicKey, XOnlyPublicKey},
         KeyAggContext,
     };
 
     #[test]
-    fn test_lift() {
+    fn test_lift() -> Result<(), secp256k1::Error> {
         let self_key: XOnlyPublicKey =
             "b2d9fb51db445564f1d4e754f644597b11ff191d12c2a582fb598e509cd72421"
                 .parse()
@@ -19,21 +19,28 @@ mod txo_tests {
 
         let lift_txo = Lift::new(self_key);
 
-        let tree = lift_txo.taproot().tree();
+        let tap_tree = lift_txo
+            .taproot()?
+            .tree()
+            .expect("lift_txo is not a valid tap_tree");
 
-        if let Some(tree) = tree {
-            let collab_path = tree.leaves()[0].tap_script();
-            let exit_path = tree.leaves()[1].tap_script();
+        let exit_path = tap_tree.leaves()[0].tap_script();
 
-            let collab_path_expected = hex::decode("20b2d9fb51db445564f1d4e754f644597b11ff191d12c2a582fb598e509cd72421ad20fe44f87e8dcf65392e213f304bee1e3a31e562bc1061830d6f2e9539496c46f2ac").unwrap();
-            let exit_path_expected = hex::decode(
-                "02a032b27520b2d9fb51db445564f1d4e754f644597b11ff191d12c2a582fb598e509cd72421ac",
-            )
-            .unwrap();
+        let exit_path_expected = hex::decode(
+            "02a032b27520b2d9fb51db445564f1d4e754f644597b11ff191d12c2a582fb598e509cd72421ac",
+        )
+        .unwrap();
 
-            assert_eq!(collab_path, collab_path_expected);
-            assert_eq!(exit_path, exit_path_expected);
-        }
+        assert_eq!(exit_path, exit_path_expected);
+
+        let spk = lift_txo.taproot()?.spk()?;
+        let spk_expected =
+            hex::decode("512014f0bcba66eb30050e5ad2d784ad67643e2590fb13d6b08edd50f2f9b3b9ace5")
+                .unwrap();
+
+        assert_eq!(spk, spk_expected);
+
+        Ok(())
     }
 
     #[test]
