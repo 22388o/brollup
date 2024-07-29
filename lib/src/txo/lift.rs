@@ -6,7 +6,7 @@ use crate::{
     taproot::{TapLeaf, TapRoot},
     well_known::operator,
 };
-use musig2::secp256k1::{self, PublicKey, XOnlyPublicKey};
+use musig2::{secp256k1::{self, PublicKey, XOnlyPublicKey}, KeyAggContext};
 
 type Bytes = Vec<u8>;
 type Key = XOnlyPublicKey;
@@ -40,11 +40,14 @@ impl Lift {
         self.operator_key_well_known
     }
 
+    pub fn key_agg_ctx(&self) -> Result<KeyAggContext, secp256k1::Error> {
+        let keys = vec![self.self_key(), self.operator_key()];
+        keys_to_key_agg_ctx(&keys).map_err(|_| secp256k1::Error::InvalidPublicKey)
+    }
+
     pub fn taproot(&self) -> Result<TapRoot, secp256k1::Error> {
         //// Inner Key: (Self + Operator)
-        let keys = vec![self.self_key(), self.operator_key()];
-        let key_agg_ctx =
-            keys_to_key_agg_ctx(&keys).map_err(|_| secp256k1::Error::InvalidPublicKey)?;
+        let key_agg_ctx = self.key_agg_ctx()?;
         let inner_key: PublicKey = key_agg_ctx.aggregated_pubkey();
 
         //// Exit Path: (Self after 3 months)
