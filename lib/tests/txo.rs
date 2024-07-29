@@ -44,6 +44,39 @@ mod txo_tests {
     }
 
     #[test]
+    fn test_vtxo() -> Result<(), secp256k1::Error> {
+        let self_key: XOnlyPublicKey =
+            "255ac1b59bafb50b4fead46fd8bf07884a9e23b6cd82a5e348a756b66973082e"
+                .parse()
+                .unwrap();
+
+        let lift_txo = Lift::new(self_key);
+
+        let tap_tree = lift_txo
+            .taproot()?
+            .tree()
+            .expect("lift_txo is not a valid tap_tree");
+
+        let exit_path = tap_tree.leaves()[0].tap_script();
+
+        let exit_path_expected = hex::decode(
+            "02a032b27520255ac1b59bafb50b4fead46fd8bf07884a9e23b6cd82a5e348a756b66973082eac",
+        )
+        .unwrap();
+
+        assert_eq!(exit_path, exit_path_expected);
+
+        let spk = lift_txo.taproot()?.spk()?;
+        let spk_expected =
+            hex::decode("51202ed65f7f5936aa7a51c39ae0b38df3f339e52b5c6cbcfa8f37c082025e06d46f")
+                .unwrap();
+
+        assert_eq!(spk, spk_expected);
+
+        Ok(())
+    }
+
+    #[test]
     fn test_connector() {
         let self_key: XOnlyPublicKey =
             "b2d9fb51db445564f1d4e754f644597b11ff191d12c2a582fb598e509cd72421"
