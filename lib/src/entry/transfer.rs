@@ -1,6 +1,6 @@
 #![allow(dead_code)]
 
-use crate::valtype::{account::Account, value::ShortVal, ToBitVec};
+use crate::valtype::{account::Account, value::ShortVal, CompactPayloadEncoding};
 
 use bit_vec::BitVec;
 
@@ -31,8 +31,8 @@ impl Transfer {
     }
 }
 
-impl ToBitVec for Transfer {
-    fn to_bit_vec(&self) -> BitVec {
+impl CompactPayloadEncoding for Transfer {
+    fn to_cpe(&self) -> BitVec {
         let mut bit_vec = BitVec::new();
 
         // Transfer or call
@@ -42,13 +42,13 @@ impl ToBitVec for Transfer {
         bit_vec.push(false);
 
         // From
-        bit_vec.extend(self.from.to_bit_vec());
+        bit_vec.extend(self.from.to_cpe());
 
         // To
-        bit_vec.extend(self.to.to_bit_vec());
+        bit_vec.extend(self.to.to_cpe());
 
         // Value
-        bit_vec.extend(self.amount.to_bit_vec());
+        bit_vec.extend(self.amount.to_cpe());
 
         bit_vec
     }

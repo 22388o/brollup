@@ -2,7 +2,7 @@
 
 use musig2::secp256k1::XOnlyPublicKey;
 
-use super::{value::ShortVal, BitVec, ToBitVec};
+use super::{value::ShortVal, BitVec, CompactPayloadEncoding};
 
 type Key = XOnlyPublicKey;
 
@@ -24,8 +24,8 @@ impl Account {
     }
 }
 
-impl ToBitVec for Account {
-    fn to_bit_vec(&self) -> BitVec {
+impl CompactPayloadEncoding for Account {
+    fn to_cpe(&self) -> BitVec {
         let mut bit_vec = BitVec::new();
 
         match self.index {
@@ -45,7 +45,7 @@ impl ToBitVec for Account {
                 // ShortVal represents compact integer forms
                 let index_compact = ShortVal(index);
 
-                bit_vec.extend(index_compact.to_bit_vec());
+                bit_vec.extend(index_compact.to_cpe());
             }
         }
 

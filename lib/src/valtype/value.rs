@@ -1,6 +1,6 @@
 #![allow(dead_code)]
 
-use super::{BitVec, ToBitVec};
+use super::{BitVec, CompactPayloadEncoding};
 
 pub struct ShortVal(pub u32);
 
@@ -18,8 +18,8 @@ impl LongVal {
     }
 }
 
-impl ToBitVec for ShortVal {
-    fn to_bit_vec(&self) -> BitVec {
+impl CompactPayloadEncoding for ShortVal {
+    fn to_cpe(&self) -> BitVec {
         let value = self.0;
         let mut bit_vec = BitVec::new();
 
@@ -80,8 +80,8 @@ impl ToBitVec for ShortVal {
     }
 }
 
-impl ToBitVec for LongVal {
-    fn to_bit_vec(&self) -> BitVec {
+impl CompactPayloadEncoding for LongVal {
+    fn to_cpe(&self) -> BitVec {
         let value = self.0;
         let mut bit_vec = BitVec::new();
 
@@ -89,7 +89,7 @@ impl ToBitVec for LongVal {
             0..=4294967295 => {
                 // Interpet as Short Val and cast to Long Val by appending a zero-bit prefix
                 bit_vec.push(false);
-                bit_vec.extend(ShortVal(value as u32).to_bit_vec());
+                bit_vec.extend(ShortVal(value as u32).to_cpe());
             }
 
             4294967296..=1099511627775 => {

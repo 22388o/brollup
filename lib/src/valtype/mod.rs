@@ -4,6 +4,7 @@ pub mod contract;
 
 use bit_vec::BitVec;
 
-pub trait ToBitVec {
-    fn to_bit_vec(&self) -> BitVec;
+// Compact Payload Encoding
+pub trait CompactPayloadEncoding {
+    fn to_cpe(&self) -> BitVec;
 }
