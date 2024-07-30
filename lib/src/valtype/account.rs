@@ -8,18 +8,18 @@ type Key = XOnlyPublicKey;
 
 pub struct Account {
     key: Key,
-    index: Option<u32>,
+    key_index: Option<u32>,
 }
 
 impl Account {
     pub fn new(key: Key) -> Account {
-        Account { key, index: None }
+        Account { key, key_index: None }
     }
 
     pub fn new_compact(key: Key, index: u32) -> Account {
         Account {
             key,
-            index: Some(index),
+            key_index: Some(index),
         }
     }
 }
@@ -28,7 +28,7 @@ impl CompactPayloadEncoding for Account {
     fn to_cpe(&self) -> BitVec {
         let mut bit_vec = BitVec::new();
 
-        match self.index {
+        match self.key_index {
             None => {
                 // Non-compact form
                 bit_vec.push(false);

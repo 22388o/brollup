@@ -4,18 +4,18 @@ use super::{value::ShortVal, BitVec, CompactPayloadEncoding};
 
 pub struct Contract {
     id: [u8; 32],
-    index: Option<u32>,
+    id_index: Option<u32>,
 }
 
 impl Contract {
     pub fn new(id: [u8; 32]) -> Contract {
-        Contract { id, index: None }
+        Contract { id, id_index: None }
     }
 
-    pub fn new_compact(id: [u8; 32], index: u32) -> Contract {
+    pub fn new_compact(id: [u8; 32], id_index: u32) -> Contract {
         Contract {
             id,
-            index: Some(index),
+            id_index: Some(id_index),
         }
     }
 }
@@ -24,7 +24,7 @@ impl CompactPayloadEncoding for Contract {
     fn to_cpe(&self) -> BitVec {
         let mut bit_vec = BitVec::new();
 
-        match self.index {
+        match self.id_index {
             None => {
                 // Non-compact form
                 bit_vec.push(false);
