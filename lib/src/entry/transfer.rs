@@ -1,6 +1,6 @@
 #![allow(dead_code)]
 
-use crate::valtype::{account::Account, value::ShortVal, CompactPayloadEncoding};
+use crate::valtype::{account::Account, value::ShortVal, CompactPayloadEncoding, MaybeCommon};
 
 use bit_vec::BitVec;
 
@@ -9,25 +9,28 @@ pub enum Fallback {
     Virtual,
 }
 
+#[derive(Clone, Copy)]
 pub struct Transfer {
     from: Account,
-    to: Account,
-    amount: ShortVal,
-    fallback: Option<Fallback>,
+    to: MaybeCommon<Account>,
+    amount: MaybeCommon<ShortVal>,
 }
 
 impl Transfer {
-    pub fn new(from: Account, to: Account, amount: u32) -> Transfer {
+    pub fn new_uncommon(from: Account, to: Account, amount: u32) -> Transfer {
         Transfer {
             from,
-            to,
-            amount: ShortVal(amount),
-            fallback: None,
+            to: MaybeCommon::Uncommon(to),
+            amount: MaybeCommon::Uncommon(ShortVal(amount)),
         }
     }
 
-    pub fn set_fallback(&mut self, fallback: Fallback) {
-        self.fallback = Some(fallback);
+    pub fn new_common(from: Account, to: (Account, u8), amount: (u32, u8)) -> Transfer {
+        Transfer {
+            from,
+            to: MaybeCommon::Common(to.0, to.1),
+            amount: MaybeCommon::Common(ShortVal(amount.0), amount.1),
+        }
     }
 }
 
@@ -47,7 +50,7 @@ impl CompactPayloadEncoding for Transfer {
         // To
         bit_vec.extend(self.to.to_cpe());
 
-        // Value
+        // Amount
         bit_vec.extend(self.amount.to_cpe());
 
         bit_vec

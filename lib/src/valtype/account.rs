@@ -6,6 +6,7 @@ use super::{value::ShortVal, BitVec, CompactPayloadEncoding};
 
 type Key = XOnlyPublicKey;
 
+#[derive(Clone, Copy)]
 pub struct Account {
     key: Key,
     key_index: Option<u32>,

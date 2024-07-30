@@ -2,6 +2,7 @@
 
 use super::{value::ShortVal, BitVec, CompactPayloadEncoding};
 
+#[derive(Clone, Copy)]
 pub struct Contract {
     id: [u8; 32],
     id_index: Option<u32>,

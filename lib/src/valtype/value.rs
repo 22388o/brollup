@@ -2,8 +2,10 @@
 
 use super::{BitVec, CompactPayloadEncoding};
 
+#[derive(Clone, Copy)]
 pub struct ShortVal(pub u32);
 
+#[derive(Clone, Copy)]
 pub struct LongVal(pub u64);
 
 impl ShortVal {
