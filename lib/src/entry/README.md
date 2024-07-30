@@ -1,11 +1,11 @@
 # Entries
-`Bitcoin Virtual Machine` employs of six types of entries:
+`Bitcoin Virtual Machine` employs of 6 types of entries:
 
-| Entry Type       |  Description                                                                                 |
-|:-----------------|:---------------------------------------------------------------------------------------------|
-| Transfer 💸      | Moves sats from a `Channel` into another `Channel`. Falls back to `Lift` by default.         |
-| Call 📡          | Calls a smart contract. This may internally involve a `Transfer`.                            |
-| Liftup ⬆️        | Onboards an account by turning `Lift` into a `VTXO`.                                         |
-| Liftdown ⬇️      | Offboards an account by swapping out `Channel` liquidity into a bare `Self`.                 |
-| Recharge 🔋      | Refreshes a `VTXO` into a new `VTXO Projector`.                                              |
-| Fallback 🌊      | Configures `Transfer` fallback preference to `VTXO`, or back to `Lift`.                      |
+| Entry Type       |  Description                                                                           |
+|:-----------------|:---------------------------------------------------------------------------------------|
+| Transfer 💸      | Moves sats from a `Channel` into another `Channel`. Falls back to `Lift` if necessary. |
+| Call 📡          | Calls a smart contract. This may internally involve `Transfer`.                        |
+| Liftup ⬆️        | Turns `Lift` into a `VTXO`.                                                            |
+| Liftdown ⬇️      | Swaps out `Channel` liquidity into a bare `Self`.                                      |
+| Recharge 🔋      | Refreshes `Channel` liquidity into a new `VTXO`.                                       |
+| Reserved 📁      | Fails the entry. Reserved for future upgrades.                                         |
