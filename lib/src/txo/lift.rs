@@ -52,7 +52,7 @@ impl Lift {
 
         //// Exit Path: (Self after 3 months)
         let mut exit_path_script = Vec::<u8>::new();
-        exit_path_script.extend(to_csv_script_encode(CSVFlag::CSVThreeMonths)); // Relative Timelock
+        exit_path_script.extend(to_csv_script_encode(CSVFlag::CSVYear)); // Relative Timelock
         exit_path_script.push(0x20); // OP_PUSHDATA_32
         exit_path_script.extend(self.self_key().serialize()); // Self Key 32-bytes
         exit_path_script.push(0xac); // OP_CHECKSIG

@@ -3,7 +3,7 @@ mod txo_tests {
     use bitcoin_vm::txo::{
         connector::Connector,
         lift::Lift,
-        projector::{Projector, ProjectorTag},
+        projector::{Projector, ProjectorTag}, vtxo::VTXO,
     };
     use musig2::secp256k1::{self, Parity, PublicKey, XOnlyPublicKey};
 
@@ -24,7 +24,7 @@ mod txo_tests {
         let exit_path = tap_tree.leaves()[0].tap_script();
 
         let exit_path_expected = hex::decode(
-            "02a032b27520b2d9fb51db445564f1d4e754f644597b11ff191d12c2a582fb598e509cd72421ac",
+            "0350cd00b27520b2d9fb51db445564f1d4e754f644597b11ff191d12c2a582fb598e509cd72421ac",
         )
         .unwrap();
 
@@ -32,7 +32,7 @@ mod txo_tests {
 
         let spk = lift_txo.taproot()?.spk()?;
         let spk_expected =
-            hex::decode("512014f0bcba66eb30050e5ad2d784ad67643e2590fb13d6b08edd50f2f9b3b9ace5")
+            hex::decode("5120768f26cecaee8a061b981a1562cac68d1a21e673c70647111a95afbdc0e484c2")
                 .unwrap();
 
         assert_eq!(spk, spk_expected);
@@ -47,7 +47,7 @@ mod txo_tests {
                 .parse()
                 .unwrap();
 
-        let lift_txo = Lift::new(self_key);
+        let lift_txo = VTXO::new(self_key);
 
         let tap_tree = lift_txo
             .taproot()?

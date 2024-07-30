@@ -1,9 +1,9 @@
 # Transaction Outputs
-`Bitcoin Virtual Machine` employs of nine types of transaction outputs (TXOs):
+`Bitcoin Virtual Machine` employs of 9 types of transaction outputs (TXOs):
 
 | TXO Type               | Kind           |  Spending Condition                                        |
 |:-----------------------|:---------------|:-----------------------------------------------------------|
-| Lift 🛗                | Bare           | `(Self + Operator) or (Self after 3 months)`               | 
+| Lift 🛗                | Bare           | `(Self + Operator) or (Self after 12 months)`              | 
 | VTXO 💵                | Virtual        | `(Self + Operator) or (Self after 3 months)`               |
 | VTXO Projector 🎥      | Bare           | `(msg.senders[] + Operator) or (Operator after 3 months)`  |
 | Channel 👥             | Virtual        | `(Self + Operator) after degrading timelock`               |
@@ -44,11 +44,11 @@ The `Bitcoin Virtual Machine` advances the rollup state by chaining `Pool Transa
 `Lift` is a bare, on-chain transaction output type used for onboarding to the `Bitcoin VM`. When a `Lift` output is funded, it can be swapped out for a 1:1 `VTXO` in a process known as lifting. In short, `Lift` lifts itself up to a `VTXO`.
 
 `Lift` carries two  spending conditions:
-`(Self + Operator) or (Self after 3 months)`
+`(Self + Operator) or (Self after 12 months)`
 
 -  **Lift Path:** `Self` and `Operator` sign from the collaborative path `(Self + Operator)` to swap the `Lift` output in exchange for a 1:1 `VTXO`. `Self` swaps out the `Lift` output with the provided `Bare Connector` to receive a `VTXO` in return.
     
--   **Exit Path:** In case the `Operator` is non-collaborative and does not sign from the collaborative path, `Self` can trigger the exit path `(Self after 3 months)` to reclaim their funds.
+-   **Exit Path:** In case the `Operator` is non-collaborative and does not sign from the collaborative path, `Self` can trigger the exit path `(Self after 12 months)` to reclaim their funds.
 
 ### External Funding
 `Lift` is an on-chain P2TR address, so it can be funded by a third-party wallet, such as an exchange, a payroll service, or an individual. When a `Lift` output is funded by an external source, it must receive at least two on-chain confirmations to be considered valid.
