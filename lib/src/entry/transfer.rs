@@ -6,11 +6,6 @@ use crate::valtype::{
 
 use bit_vec::BitVec;
 
-pub enum Fallback {
-    Bare,
-    Virtual,
-}
-
 #[derive(Clone, Copy)]
 pub struct Transfer {
     from: Account,
