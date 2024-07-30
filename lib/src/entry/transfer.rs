@@ -14,19 +14,19 @@ pub struct Transfer {
 }
 
 impl Transfer {
+    pub fn new(from: Account, to:  MaybeCommon<Account>, amount: MaybeCommon<ShortVal>) -> Transfer {
+        Transfer {
+            from,
+            to,
+            amount,
+        }
+    }
+
     pub fn new_uncommon(from: Account, to: Account, amount: u32) -> Transfer {
         Transfer {
             from,
             to: MaybeCommon::Uncommon(to),
             amount: MaybeCommon::Uncommon(ShortVal(amount)),
-        }
-    }
-
-    pub fn new_common(from: Account, to: (Account, u8), amount: (u32, u8)) -> Transfer {
-        Transfer {
-            from,
-            to: MaybeCommon::Common(to.0, to.1),
-            amount: MaybeCommon::Common(ShortVal(amount.0), amount.1),
         }
     }
 }
