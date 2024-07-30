@@ -17,6 +17,14 @@ impl Transfer {
     pub fn new(from: Account, to: MaybeCommon<Account>, amount: MaybeCommon<ShortVal>) -> Transfer {
         Transfer { from, to, amount }
     }
+
+    pub fn new_uncommon(from: Account, to: Account, amount: ShortVal) -> Transfer {
+        Transfer {
+            from,
+            to: MaybeCommon::Uncommon(to),
+            amount: MaybeCommon::Uncommon(amount),
+        }
+    }
 }
 
 impl CompactPayloadEncoding for Transfer {
