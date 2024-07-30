@@ -1,7 +1,7 @@
 #![allow(dead_code)]
 
 use crate::valtype::{
-    account::Account, maybe_common::MaybeCommon, value::ShortVal, CompactPayloadEncoding,
+    account::Account, maybe_common::MaybeCommon, value::ShortVal, cpe::CompactPayloadEncoding,
 };
 
 use bit_vec::BitVec;

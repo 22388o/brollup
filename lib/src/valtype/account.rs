@@ -1,8 +1,9 @@
 #![allow(dead_code)]
 
+use bit_vec::BitVec;
 use musig2::secp256k1::XOnlyPublicKey;
 
-use super::{value::ShortVal, BitVec, CompactPayloadEncoding};
+use super::{value::ShortVal, cpe::CompactPayloadEncoding};
 
 type Key = XOnlyPublicKey;
 

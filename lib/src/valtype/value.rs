@@ -1,6 +1,8 @@
 #![allow(dead_code)]
 
-use super::{BitVec, CompactPayloadEncoding};
+use bit_vec::BitVec;
+
+use super::cpe::CompactPayloadEncoding;
 
 #[derive(Clone, Copy)]
 pub struct ShortVal(pub u32);

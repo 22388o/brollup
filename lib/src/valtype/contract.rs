@@ -1,6 +1,8 @@
 #![allow(dead_code)]
 
-use super::{value::ShortVal, BitVec, CompactPayloadEncoding};
+use bit_vec::BitVec;
+
+use super::{value::ShortVal, cpe::CompactPayloadEncoding};
 
 #[derive(Clone, Copy)]
 pub struct Contract {

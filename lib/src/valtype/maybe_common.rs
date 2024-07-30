@@ -3,7 +3,7 @@ use std::u8;
 use super::account::Account;
 use super::contract::Contract;
 use super::value::{LongVal, ShortVal};
-use super::CompactPayloadEncoding;
+use crate::valtype::cpe::CompactPayloadEncoding;
 use bit_vec::BitVec;
 
 pub trait MaybeCommonType {}
