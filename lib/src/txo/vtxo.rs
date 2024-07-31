@@ -3,7 +3,7 @@
 use crate::{
     musig2::keys_to_key_agg_ctx,
     serialize::csv::{to_csv_script_encode, CSVFlag},
-    taproot::{TapLeaf, TapRoot},
+    taproot::{TapLeaf, TapRoot, P2TR},
     well_known::operator,
 };
 use musig2::{
@@ -47,8 +47,10 @@ impl VTXO {
         let keys = vec![self.self_key(), self.operator_key()];
         keys_to_key_agg_ctx(&keys).map_err(|_| secp256k1::Error::InvalidPublicKey)
     }
+}
 
-    pub fn taproot(&self) -> Result<TapRoot, secp256k1::Error> {
+impl P2TR for VTXO {
+    fn taproot(&self) -> Result<TapRoot, secp256k1::Error> {
         //// Inner Key: (Self + Operator)
         let key_agg_ctx = self.key_agg_ctx()?;
         let inner_key: PublicKey = key_agg_ctx.aggregated_pubkey();
@@ -64,7 +66,7 @@ impl VTXO {
         Ok(TapRoot::key_and_script_path_single(inner_key, exit_path))
     }
 
-    pub fn spk(&self) -> Result<Bytes, secp256k1::Error> {
+    fn spk(&self) -> Result<Bytes, secp256k1::Error> {
         self.taproot()?.spk()
     }
 }

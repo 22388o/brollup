@@ -4,10 +4,10 @@ use bit_vec::BitVec;
 use musig2::secp256k1::{self, XOnlyPublicKey};
 
 use crate::musig2::keys_to_key_agg_ctx;
-use crate::serialize::{push::encode_multi_push, csv::CSVFlag};
-use crate::taproot::TapLeaf;
-use crate::{hash::hash_160, serialize::csv::to_csv_script_encode, taproot::TapRoot};
 use crate::serialize::push::PushFlag;
+use crate::serialize::{csv::CSVFlag, push::encode_multi_push};
+use crate::taproot::{TapLeaf, P2TR};
+use crate::{hash::hash_160, serialize::csv::to_csv_script_encode, taproot::TapRoot};
 
 type Bytes = Vec<u8>;
 type Key = XOnlyPublicKey;
@@ -128,14 +128,15 @@ impl Payload {
     }
 
     fn msg_senders_aggregate_key(&self) -> XOnlyPublicKey {
-
         let key_agg_ctx = keys_to_key_agg_ctx(&self.msg_senders);
 
         // consider removing unwrap here
         key_agg_ctx.unwrap().aggregated_pubkey()
     }
+}
 
-    pub fn taproot(&self) -> TapRoot {
+impl P2TR for Payload {
+    fn taproot(&self) -> Result<TapRoot, secp256k1::Error>  {
         let mut tap_script = Vec::<u8>::new();
 
         // OP_IF
@@ -183,10 +184,10 @@ impl Payload {
         let tap_leaf = TapLeaf::new(tap_script);
         let tap_root = TapRoot::script_path_only_single(tap_leaf);
 
-        tap_root
+        Ok(tap_root)
     }
 
-    pub fn spk(&self) -> Result<Bytes, secp256k1::Error> {
-        self.taproot().spk()
+    fn spk(&self) -> Result<Bytes, secp256k1::Error> {
+        self.taproot()?.spk()
     }
 }

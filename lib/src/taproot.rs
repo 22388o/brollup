@@ -19,6 +19,11 @@ lazy_static! {
     ];
 }
 
+pub trait P2TR {
+    fn taproot(&self) -> Result<TapRoot, secp256k1::Error>;
+    fn spk(&self) -> Result<Bytes, secp256k1::Error>;
+}
+
 #[derive(Clone)]
 pub enum Branch {
     Leaf(TapLeaf),

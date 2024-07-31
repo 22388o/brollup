@@ -3,7 +3,7 @@
 use crate::{
     musig2::keys_to_key_agg_ctx,
     serialize::csv::{to_csv_script_encode, CSVFlag},
-    taproot::{TapLeaf, TapRoot},
+    taproot::{TapLeaf, TapRoot, P2TR},
     well_known::operator,
 };
 use musig2::{
@@ -52,7 +52,13 @@ impl Projector {
         keys_to_key_agg_ctx(&keys).map_err(|_| secp256k1::Error::InvalidPublicKey)
     }
 
-    pub fn taproot(&self) -> Result<TapRoot, secp256k1::Error> {
+    pub fn tag(&self) -> ProjectorTag {
+        self.tag
+    }
+}
+
+impl P2TR for Projector {
+    fn taproot(&self) -> Result<TapRoot, secp256k1::Error> {
         //// Inner Key: (Self + Operator)
         let key_agg_ctx = self.key_agg_ctx()?;
         let inner_key: PublicKey = key_agg_ctx.aggregated_pubkey();
@@ -68,11 +74,7 @@ impl Projector {
         Ok(TapRoot::key_and_script_path_single(inner_key, sweep_path))
     }
 
-    pub fn spk(&self) -> Result<Bytes, secp256k1::Error> {
+    fn spk(&self) -> Result<Bytes, secp256k1::Error> {
         self.taproot()?.spk()
-    }
-
-    pub fn tag(&self) -> ProjectorTag {
-        self.tag
     }
 }

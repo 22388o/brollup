@@ -1,9 +1,13 @@
 #[cfg(test)]
 mod txo_tests {
-    use brollup::txo::{
-        connector::Connector,
-        lift::Lift,
-        projector::{Projector, ProjectorTag}, vtxo::VTXO,
+    use brollup::{
+        taproot::P2TR,
+        txo::{
+            connector::Connector,
+            lift::Lift,
+            projector::{Projector, ProjectorTag},
+            vtxo::VTXO,
+        },
     };
     use musig2::secp256k1::{self, Parity, PublicKey, XOnlyPublicKey};
 
