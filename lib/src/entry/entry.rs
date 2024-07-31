@@ -2,14 +2,14 @@ use super::transfer::Transfer;
 use crate::serialize::cpe::CompactPayloadEncoding;
 use bit_vec::BitVec;
 
-pub trait EntryType {}
+pub enum Entry {
+    Transfer(Transfer),
+}
 
-impl EntryType for Transfer {}
-
-pub struct Entry<T: EntryType>(pub T);
-
-impl<T: EntryType + CompactPayloadEncoding> CompactPayloadEncoding for Entry<T> {
+impl CompactPayloadEncoding for Entry {
     fn to_cpe(&self) -> BitVec {
-        self.0.to_cpe()
+        match self {
+            Entry::Transfer(transfer) => transfer.to_cpe(),
+        }
     }
 }

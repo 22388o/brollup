@@ -165,7 +165,7 @@ mod txo_tests {
 
         let trs = Transfer::new_uncommon(acct, acct, amt);
 
-        let txo: Entry<Transfer> = Entry(trs);
+        let txo = Entry::Transfer(trs);
 
         println!("bits {}", txo.to_cpe());
     }

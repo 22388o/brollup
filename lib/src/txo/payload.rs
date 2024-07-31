@@ -3,7 +3,9 @@
 use bit_vec::BitVec;
 use musig2::secp256k1::{self, XOnlyPublicKey};
 
+use crate::entry::entry::Entry;
 use crate::musig2::keys_to_key_agg_ctx;
+use crate::serialize::cpe::CompactPayloadEncoding;
 use crate::serialize::push::PushFlag;
 use crate::serialize::{csv::CSVFlag, push::encode_multi_push};
 use crate::taproot::{TapLeaf, P2TR};
@@ -21,7 +23,7 @@ pub struct Payload {
     fresh_operator_key_dynamic: Key,
     vtxo_projector_agg_sig: [u8; 64],
     connector_projector_agg_sig: [u8; 64],
-    entries: Vec<BitVec>,
+    entries: Vec<Entry>,
 }
 
 impl Payload {
@@ -34,7 +36,7 @@ impl Payload {
         fresh_operator_key_dynamic: Key,
         vtxo_projector_agg_sig: [u8; 64],
         connector_projector_agg_sig: [u8; 64],
-        entries: Vec<BitVec>,
+        entries: Vec<Entry>,
     ) -> Payload {
         Payload {
             msg_senders,
@@ -113,7 +115,7 @@ impl Payload {
         let mut entries_whole = BitVec::new();
 
         for entry in self.entries.iter() {
-            entries_whole.extend(entry);
+            entries_whole.extend(entry.to_cpe());
         }
 
         let zero_bits_padded: u8 = 8 - (entries_whole.len() % 8) as u8;
