@@ -1,6 +1,6 @@
 #[cfg(test)]
 mod taproot_tests {
-    use bitcoin_vm::taproot::{ControlBlock, TapBranch, TapLeaf, TapRoot, TapTree};
+    use brollup::taproot::{ControlBlock, TapBranch, TapLeaf, TapRoot, TapTree};
     use musig2::secp256k1::{Parity, PublicKey};
     use std::error::Error;
 

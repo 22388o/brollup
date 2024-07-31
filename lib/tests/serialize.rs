@@ -1,6 +1,6 @@
 #[cfg(test)]
 mod serialize_test {
-    use bitcoin_vm::serialize::{
+    use brollup::serialize::{
         chunkify, to_csv_script_encode, to_n_sequence_encode, with_prefix_pushdata, CSVFlag,
         PushFlag,
     };

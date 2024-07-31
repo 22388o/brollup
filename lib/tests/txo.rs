@@ -1,6 +1,6 @@
 #[cfg(test)]
 mod txo_tests {
-    use bitcoin_vm::txo::{
+    use brollup::txo::{
         connector::Connector,
         lift::Lift,
         projector::{Projector, ProjectorTag}, vtxo::VTXO,
