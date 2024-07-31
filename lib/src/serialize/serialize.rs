@@ -1,4 +1,4 @@
-use crate::entry::EntryType;
+use crate::entry::entry::EntryType;
 
 type Bytes = Vec<u8>;
 
