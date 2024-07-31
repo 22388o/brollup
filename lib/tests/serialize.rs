@@ -442,6 +442,6 @@ mod serialize_test {
 
         assert_eq!(chunks[0].clone(), expected_1);
         assert_eq!(chunks[1].clone(), expected_2);
-        assert_eq!(chunks[2].clone(), expected_3); 
+        assert_eq!(chunks[2].clone(), expected_3);
     }
 }

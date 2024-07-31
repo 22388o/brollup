@@ -31,10 +31,62 @@ impl<T: MaybeCommonType + CompactPayloadEncoding> CompactPayloadEncoding for May
                 bit_vec.extend(uncommon.to_cpe());
                 bit_vec
             }
-            MaybeCommon::Common(_, _) => {
+            MaybeCommon::Common(_, common_index) => {
                 // Common bit: true
                 bit_vec.push(true);
-                panic!("Future extension.")
+                // 3-bit common index encoding
+                match common_index {
+                    0 => {
+                        // 0b000
+                        bit_vec.push(false);
+                        bit_vec.push(false);
+                        bit_vec.push(false);
+                    }
+                    1 => {
+                        // 0b001
+                        bit_vec.push(false);
+                        bit_vec.push(false);
+                        bit_vec.push(true);
+                    }
+                    2 => {
+                        // 0b010
+                        bit_vec.push(false);
+                        bit_vec.push(true);
+                        bit_vec.push(false);
+                    }
+                    3 => {
+                        // 0b011
+                        bit_vec.push(false);
+                        bit_vec.push(true);
+                        bit_vec.push(true);
+                    }
+                    4 => {
+                        // 0b100
+                        bit_vec.push(true);
+                        bit_vec.push(false);
+                        bit_vec.push(false);
+                    }
+                    5 => {
+                        // 0b101
+                        bit_vec.push(true);
+                        bit_vec.push(false);
+                        bit_vec.push(true);
+                    }
+                    6 => {
+                        // 0b110
+                        bit_vec.push(true);
+                        bit_vec.push(true);
+                        bit_vec.push(false);
+                    }
+                    7 => {
+                        // 0b111
+                        bit_vec.push(true);
+                        bit_vec.push(true);
+                        bit_vec.push(true);
+                    }
+                    _ => panic!("Common index is 3-bit-long."),
+                }
+                bit_vec
             }
         }
     }
