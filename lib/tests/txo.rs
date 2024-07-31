@@ -167,6 +167,6 @@ mod txo_tests {
 
         let txo: Entry<Transfer> = Entry(trs);
 
-        println!("to {}", txo.0.to_cpe())
+        println!("bits {}", txo.to_cpe());
     }
 }
