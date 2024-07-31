@@ -6,8 +6,8 @@ use super::value::ShortVal;
 
 #[derive(Clone, Copy)]
 pub struct Contract {
-    pub id: [u8; 32],
-    pub id_index: Option<u32>,
+    id: [u8; 32],
+    id_index: Option<u32>,
 }
 
 impl Contract {

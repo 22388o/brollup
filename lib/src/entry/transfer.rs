@@ -9,9 +9,9 @@ use crate::{
 
 #[derive(Clone, Copy)]
 pub struct Transfer {
-    pub from: Account,
-    pub to: MaybeCommon<Account>,
-    pub amount: MaybeCommon<ShortVal>,
+    from: Account,
+    to: MaybeCommon<Account>,
+    amount: MaybeCommon<ShortVal>,
 }
 
 impl Transfer {

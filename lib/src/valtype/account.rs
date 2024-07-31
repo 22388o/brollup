@@ -9,8 +9,8 @@ type Key = XOnlyPublicKey;
 
 #[derive(Clone, Copy)]
 pub struct Account {
-    pub key: Key,
-    pub key_index: Option<u32>,
+    key: Key,
+    key_index: Option<u32>,
 }
 
 impl Account {
