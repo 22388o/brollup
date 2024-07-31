@@ -1,3 +1,5 @@
+#![allow(dead_code)]
+
 use std::u8;
 
 use super::account::Account;
@@ -42,7 +44,7 @@ impl<T: MaybeCommonType + CompactPayloadEncoding> CompactPayloadEncoding for May
     }
 }
 
-fn common_index_from_u8(common_index: &u8) -> BitVec {
+pub fn common_index_from_u8(common_index: &u8) -> BitVec {
     let mut bit_vec = BitVec::new();
 
     // 3-bit common index encoding
@@ -98,4 +100,17 @@ fn common_index_from_u8(common_index: &u8) -> BitVec {
         _ => panic!("Common index is 3-bit-long."),
     }
     bit_vec
+}
+
+pub fn common_index_to_u8(common_index: &BitVec) -> u8 {
+    let mut bit_vec = BitVec::new();
+    bit_vec.extend(common_index);
+
+    bit_vec.insert(0, false);
+    bit_vec.insert(0, false);
+    bit_vec.insert(0, false);
+    bit_vec.insert(0, false);
+    bit_vec.insert(0, false);
+
+    bit_vec.to_bytes()[0]
 }
