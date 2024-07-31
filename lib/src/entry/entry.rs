@@ -6,7 +6,7 @@ pub trait EntryType {}
 
 impl EntryType for Transfer {}
 
-pub struct Entry<T: EntryType>(T);
+pub struct Entry<T: EntryType>(pub T);
 
 impl<T: EntryType + CompactPayloadEncoding> CompactPayloadEncoding for Entry<T> {
     fn to_cpe(&self) -> BitVec {

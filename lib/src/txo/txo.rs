@@ -12,7 +12,7 @@ impl TXOType for super::projector::Projector {}
 impl TXOType for super::vtxo::VTXO {}
 impl TXOType for super::payload::Payload {}
 
-pub struct TXO<T: TXOType>(T);
+pub struct TXO<T: TXOType>(pub T);
 
 impl<T: TXOType + P2TR> P2TR for TXO<T> {
     fn taproot(&self) -> Result<TapRoot, secp256k1::Error> {

@@ -1,6 +1,8 @@
 #[cfg(test)]
 mod txo_tests {
     use brollup::{
+        entry::{entry::Entry, transfer::Transfer},
+        serialize::cpe::CompactPayloadEncoding,
         taproot::P2TR,
         txo::{
             connector::Connector,
@@ -8,6 +10,7 @@ mod txo_tests {
             projector::{Projector, ProjectorTag},
             vtxo::VTXO,
         },
+        valtype::{account::Account, value::ShortVal},
     };
     use musig2::secp256k1::{self, Parity, PublicKey, XOnlyPublicKey};
 
@@ -148,5 +151,22 @@ mod txo_tests {
         assert_eq!(expected_spk, spk);
 
         Ok(())
+    }
+
+    #[test]
+    fn test_txo_transfer() {
+        let key: XOnlyPublicKey =
+            "b2d9fb51db445564f1d4e754f644597b11ff191d12c2a582fb598e509cd72421"
+                .parse()
+                .unwrap();
+
+        let acct = Account::new(key);
+        let amt = ShortVal::new(23423);
+
+        let trs = Transfer::new_uncommon(acct, acct, amt);
+
+        let txo: Entry<Transfer> = Entry(trs);
+
+        println!("to {}", txo.0.to_cpe())
     }
 }
