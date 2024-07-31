@@ -1,13 +1,9 @@
 #![allow(dead_code)]
 
-use bit_vec::BitVec;
-
-use super::{value::ShortVal, cpe::CompactPayloadEncoding};
-
 #[derive(Clone, Copy)]
 pub struct Contract {
-    id: [u8; 32],
-    id_index: Option<u32>,
+    pub id: [u8; 32],
+    pub id_index: Option<u32>,
 }
 
 impl Contract {
@@ -20,34 +16,5 @@ impl Contract {
             id,
             id_index: Some(id_index),
         }
-    }
-}
-
-impl CompactPayloadEncoding for Contract {
-    fn to_cpe(&self) -> BitVec {
-        let mut bit_vec = BitVec::new();
-
-        match self.id_index {
-            None => {
-                // Non-compact form
-                bit_vec.push(false);
-
-                let id_array = self.id;
-                let id_bits = BitVec::from_bytes(&id_array);
-
-                bit_vec.extend(id_bits);
-            }
-            Some(index) => {
-                // Compact form
-                bit_vec.push(true);
-
-                // ShortAmount represents compact integer forms
-                let index_compact = ShortVal(index);
-
-                bit_vec.extend(index_compact.to_cpe());
-            }
-        }
-
-        bit_vec
     }
 }

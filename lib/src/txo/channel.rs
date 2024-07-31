@@ -1,7 +1,7 @@
 #![allow(dead_code)]
 
 use crate::{
-    serialize::{to_csv_script_encode, CSVFlag},
+    serialize::csv::{to_csv_script_encode, CSVFlag},
     taproot::{TapLeaf, TapRoot},
 };
 use musig2::secp256k1::{self, XOnlyPublicKey};

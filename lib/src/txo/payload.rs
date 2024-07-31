@@ -4,10 +4,10 @@ use bit_vec::BitVec;
 use musig2::secp256k1::{self, XOnlyPublicKey};
 
 use crate::musig2::keys_to_key_agg_ctx;
-use crate::serialize::{encode_multi_push, CSVFlag};
+use crate::serialize::{push::encode_multi_push, csv::CSVFlag};
 use crate::taproot::TapLeaf;
-use crate::{hash::hash_160, serialize::to_csv_script_encode, taproot::TapRoot};
-use crate::serialize::PushFlag;
+use crate::{hash::hash_160, serialize::csv::to_csv_script_encode, taproot::TapRoot};
+use crate::serialize::push::PushFlag;
 
 type Bytes = Vec<u8>;
 type Key = XOnlyPublicKey;

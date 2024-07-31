@@ -2,7 +2,7 @@
 
 use crate::{
     musig2::keys_to_key_agg_ctx,
-    serialize::{to_csv_script_encode, CSVFlag},
+    serialize::csv::{to_csv_script_encode, CSVFlag},
     taproot::{TapLeaf, TapRoot},
     well_known::operator,
 };

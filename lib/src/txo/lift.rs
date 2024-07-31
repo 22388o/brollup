@@ -2,11 +2,14 @@
 
 use crate::{
     musig2::keys_to_key_agg_ctx,
-    serialize::{to_csv_script_encode, CSVFlag},
+    serialize::csv::{to_csv_script_encode, CSVFlag},
     taproot::{TapLeaf, TapRoot},
     well_known::operator,
 };
-use musig2::{secp256k1::{self, PublicKey, XOnlyPublicKey}, KeyAggContext};
+use musig2::{
+    secp256k1::{self, PublicKey, XOnlyPublicKey},
+    KeyAggContext,
+};
 
 type Bytes = Vec<u8>;
 type Key = XOnlyPublicKey;
