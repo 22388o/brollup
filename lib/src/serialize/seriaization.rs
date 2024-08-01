@@ -1,5 +1,6 @@
 type Bytes = Vec<u8>;
 
+#[derive(Debug)]
 pub enum SerializationError {
     KeyParseError
 }
