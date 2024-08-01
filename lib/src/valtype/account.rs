@@ -27,6 +27,10 @@ impl Account {
             key_index: Some(index),
         }
     }
+
+    pub fn key(&self) -> Key {
+        self.key
+    }
 }
 
 impl CompactPayloadEncoding for Account {

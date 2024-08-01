@@ -13,11 +13,19 @@ impl ShortVal {
     pub fn new(value: u32) -> ShortVal {
         ShortVal(value)
     }
+
+    pub fn value(&self) -> u32 {
+        self.0
+    }
 }
 
 impl LongVal {
     pub fn new(value: u64) -> LongVal {
         LongVal(value)
+    }
+
+    pub fn value(&self) -> u64 {
+        self.0
     }
 }
 

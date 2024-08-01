@@ -21,6 +21,10 @@ impl Contract {
             id_index: Some(id_index),
         }
     }
+
+    pub fn contract_id(&self) -> [u8; 32] {
+        self.id
+    }
 }
 
 impl CompactPayloadEncoding for Contract {
