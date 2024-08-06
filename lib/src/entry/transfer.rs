@@ -9,7 +9,7 @@ type Key = XOnlyPublicKey;
 use crate::{
     serialize::{
         cpe::CompactPayloadEncoding,
-        seriaization::{Serialization, SerializationError},
+        serialization::{Serialization, SerializationError},
     },
     valtype::{account::Account, maybe_common::MaybeCommon, value::ShortVal},
 };
