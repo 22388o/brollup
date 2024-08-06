@@ -2,8 +2,10 @@
 type Bytes = Vec<u8>;
 
 enum PrefixFlag {
-    PrefixCompactSize,
+    // https://en.bitcoin.it/wiki/Script
     PrefixPushdata,
+    // https://en.bitcoin.it/wiki/Protocol_documentation#Variable_length_integer
+    PrefixCompactSize,
 }
 
 pub trait Prefix {
