@@ -24,16 +24,16 @@ impl<T: MaybeCommonType + CompactPayloadEncoding> CompactPayloadEncoding for May
 
         match self {
             MaybeCommon::Uncommon(uncommon) => {
-                // Common bit: false
+                // Common bit = false
                 bit_vec.push(false);
-                // Bit-encoding
+                // Bit-encoding:
                 bit_vec.extend(uncommon.to_cpe());
                 bit_vec
             }
             MaybeCommon::Common(_, common_index) => {
-                // Common bit: true
+                // Common bit = true
                 bit_vec.push(true);
-                // 3-bit common index encoding
+                // 3-bit common index encoding:
                 bit_vec.extend(BitVec::from_u8_common_index(common_index));
                 bit_vec
             }
