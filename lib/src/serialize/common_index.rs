@@ -1,16 +1,16 @@
 use bit_vec::BitVec;
 
 pub trait CommonIndex {
-    fn from_u8(common_index: &u8) -> BitVec;
-    fn to_u8(&self) -> u8;
+    fn from_u8_common_index(common_index: &u8) -> BitVec;
+    fn to_u8_common_index(&self) -> u8;
 }
 
 impl CommonIndex for BitVec {
-    fn from_u8(common_index: &u8) -> BitVec {
+    fn from_u8_common_index(common_index: &u8) -> BitVec {
         common_index_from_u8(common_index)
     }
 
-    fn to_u8(&self) -> u8 {
+    fn to_u8_common_index(&self) -> u8 {
         common_index_to_u8(self)
     }
 }
