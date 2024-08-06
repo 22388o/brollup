@@ -36,7 +36,7 @@ impl CompactPayloadEncoding for ShortVal {
         let mut bit_vec = BitVec::new();
 
         match value {
-            0x00..=255 => {
+            0..=255 => {
                 // b00 -> UInt 8 (1-byte)
                 bit_vec.push(false);
                 bit_vec.push(false);
