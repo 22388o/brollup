@@ -1,4 +1,3 @@
-#![allow(dead_code)]
 type Bytes = Vec<u8>;
 
 pub trait Prefix {
