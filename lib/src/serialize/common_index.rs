@@ -1,6 +1,21 @@
 use bit_vec::BitVec;
 
-pub fn common_index_from_u8(common_index: &u8) -> BitVec {
+pub trait CommonIndex {
+    fn from_u8(common_index: &u8) -> BitVec;
+    fn to_u8(&self) -> u8;
+}
+
+impl CommonIndex for BitVec {
+    fn from_u8(common_index: &u8) -> BitVec {
+        common_index_from_u8(common_index)
+    }
+
+    fn to_u8(&self) -> u8 {
+        common_index_to_u8(self)
+    }
+}
+
+fn common_index_from_u8(common_index: &u8) -> BitVec {
     let mut bit_vec = BitVec::new();
 
     // 3-bit common index encoding
@@ -58,7 +73,7 @@ pub fn common_index_from_u8(common_index: &u8) -> BitVec {
     bit_vec
 }
 
-pub fn common_index_to_u8(common_index: &BitVec) -> u8 {
+fn common_index_to_u8(common_index: &BitVec) -> u8 {
     let mut bit_vec = BitVec::new();
     bit_vec.extend(common_index);
 
