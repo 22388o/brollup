@@ -63,7 +63,7 @@ impl CommonIndex for BitVec {
                 bit_vec.push(true);
                 bit_vec.push(true);
             }
-            _ => panic!("Common index is 3-bit-long."),
+            _ => panic!("Common index must be 3-bit-long."),
         }
         bit_vec
     }
