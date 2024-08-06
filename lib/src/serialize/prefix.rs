@@ -14,93 +14,85 @@ pub trait Prefix {
 }
 
 impl Prefix for Bytes {
-    fn with_prefix_pushdata(&self) -> Bytes {
-        with_prefix(self, PrefixFlag::PrefixPushdata)
-    }
+    fn with_prefix_pushdata(&self) -> Self {
+        let mut bytes = Vec::<u8>::new();
+        let data_len = self.len();
 
-    fn with_prefix_compact_size(&self) -> Bytes {
-        with_prefix(self, PrefixFlag::PrefixCompactSize)
-    }
-}
-
-fn with_prefix(data: &Bytes, flag: PrefixFlag) -> Bytes {
-    let mut return_vec = Vec::<u8>::new();
-    let data_len = data.len();
-
-    match flag {
-        PrefixFlag::PrefixCompactSize => {
+        if data_len == 1 && &self[0] <= &0x10 {
+            // Minimal push
+            match &self[0] {
+                0x00 => bytes.push(0x00), // OP_0
+                0x01 => bytes.push(0x51), // OP_1
+                0x02 => bytes.push(0x52), // OP_2
+                0x03 => bytes.push(0x53), // OP_3
+                0x04 => bytes.push(0x54), // OP_4
+                0x05 => bytes.push(0x55), // OP_5
+                0x06 => bytes.push(0x56), // OP_6
+                0x07 => bytes.push(0x57), // OP_7
+                0x08 => bytes.push(0x58), // OP_8
+                0x09 => bytes.push(0x59), // OP_9
+                0x0a => bytes.push(0x5a), // OP_10
+                0x0b => bytes.push(0x5b), // OP_11
+                0x0c => bytes.push(0x5c), // OP_12
+                0x0d => bytes.push(0x5d), // OP_13
+                0x0e => bytes.push(0x5e), // OP_14
+                0x0f => bytes.push(0x5f), // OP_15
+                0x10 => bytes.push(0x60), // OP_16
+                _ => (),
+            }
+        } else {
             match data_len {
-                0..=252 => return_vec.extend(vec![data_len as u8]),
-                253..=65535 => {
-                    return_vec.extend([0xfd]);
+                0..=75 => bytes.extend(vec![data_len as u8]),
+                76..=255 => {
+                    bytes.extend([0x4c]);
+                    bytes.extend([data_len as u8]);
+                }
+                256..=65535 => {
+                    bytes.extend(vec![0x4d]);
 
-                    let data_len_bytes: [u8; 2] = (data_len as u16).to_le_bytes();
-                    return_vec.extend(data_len_bytes);
+                    let x_bytes: [u8; 2] = (data_len as u16).to_le_bytes();
+                    bytes.extend(x_bytes);
                 }
                 65536..=4294967295 => {
-                    return_vec.extend([0xfe]);
+                    bytes.extend([0x4e]);
 
-                    let data_len_bytes: [u8; 4] = (data_len as u32).to_le_bytes();
-                    return_vec.extend(data_len_bytes);
-                }
-                4294967296..=18446744073709551615 => {
-                    return_vec.extend([0xff]);
-
-                    let data_len_bytes: [u8; 8] = (data_len as u64).to_le_bytes();
-                    return_vec.extend(data_len_bytes);
+                    let x_bytes: [u8; 4] = (data_len as u32).to_le_bytes();
+                    bytes.extend(x_bytes);
                 }
                 _ => panic!("Out of range data to prefix."),
             }
-            return_vec.extend(data);
-            return_vec
+            bytes.extend(self);
         }
-        PrefixFlag::PrefixPushdata => {
-            if data_len == 1 && &data[0] <= &0x10 {
-                // Minimal push
-                match &data[0] {
-                    0x00 => return_vec.push(0x00), // OP_0
-                    0x01 => return_vec.push(0x51), // OP_1
-                    0x02 => return_vec.push(0x52), // OP_2
-                    0x03 => return_vec.push(0x53), // OP_3
-                    0x04 => return_vec.push(0x54), // OP_4
-                    0x05 => return_vec.push(0x55), // OP_5
-                    0x06 => return_vec.push(0x56), // OP_6
-                    0x07 => return_vec.push(0x57), // OP_7
-                    0x08 => return_vec.push(0x58), // OP_8
-                    0x09 => return_vec.push(0x59), // OP_9
-                    0x0a => return_vec.push(0x5a), // OP_10
-                    0x0b => return_vec.push(0x5b), // OP_11
-                    0x0c => return_vec.push(0x5c), // OP_12
-                    0x0d => return_vec.push(0x5d), // OP_13
-                    0x0e => return_vec.push(0x5e), // OP_14
-                    0x0f => return_vec.push(0x5f), // OP_15
-                    0x10 => return_vec.push(0x60), // OP_16
-                    _ => (),
-                }
-            } else {
-                match data_len {
-                    0..=75 => return_vec.extend(vec![data_len as u8]),
-                    76..=255 => {
-                        return_vec.extend([0x4c]);
-                        return_vec.extend([data_len as u8]);
-                    }
-                    256..=65535 => {
-                        return_vec.extend(vec![0x4d]);
+        bytes
+    }
 
-                        let x_bytes: [u8; 2] = (data_len as u16).to_le_bytes();
-                        return_vec.extend(x_bytes);
-                    }
-                    65536..=4294967295 => {
-                        return_vec.extend([0x4e]);
+    fn with_prefix_compact_size(&self) -> Self {
+        let mut bytes = Vec::<u8>::new();
+        let data_len = self.len();
 
-                        let x_bytes: [u8; 4] = (data_len as u32).to_le_bytes();
-                        return_vec.extend(x_bytes);
-                    }
-                    _ => panic!("Out of range data to prefix."),
-                }
-                return_vec.extend(data);
+        match data_len {
+            0..=252 => bytes.extend(vec![data_len as u8]),
+            253..=65535 => {
+                bytes.extend([0xfd]);
+
+                let data_len_bytes: [u8; 2] = (data_len as u16).to_le_bytes();
+                bytes.extend(data_len_bytes);
             }
-            return_vec
+            65536..=4294967295 => {
+                bytes.extend([0xfe]);
+
+                let data_len_bytes: [u8; 4] = (data_len as u32).to_le_bytes();
+                bytes.extend(data_len_bytes);
+            }
+            4294967296..=18446744073709551615 => {
+                bytes.extend([0xff]);
+
+                let data_len_bytes: [u8; 8] = (data_len as u64).to_le_bytes();
+                bytes.extend(data_len_bytes);
+            }
+            _ => panic!("Out of range data to prefix."),
         }
+        bytes.extend(self);
+        bytes
     }
 }
