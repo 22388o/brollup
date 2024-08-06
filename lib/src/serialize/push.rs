@@ -9,16 +9,16 @@ enum PushFlag {
 }
 
 pub trait Push {
-    // Put data in chunks, 520 bytes-long each.
+    // Put bytes in chunks, 520 bytes-long each.
     fn put_in_pushdata_chunks(&self) -> Vec<Bytes>;
 
-    // Put data in chunks, 520/80 bytes-long each.
+    // Put bytes in chunks, 520/80 bytes-long each.
     fn put_in_witness_chunks(&self, standard: bool) -> Vec<Bytes>;
 
-    // Put data in chunks, 520 bytes-long each, then encode the chunks into a single byte vector.
+    // Put bytes in chunks, 520 bytes-long each, then encode the chunks into a single byte vector.
     fn as_multi_pushdata_push(&self) -> Bytes;
 
-    // Put data in chunks, 520/80 bytes-long each, then encode the chunks into a single byte vector.
+    // Put bytes in chunks, 520/80 bytes-long each, then encode the chunks into a single byte vector.
     fn as_multi_witness_push(&self, standard: bool) -> Bytes;
 }
 
