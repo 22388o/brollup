@@ -1,20 +1,34 @@
+use std::u8;
+
+use uintx::{u24, u40, u48, u56};
+
 type Bytes = Vec<u8>;
 
-pub fn u32_to_bytes(value: u32) -> Bytes {
-    let vec_u8: Bytes = vec![
-        (value & 0xFF) as u8,
-        ((value >> 8) & 0xFF) as u8,
-        ((value >> 16) & 0xFF) as u8,
-        ((value >> 24) & 0xFF) as u8,
-    ];
-    vec_u8
+pub fn u64_to_array(value: u64) -> [u8; 8] {
+    value.to_le_bytes()
 }
 
-// Not tested.
-pub fn bytes_to_u32(bytes: Bytes) -> u32 {
-    let vec_u32: Vec<u32> = bytes
-        .chunks_exact(4)
-        .map(|chunk| u32::from_le_bytes([chunk[0], chunk[1], chunk[2], chunk[3]]))
-        .collect();
-    vec_u32[0]
+
+pub fn u56_to_array(value: u56) -> [u8; 7] {
+    value.to_le_bytes()
+}
+
+pub fn u48_to_array(value: u48) -> [u8; 6] {
+    value.to_le_bytes()
+}
+
+pub fn u40_to_array(value: u40) -> [u8; 5] {
+    value.to_le_bytes()
+}
+
+pub fn u32_to_array(value: u32) -> [u8; 4] {
+    value.to_le_bytes()
+}
+
+pub fn u24_to_array(value: u24) -> [u8; 3] {
+    value.to_le_bytes()
+}
+
+pub fn u16_to_array(value: u16) -> [u8; 2] {
+    [(value & 0xFF) as u8, ((value >> 8) & 0xFF) as u8]
 }

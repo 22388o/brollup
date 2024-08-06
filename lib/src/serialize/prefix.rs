@@ -4,40 +4,29 @@ type Bytes = Vec<u8>;
 
 // https://en.bitcoin.it/wiki/Protocol_documentation#Variable_length_integer
 pub fn with_prefix_compact_size(data: &Bytes) -> Bytes {
-    let mut return_vec: Bytes = Vec::<u8>::new();
+    let mut return_vec = Vec::<u8>::new();
 
     let data_len = data.len();
 
     match data_len {
         0..=252 => return_vec.extend(vec![data_len as u8]),
         253..=65535 => {
-            return_vec.extend(vec![0xfd]);
-            let vec_u8: Bytes = vec![(data_len & 0xFF) as u8, (data_len >> 8 & 0xFF) as u8];
-            return_vec.extend(vec_u8)
+            return_vec.extend([0xfd]);
+
+            let data_len_bytes: [u8; 2] = (data_len as u16).to_le_bytes();
+            return_vec.extend(data_len_bytes);
         }
         65536..=4294967295 => {
-            return_vec.extend(vec![0xfe]);
-            let vec_u8: Bytes = vec![
-                (data_len & 0xFF) as u8,
-                ((data_len >> 8) & 0xFF) as u8,
-                ((data_len >> 16) & 0xFF) as u8,
-                ((data_len >> 24) & 0xFF) as u8,
-            ];
-            return_vec.extend(vec_u8)
+            return_vec.extend([0xfe]);
+
+            let data_len_bytes: [u8; 4] = (data_len as u32).to_le_bytes();
+            return_vec.extend(data_len_bytes);
         }
-        4294967296..=0xFFFFFFFFFFFFFFFF => {
-            return_vec.extend(vec![0xff]);
-            let vec_u8: Bytes = vec![
-                (data_len & 0xFF) as u8,
-                ((data_len >> 8) & 0xFF) as u8,
-                ((data_len >> 16) & 0xFF) as u8,
-                ((data_len >> 24) & 0xFF) as u8,
-                ((data_len >> 32) & 0xFF) as u8,
-                ((data_len >> 40) & 0xFF) as u8,
-                ((data_len >> 48) & 0xFF) as u8,
-                ((data_len >> 56) & 0xFF) as u8,
-            ];
-            return_vec.extend(vec_u8)
+        4294967296..=18446744073709551615 => {
+            return_vec.extend([0xff]);
+
+            let data_len_bytes: [u8; 8] = (data_len as u64).to_le_bytes();
+            return_vec.extend(data_len_bytes);
         }
         _ => panic!(),
     }
@@ -73,31 +62,25 @@ pub fn with_prefix_pushdata(data: &Bytes) -> Bytes {
         }
         return_vec
     } else {
-        match data.len() {
-            x if x <= 75 => return_vec.extend(vec![x as u8]),
-            x if x <= 0xFF => {
-                return_vec.extend(vec![0x4c]);
-                return_vec.extend(vec![x as u8])
+        let data_len = data.len();
+
+        match data_len {
+            0..=75 => return_vec.extend(vec![data_len as u8]),
+            76..=255 => {
+                return_vec.extend([0x4c]);
+                return_vec.extend([data_len as u8]);
             }
-            x if x <= 0xFFFF => {
+            256..=65535 => {
                 return_vec.extend(vec![0x4d]);
 
-                let vec_u8: Bytes = vec![(x & 0xFF) as u8, (x >> 8 & 0xFF) as u8];
-
-                return_vec.extend(vec_u8)
+                let x_bytes: [u8; 2] = (data_len as u16).to_le_bytes();
+                return_vec.extend(x_bytes);
             }
-            x if x <= 0xFFFFFFFF => {
-                return_vec.extend(vec![0x4e]);
+            65536..=4294967295 => {
+                return_vec.extend([0x4e]);
 
-                // In little endian order
-                let vec_u8: Bytes = vec![
-                    (x & 0xFF) as u8,
-                    ((x >> 8) & 0xFF) as u8,
-                    ((x >> 16) & 0xFF) as u8,
-                    ((x >> 24) & 0xFF) as u8,
-                ];
-
-                return_vec.extend(vec_u8)
+                let x_bytes: [u8; 4] = (data_len as u32).to_le_bytes();
+                return_vec.extend(x_bytes);
             }
             _ => panic!(),
         }

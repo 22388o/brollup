@@ -1,8 +1,10 @@
 #[cfg(test)]
 mod serialize_test {
-    use brollup::serialize::{csv::{to_csv_script_encode, to_n_sequence_encode, CSVFlag}, prefix::with_prefix_pushdata, push::{chunkify, PushFlag}};
-
-    
+    use brollup::serialize::{
+        csv::{to_csv_script_encode, to_n_sequence_encode, CSVFlag},
+        prefix::with_prefix_pushdata,
+        push::{chunkify, PushFlag},
+    };
 
     #[test]
     fn test_prefix_pushdata() {

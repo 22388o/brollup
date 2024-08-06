@@ -8,7 +8,6 @@ type Key = XOnlyPublicKey;
 
 use crate::{
     serialize::{
-        conversion::{bytes_to_u32, u32_to_bytes},
         cpe::CompactPayloadEncoding,
         seriaization::{Serialization, SerializationError},
     },
@@ -79,7 +78,7 @@ impl Serialization for Transfer {
             MaybeCommon::Uncommon(amount) => amount.value(),
             MaybeCommon::Common(amount, _) => amount.value(),
         };
-        bytes.extend(u32_to_bytes(amount));
+        bytes.extend(amount.to_le_bytes());
 
         bytes
     }
@@ -96,8 +95,8 @@ impl Serialization for Transfer {
         let to_account = Account::new(to_key);
 
         // Amount
-        let amount = &bytes[64..68];
-        let amount_u32 = bytes_to_u32(amount.to_vec());
+        let amount: &[u8] = &bytes[64..68];
+        let amount_u32 = u32::from_le_bytes([amount[0], amount[1], amount[2], amount[3]]);
         let amount_short_val = ShortVal::new(amount_u32);
 
         Ok(Transfer::new_uncommon(
