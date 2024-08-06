@@ -10,7 +10,7 @@ pub trait CommonIndex {
 }
 
 impl CommonIndex for BitVec {
-    fn from_u8_common_index(common_index: &u8) -> Self {
+    fn from_u8_common_index(common_index: &u8) -> BitVec {
         let mut bit_vec = BitVec::new();
 
         // 3-bit common index encoding
