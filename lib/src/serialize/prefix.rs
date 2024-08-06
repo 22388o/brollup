@@ -49,13 +49,13 @@ fn with_prefix(data: &Bytes, flag: PrefixFlag) -> Bytes {
                     let data_len_bytes: [u8; 8] = (data_len as u64).to_le_bytes();
                     return_vec.extend(data_len_bytes);
                 }
-                _ => panic!(),
+                _ => panic!("Out of range data to prefix."),
             }
             return_vec.extend(data);
             return_vec
         }
         PrefixFlag::PrefixPushdata => {
-            if data_len == 1 && &data[0] <= &16 {
+            if data_len == 1 && &data[0] <= &0x10 {
                 // Minimal push
                 match &data[0] {
                     0x00 => return_vec.push(0x00), // OP_0
@@ -75,7 +75,7 @@ fn with_prefix(data: &Bytes, flag: PrefixFlag) -> Bytes {
                     0x0e => return_vec.push(0x5e), // OP_14
                     0x0f => return_vec.push(0x5f), // OP_15
                     0x10 => return_vec.push(0x60), // OP_16
-                    _ => panic!(),
+                    _ => (),
                 }
             } else {
                 match data_len {
@@ -96,7 +96,7 @@ fn with_prefix(data: &Bytes, flag: PrefixFlag) -> Bytes {
                         let x_bytes: [u8; 4] = (data_len as u32).to_le_bytes();
                         return_vec.extend(x_bytes);
                     }
-                    _ => panic!(),
+                    _ => panic!("Out of range data to prefix."),
                 }
                 return_vec.extend(data);
             }
