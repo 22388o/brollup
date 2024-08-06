@@ -54,8 +54,10 @@ fn chunkify(data: &Bytes, flag: &PushFlag) -> Vec<Bytes> {
     let chunk_size: usize = match flag {
         // https://github.com/bitcoin/bitcoin/blob/master/src/policy/policy.h#L45
         PushFlag::StandardWitnessPush => 80,
+
         // https://github.com/bitcoin/bitcoin/blob/master/src/script/script.h#L27
         PushFlag::NonStandardWitnessPush => 520,
+
         // https://github.com/bitcoin/bitcoin/blob/master/src/script/script.h#L27
         PushFlag::ScriptPush => 520,
     };
@@ -88,7 +90,7 @@ fn chunkify(data: &Bytes, flag: &PushFlag) -> Vec<Bytes> {
         covered = covered + to_cover;
     }
 
-    // At the end, all bytes must have covered
+    // At the end, all bytes must have been covered.
     assert_eq!(data_len, covered);
 
     chunks
@@ -100,9 +102,10 @@ fn encode_multi_push(data: &Bytes, flag: PushFlag) -> Bytes {
 
     for chunk in chunks {
         match flag {
-            // Use OP_PUSHDATA encoding for in-script witness pushes
+            // Use OP_PUSHDATA encoding for in-script witness pushes.
             PushFlag::ScriptPush => encoded.extend(&chunk.prefix_pushdata()),
-            // Use varint encoding for out-script witness pushes
+
+            // Use varint encoding for out-script witness pushes.
             _ => encoded.extend(&chunk.prefix_compact_size()),
         }
     }
