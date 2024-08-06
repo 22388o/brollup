@@ -6,7 +6,7 @@ pub trait Prefix {
     // https://en.bitcoin.it/wiki/Script
     fn prefix_pushdata(&self) -> Bytes;
 
-    // Interpret the data as common protocol serialization and prefix it with varint.
+    // Interpret the data as common protocol serialization and prefix it with a variable length integer.
     // https://en.bitcoin.it/wiki/Protocol_documentation#Variable_length_integer
     fn prefix_compact_size(&self) -> Bytes;
 }
