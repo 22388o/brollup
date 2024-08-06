@@ -1,11 +1,11 @@
 type Bytes = Vec<u8>;
 
 pub trait Prefix {
-    // Interpret the data as a stack push and prefix it with OP_PUSHDATA.
+    // Interpret bytes as stack push and prefix them with OP_PUSHDATA.
     // https://en.bitcoin.it/wiki/Script
     fn prefix_pushdata(&self) -> Bytes;
 
-    // Interpret the data as common protocol serialization and prefix it with a variable-length integer.
+    // Interpret bytes as common protocol serialization and prefix them with a variable-length integer.
     // https://en.bitcoin.it/wiki/Protocol_documentation#Variable_length_integer
     fn prefix_compact_size(&self) -> Bytes;
 }
