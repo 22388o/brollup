@@ -20,6 +20,8 @@ impl Prefix for Bytes {
             // Check minimal push.
             // https://github.com/bitcoin/bitcoin/blob/master/src/script/script.cpp#L366
             match &self[0] {
+                // OP_1NEGATE
+                0x81 => bytes.push(0x4f),
                 // OP_0
                 0x00 => bytes.push(0x00),
                 // OP_1
