@@ -102,10 +102,10 @@ fn encode_multi_push(data: &Bytes, flag: PushFlag) -> Bytes {
 
     for chunk in chunks {
         match flag {
-            // Use OP_PUSHDATA encoding for in-script witness pushes.
+            // Use OP_PUSHDATA encoding for in-script pushes.
             PushFlag::ScriptPush => encoded.extend(chunk.prefix_pushdata()),
 
-            // Use varint encoding for out-script witness pushes.
+            // Use varint encoding for witness pushes.
             _ => encoded.extend(chunk.prefix_compact_size()),
         }
     }
