@@ -6,8 +6,8 @@ use musig2::secp256k1::{self, XOnlyPublicKey};
 use crate::entry::entry::Entry;
 use crate::musig2::keys_to_key_agg_ctx;
 use crate::serialize::cpe::CompactPayloadEncoding;
-use crate::serialize::push::PushFlag;
-use crate::serialize::{csv::CSVFlag, push::encode_multi_push};
+use crate::serialize::csv::CSVFlag;
+use crate::serialize::push::Push;
 use crate::taproot::{TapLeaf, P2TR};
 use crate::{hash::hash_160, serialize::csv::to_csv_script_encode, taproot::TapRoot};
 
@@ -181,7 +181,7 @@ impl P2TR for Payload {
         tap_script.push(0x68);
 
         // Push payload
-        tap_script.extend(encode_multi_push(&self.payload(), PushFlag::ScriptPush));
+        tap_script.extend(self.payload().as_multi_pushdata_push());
 
         let tap_leaf = TapLeaf::new(tap_script);
         let tap_root = TapRoot::script_path_only_single(tap_leaf);

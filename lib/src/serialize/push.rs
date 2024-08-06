@@ -3,14 +3,51 @@ use super::prefix::Prefix;
 type Bytes = Vec<u8>;
 
 #[derive(Clone)]
-pub enum PushFlag {
+enum PushFlag {
     StandardWitnessPush,
     NonStandardWitnessPush,
     ScriptPush,
 }
 
-// Put data in chunks 520/80 byte-long each
-pub fn chunkify(data: &Bytes, flag: PushFlag) -> Vec<Bytes> {
+pub trait Push {
+    // Put data in chunks, 520 bytes-long each.
+    fn put_in_pushdata_chunks(&self) -> Vec<Bytes>;
+
+    // Put data in chunks, 520/80 bytes-long each.
+    fn put_in_witness_chunks(&self, standard: bool) -> Vec<Bytes>;
+
+    // Put data in chunks, 520 bytes-long each, and serialize the chunks into a single piece.
+    fn as_multi_pushdata_push(&self) -> Bytes;
+
+    // Put data in chunks, 520/80 bytes-long each, and serialize the chunks into a single piece.
+    fn as_multi_witness_push(&self, standard: bool) -> Bytes;
+}
+
+impl Push for Bytes {
+    fn put_in_pushdata_chunks(&self) -> Vec<Bytes> {
+        chunkify(self, PushFlag::ScriptPush)
+    }
+
+    fn put_in_witness_chunks(&self, standard: bool) -> Vec<Bytes> {
+        match standard {
+            false => chunkify(self, PushFlag::NonStandardWitnessPush),
+            true => chunkify(self, PushFlag::StandardWitnessPush),
+        }
+    }
+
+    fn as_multi_pushdata_push(&self) -> Bytes {
+        encode_multi_push(self, PushFlag::ScriptPush)
+    }
+
+    fn as_multi_witness_push(&self, standard: bool) -> Bytes {
+        match standard {
+            false => encode_multi_push(self, PushFlag::NonStandardWitnessPush),
+            true => encode_multi_push(self, PushFlag::StandardWitnessPush),
+        }
+    }
+}
+
+fn chunkify(data: &Bytes, flag: PushFlag) -> Vec<Bytes> {
     let mut chunks: Vec<Bytes> = Vec::<Bytes>::new();
 
     let data_len = data.len();
@@ -58,7 +95,7 @@ pub fn chunkify(data: &Bytes, flag: PushFlag) -> Vec<Bytes> {
     chunks
 }
 
-pub fn encode_multi_push(data: &Bytes, flag: PushFlag) -> Bytes {
+fn encode_multi_push(data: &Bytes, flag: PushFlag) -> Bytes {
     let mut encoded: Bytes = Vec::<u8>::new();
     let chunks: Vec<Bytes> = chunkify(data, flag.clone());
 
