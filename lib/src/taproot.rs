@@ -1,7 +1,7 @@
 #![allow(dead_code)]
 
 use crate::hash::{tagged_hash, HashTag};
-use crate::serialize::prefix::{add_prefix, PrefixFlag};
+use crate::serialize::prefix::Prefix;
 use lazy_static::lazy_static;
 use musig2::secp256k1::{self, Parity, PublicKey, Scalar, Secp256k1, XOnlyPublicKey};
 use std::cmp::Ordering;
@@ -423,7 +423,7 @@ pub fn hash_tap_leaf(raw_script_vec: &Bytes, version: u8) -> [u8; 32] {
     let mut data: Bytes = Vec::new();
 
     data.extend(&[version]);
-    data.extend(add_prefix(raw_script_vec, PrefixFlag::PrefixCompactSize));
+    data.extend(raw_script_vec.with_prefix_compact_size());
 
     tagged_hash(data, HashTag::TapLeafTag)
 }

@@ -1,4 +1,4 @@
-use super::prefix::{add_prefix, PrefixFlag};
+use super::prefix::Prefix;
 
 type Bytes = Vec<u8>;
 
@@ -65,9 +65,9 @@ pub fn encode_multi_push(data: &Bytes, flag: PushFlag) -> Bytes {
     for chunk in chunks {
         match flag {
             // Use OP_PUSHDATA encoding for in-script witness pushes
-            PushFlag::ScriptPush => encoded.extend(add_prefix(&chunk, PrefixFlag::PrefixPushdata)),
+            PushFlag::ScriptPush => encoded.extend(&chunk.with_prefix_pushdata()),
             // Use varint encoding for out-script witness pushes
-            _ => encoded.extend(add_prefix(&chunk, PrefixFlag::PrefixCompactSize)),
+            _ => encoded.extend(&chunk.with_prefix_compact_size()),
         }
     }
 

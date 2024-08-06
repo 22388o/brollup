@@ -1,13 +1,27 @@
 #![allow(dead_code)]
-
 type Bytes = Vec<u8>;
 
-pub enum PrefixFlag {
+enum PrefixFlag {
     PrefixCompactSize,
     PrefixPushdata,
 }
 
-pub fn add_prefix(data: &Bytes, flag: PrefixFlag) -> Bytes {
+pub trait Prefix {
+    fn with_prefix_pushdata(&self) -> Bytes;
+    fn with_prefix_compact_size(&self) -> Bytes;
+}
+
+impl Prefix for Bytes {
+    fn with_prefix_pushdata(&self) -> Bytes {
+        with_prefix(self, PrefixFlag::PrefixPushdata)
+    }
+
+    fn with_prefix_compact_size(&self) -> Bytes {
+        with_prefix(self, PrefixFlag::PrefixCompactSize)
+    }
+}
+
+fn with_prefix(data: &Bytes, flag: PrefixFlag) -> Bytes {
     let mut return_vec = Vec::<u8>::new();
     let data_len = data.len();
 
