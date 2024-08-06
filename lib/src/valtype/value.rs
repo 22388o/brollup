@@ -2,6 +2,7 @@
 
 use crate::serialize::cpe::CompactPayloadEncoding;
 use bit_vec::BitVec;
+use uintx::{u24, u40, u48, u56};
 
 #[derive(Clone, Copy)]
 pub struct ShortVal(pub u32);
@@ -50,8 +51,8 @@ impl CompactPayloadEncoding for ShortVal {
                 bit_vec.push(false);
                 bit_vec.push(true);
 
-                let val_bytes = vec![(value & 0xFF) as u8, (value >> 8 & 0xFF) as u8];
-                let val_bits = BitVec::from_bytes(&val_bytes);
+                let val_array: [u8; 2] = (value as u16).to_le_bytes();
+                let val_bits = BitVec::from_bytes(&val_array);
                 bit_vec.extend(val_bits);
             }
 
@@ -60,13 +61,8 @@ impl CompactPayloadEncoding for ShortVal {
                 bit_vec.push(true);
                 bit_vec.push(false);
 
-                let val_bytes = vec![
-                    (value & 0xFF) as u8,
-                    ((value >> 8) & 0xFF) as u8,
-                    ((value >> 16) & 0xFF) as u8,
-                ];
-
-                let val_bits = BitVec::from_bytes(&val_bytes);
+                let val_array: [u8; 3] = u24::from(value).to_le_bytes();
+                let val_bits = BitVec::from_bytes(&val_array);
                 bit_vec.extend(val_bits);
             }
 
@@ -75,14 +71,8 @@ impl CompactPayloadEncoding for ShortVal {
                 bit_vec.push(true);
                 bit_vec.push(true);
 
-                let val_bytes = vec![
-                    (value & 0xFF) as u8,
-                    ((value >> 8) & 0xFF) as u8,
-                    ((value >> 16) & 0xFF) as u8,
-                    ((value >> 24) & 0xFF) as u8,
-                ];
-
-                let val_bits = BitVec::from_bytes(&val_bytes);
+                let val_array: [u8; 4] = (value as u32).to_le_bytes();
+                let val_bits = BitVec::from_bytes(&val_array);
                 bit_vec.extend(val_bits);
             }
         }
@@ -109,15 +99,8 @@ impl CompactPayloadEncoding for LongVal {
                 bit_vec.push(false);
                 bit_vec.push(false);
 
-                let val_bytes = vec![
-                    (value & 0xFF) as u8,
-                    ((value >> 8) & 0xFF) as u8,
-                    ((value >> 16) & 0xFF) as u8,
-                    ((value >> 24) & 0xFF) as u8,
-                    ((value >> 32) & 0xFF) as u8,
-                ];
-
-                let val_bits = BitVec::from_bytes(&val_bytes);
+                let val_array: [u8; 5] = u40::from(value).to_le_bytes();
+                let val_bits = BitVec::from_bytes(&val_array);
                 bit_vec.extend(val_bits);
             }
 
@@ -127,16 +110,8 @@ impl CompactPayloadEncoding for LongVal {
                 bit_vec.push(false);
                 bit_vec.push(true);
 
-                let val_bytes = vec![
-                    (value & 0xFF) as u8,
-                    ((value >> 8) & 0xFF) as u8,
-                    ((value >> 16) & 0xFF) as u8,
-                    ((value >> 24) & 0xFF) as u8,
-                    ((value >> 32) & 0xFF) as u8,
-                    ((value >> 40) & 0xFF) as u8,
-                ];
-
-                let val_bits = BitVec::from_bytes(&val_bytes);
+                let val_array: [u8; 6] = u48::from(value).to_le_bytes();
+                let val_bits = BitVec::from_bytes(&val_array);
                 bit_vec.extend(val_bits);
             }
 
@@ -146,17 +121,8 @@ impl CompactPayloadEncoding for LongVal {
                 bit_vec.push(true);
                 bit_vec.push(false);
 
-                let val_bytes = vec![
-                    (value & 0xFF) as u8,
-                    ((value >> 8) & 0xFF) as u8,
-                    ((value >> 16) & 0xFF) as u8,
-                    ((value >> 24) & 0xFF) as u8,
-                    ((value >> 32) & 0xFF) as u8,
-                    ((value >> 40) & 0xFF) as u8,
-                    ((value >> 48) & 0xFF) as u8,
-                ];
-
-                let val_bits = BitVec::from_bytes(&val_bytes);
+                let val_array: [u8; 7] = u56::from(value).to_le_bytes();
+                let val_bits = BitVec::from_bytes(&val_array);
                 bit_vec.extend(val_bits);
             }
 
@@ -166,17 +132,8 @@ impl CompactPayloadEncoding for LongVal {
                 bit_vec.push(true);
                 bit_vec.push(true);
 
-                let val_bytes = vec![
-                    (value & 0xFF) as u8,
-                    ((value >> 8) & 0xFF) as u8,
-                    ((value >> 16) & 0xFF) as u8,
-                    ((value >> 24) & 0xFF) as u8,
-                    ((value >> 32) & 0xFF) as u8,
-                    ((value >> 40) & 0xFF) as u8,
-                    ((value >> 48) & 0xFF) as u8,
-                ];
-
-                let val_bits = BitVec::from_bytes(&val_bytes);
+                let val_array: [u8; 8] = value.to_le_bytes();
+                let val_bits = BitVec::from_bytes(&val_array);
                 bit_vec.extend(val_bits);
             }
         }
