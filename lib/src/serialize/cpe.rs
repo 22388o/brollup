@@ -13,7 +13,7 @@ impl CommonIndex for BitVec {
     fn from_u8_common_index(common_index: &u8) -> Self {
         let mut bit_vec = BitVec::new();
 
-        // 3-bit common index encoding:
+        // 3-bit common index encoding
         match common_index {
             0 => {
                 // 0b000
