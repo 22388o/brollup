@@ -11,7 +11,7 @@ pub trait Prefix {
 }
 
 impl Prefix for Bytes {
-    fn prefix_pushdata(&self) -> Self {
+    fn prefix_pushdata(&self) -> Bytes {
         let mut bytes = Vec::<u8>::new();
         let data_len = self.len();
 
@@ -83,7 +83,7 @@ impl Prefix for Bytes {
         bytes
     }
 
-    fn prefix_compact_size(&self) -> Self {
+    fn prefix_compact_size(&self) -> Bytes {
         let mut bytes = Vec::<u8>::new();
         let data_len = self.len();
 
