@@ -5,20 +5,20 @@ use bit_vec::BitVec;
 use crate::serialize::{common_index::CommonIndex, cpe::CompactPayloadEncoding};
 use std::u8;
 
-pub trait CommonValtype {}
+pub trait MaybeCommonValtype {}
 
-impl CommonValtype for super::account::Account {}
-impl CommonValtype for super::contract::Contract {}
-impl CommonValtype for super::value::ShortVal {}
-impl CommonValtype for super::value::LongVal {}
+impl MaybeCommonValtype for super::account::Account {}
+impl MaybeCommonValtype for super::contract::Contract {}
+impl MaybeCommonValtype for super::value::ShortVal {}
+impl MaybeCommonValtype for super::value::LongVal {}
 
 #[derive(Clone, Copy)]
-pub enum MaybeCommon<T: CommonValtype + CompactPayloadEncoding> {
+pub enum MaybeCommon<T: MaybeCommonValtype + CompactPayloadEncoding> {
     Common(T, u8),
     Uncommon(T),
 }
 
-impl<T: CommonValtype + CompactPayloadEncoding> CompactPayloadEncoding for MaybeCommon<T> {
+impl<T: MaybeCommonValtype + CompactPayloadEncoding> CompactPayloadEncoding for MaybeCommon<T> {
     fn to_cpe(&self) -> BitVec {
         let mut bit_vec = BitVec::new();
 
