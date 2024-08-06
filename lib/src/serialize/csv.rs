@@ -1,4 +1,4 @@
-use super::prefix::with_prefix_pushdata;
+use super::prefix::{add_prefix, PrefixFlag};
 
 type Bytes = Vec<u8>;
 
@@ -89,7 +89,10 @@ pub fn to_csv_script_encode(flag: CSVFlag) -> Bytes {
         CSVFlag::CSVThreeMonths => encoded.extend(vec![0x02, 0xa0, 0x32]),
         CSVFlag::CSVSixMonths => encoded.extend(vec![0x02, 0x40, 0x65]),
         CSVFlag::CSVYear => encoded.extend(vec![0x03, 0x50, 0xcd, 0x00]),
-        CSVFlag::Days(days) => encoded.extend(with_prefix_pushdata(&days_to_bytes(days, true))),
+        CSVFlag::Days(days) => encoded.extend(add_prefix(
+            &days_to_bytes(days, true),
+            PrefixFlag::PrefixPushdata,
+        )),
     }
 
     // OP_CHECKSEQUENCEVERIFY

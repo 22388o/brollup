@@ -1,9 +1,7 @@
 #[cfg(test)]
 mod serialize_test {
     use brollup::serialize::{
-        csv::{to_csv_script_encode, to_n_sequence_encode, CSVFlag},
-        prefix::with_prefix_pushdata,
-        push::{chunkify, PushFlag},
+        csv::{to_csv_script_encode, to_n_sequence_encode, CSVFlag}, prefix::{add_prefix, PrefixFlag}, push::{chunkify, PushFlag}
     };
 
     #[test]
@@ -11,17 +9,17 @@ mod serialize_test {
         let data_1 = hex::decode("aa").unwrap();
         let expected_1 = hex::decode("01aa").unwrap();
 
-        assert_eq!(with_prefix_pushdata(&data_1), expected_1);
+        assert_eq!(add_prefix(&data_1, PrefixFlag::PrefixPushdata), expected_1);
 
         let data_2 = hex::decode("aaaa").unwrap();
         let expected_2 = hex::decode("02aaaa").unwrap();
 
-        assert_eq!(with_prefix_pushdata(&data_2), expected_2);
+        assert_eq!(add_prefix(&data_2, PrefixFlag::PrefixPushdata), expected_2);
 
         let data_3 = hex::decode("aaaaaaaaaa").unwrap();
         let expected_3 = hex::decode("05aaaaaaaaaa").unwrap();
 
-        assert_eq!(with_prefix_pushdata(&data_3), expected_3);
+        assert_eq!(add_prefix(&data_3, PrefixFlag::PrefixPushdata), expected_3);
 
         let data_4 = hex::decode(
             "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
@@ -29,61 +27,61 @@ mod serialize_test {
         .unwrap();
         let expected_4 = hex::decode("2aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa").unwrap();
 
-        assert_eq!(with_prefix_pushdata(&data_4), expected_4);
+        assert_eq!(add_prefix(&data_4, PrefixFlag::PrefixPushdata), expected_4);
 
         let data_5 = hex::decode("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa").unwrap();
         let expected_5 = hex::decode("4baaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa").unwrap();
 
-        assert_eq!(with_prefix_pushdata(&data_5), expected_5);
+        assert_eq!(add_prefix(&data_5, PrefixFlag::PrefixPushdata), expected_5);
 
         let data_6 = hex::decode("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa").unwrap();
         let expected_6 = hex::decode("4c4daaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa").unwrap();
 
-        assert_eq!(with_prefix_pushdata(&data_6), expected_6);
+        assert_eq!(add_prefix(&data_6, PrefixFlag::PrefixPushdata), expected_6);
 
         let data_7 = hex::decode("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa").unwrap();
         let expected_7 = hex::decode("4d0a01aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa").unwrap();
 
-        assert_eq!(with_prefix_pushdata(&data_7), expected_7);
+        assert_eq!(add_prefix(&data_7, PrefixFlag::PrefixPushdata), expected_7);
 
         // Minimal pushes
 
         let data_8 = hex::decode("").unwrap();
         let expected_8 = hex::decode("00").unwrap();
 
-        assert_eq!(with_prefix_pushdata(&data_8), expected_8);
+        assert_eq!(add_prefix(&data_8, PrefixFlag::PrefixPushdata), expected_8);
 
         let data_9 = hex::decode("01").unwrap();
         let expected_9 = hex::decode("51").unwrap();
 
-        assert_eq!(with_prefix_pushdata(&data_9), expected_9);
+        assert_eq!(add_prefix(&data_9, PrefixFlag::PrefixPushdata), expected_9);
 
         let data_10 = hex::decode("09").unwrap();
         let expected_10 = hex::decode("59").unwrap();
 
-        assert_eq!(with_prefix_pushdata(&data_10), expected_10);
+        assert_eq!(add_prefix(&data_10, PrefixFlag::PrefixPushdata), expected_10);
 
         let data_11 = hex::decode("0a").unwrap();
         let expected_11 = hex::decode("5a").unwrap();
 
-        assert_eq!(with_prefix_pushdata(&data_11), expected_11);
+        assert_eq!(add_prefix(&data_11, PrefixFlag::PrefixPushdata), expected_11);
 
         let data_12 = hex::decode("0f").unwrap();
         let expected_12 = hex::decode("5f").unwrap();
 
-        assert_eq!(with_prefix_pushdata(&data_12), expected_12);
+        assert_eq!(add_prefix(&data_12, PrefixFlag::PrefixPushdata), expected_12);
 
         let data_13 = hex::decode("10").unwrap();
         let expected_13 = hex::decode("60").unwrap();
 
-        assert_eq!(with_prefix_pushdata(&data_13), expected_13);
+        assert_eq!(add_prefix(&data_13, PrefixFlag::PrefixPushdata), expected_13);
 
         let data_14 = hex::decode("11").unwrap();
         let not_expected_14 = hex::decode("61").unwrap();
         let expected_14 = hex::decode("0111").unwrap();
 
-        assert_eq!(with_prefix_pushdata(&data_14), expected_14);
-        assert_ne!(with_prefix_pushdata(&data_14), not_expected_14);
+        assert_eq!(add_prefix(&data_14, PrefixFlag::PrefixPushdata), expected_14);
+        assert_ne!(add_prefix(&data_14, PrefixFlag::PrefixPushdata), not_expected_14);
     }
 
     #[test]
