@@ -34,7 +34,7 @@ impl<T: CommonValtype + CompactPayloadEncoding> CompactPayloadEncoding for Maybe
                 // Common bit: true
                 bit_vec.push(true);
                 // 3-bit common index encoding
-                bit_vec.extend(BitVec::from_u8(common_index));
+                bit_vec.extend(BitVec::from_u8_common_index(common_index));
                 bit_vec
             }
         }
