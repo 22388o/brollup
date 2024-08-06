@@ -2,23 +2,23 @@
 
 use bit_vec::BitVec;
 
-use crate::serialize::{common_index::common_index_from_u8, cpe::CompactPayloadEncoding};
+use crate::serialize::{common_index::CommonIndex, cpe::CompactPayloadEncoding};
 use std::u8;
 
-pub trait Commonable {}
+pub trait CommonValtype {}
 
-impl Commonable for super::account::Account {}
-impl Commonable for super::contract::Contract {}
-impl Commonable for super::value::ShortVal {}
-impl Commonable for super::value::LongVal {}
+impl CommonValtype for super::account::Account {}
+impl CommonValtype for super::contract::Contract {}
+impl CommonValtype for super::value::ShortVal {}
+impl CommonValtype for super::value::LongVal {}
 
 #[derive(Clone, Copy)]
-pub enum MaybeCommon<T: Commonable + CompactPayloadEncoding> {
+pub enum MaybeCommon<T: CommonValtype + CompactPayloadEncoding> {
     Common(T, u8),
     Uncommon(T),
 }
 
-impl<T: Commonable + CompactPayloadEncoding> CompactPayloadEncoding for MaybeCommon<T> {
+impl<T: CommonValtype + CompactPayloadEncoding> CompactPayloadEncoding for MaybeCommon<T> {
     fn to_cpe(&self) -> BitVec {
         let mut bit_vec = BitVec::new();
 
@@ -34,7 +34,7 @@ impl<T: Commonable + CompactPayloadEncoding> CompactPayloadEncoding for MaybeCom
                 // Common bit: true
                 bit_vec.push(true);
                 // 3-bit common index encoding
-                bit_vec.extend(common_index_from_u8(common_index));
+                bit_vec.extend(BitVec::from_u8(common_index));
                 bit_vec
             }
         }
