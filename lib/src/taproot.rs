@@ -423,7 +423,7 @@ pub fn hash_tap_leaf(raw_script_vec: &Bytes, version: u8) -> [u8; 32] {
     let mut data: Bytes = Vec::new();
 
     data.extend(&[version]);
-    data.extend(raw_script_vec.with_prefix_compact_size());
+    data.extend(raw_script_vec.prefix_compact_size());
 
     tagged_hash(data, HashTag::TapLeafTag)
 }

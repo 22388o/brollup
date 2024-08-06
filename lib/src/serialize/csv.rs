@@ -89,7 +89,7 @@ pub fn to_csv_script_encode(flag: CSVFlag) -> Bytes {
         CSVFlag::CSVThreeMonths => encoded.extend(vec![0x02, 0xa0, 0x32]),
         CSVFlag::CSVSixMonths => encoded.extend(vec![0x02, 0x40, 0x65]),
         CSVFlag::CSVYear => encoded.extend(vec![0x03, 0x50, 0xcd, 0x00]),
-        CSVFlag::Days(days) => encoded.extend(&days_to_bytes(days, true).with_prefix_pushdata()),
+        CSVFlag::Days(days) => encoded.extend(&days_to_bytes(days, true).prefix_pushdata()),
     }
 
     // OP_CHECKSEQUENCEVERIFY
