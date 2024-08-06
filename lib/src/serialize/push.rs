@@ -2,7 +2,6 @@ use super::prefix::Prefix;
 
 type Bytes = Vec<u8>;
 
-#[derive(Clone)]
 enum PushFlag {
     StandardWitnessPush,
     NonStandardWitnessPush,
@@ -16,22 +15,22 @@ pub trait Push {
     // Put data in chunks, 520/80 bytes-long each.
     fn put_in_witness_chunks(&self, standard: bool) -> Vec<Bytes>;
 
-    // Put data in chunks, 520 bytes-long each, and serialize the chunks into a single piece.
+    // Put data in chunks, 520 bytes-long each, then encode the chunks into a single byte vector.
     fn as_multi_pushdata_push(&self) -> Bytes;
 
-    // Put data in chunks, 520/80 bytes-long each, and serialize the chunks into a single piece.
+    // Put data in chunks, 520/80 bytes-long each, then encode the chunks into a single byte vector.
     fn as_multi_witness_push(&self, standard: bool) -> Bytes;
 }
 
 impl Push for Bytes {
     fn put_in_pushdata_chunks(&self) -> Vec<Bytes> {
-        chunkify(self, PushFlag::ScriptPush)
+        chunkify(self, &PushFlag::ScriptPush)
     }
 
     fn put_in_witness_chunks(&self, standard: bool) -> Vec<Bytes> {
         match standard {
-            false => chunkify(self, PushFlag::NonStandardWitnessPush),
-            true => chunkify(self, PushFlag::StandardWitnessPush),
+            false => chunkify(self, &PushFlag::NonStandardWitnessPush),
+            true => chunkify(self, &PushFlag::StandardWitnessPush),
         }
     }
 
@@ -47,7 +46,7 @@ impl Push for Bytes {
     }
 }
 
-fn chunkify(data: &Bytes, flag: PushFlag) -> Vec<Bytes> {
+fn chunkify(data: &Bytes, flag: &PushFlag) -> Vec<Bytes> {
     let mut chunks: Vec<Bytes> = Vec::<Bytes>::new();
 
     let data_len = data.len();
@@ -97,7 +96,7 @@ fn chunkify(data: &Bytes, flag: PushFlag) -> Vec<Bytes> {
 
 fn encode_multi_push(data: &Bytes, flag: PushFlag) -> Bytes {
     let mut encoded: Bytes = Vec::<u8>::new();
-    let chunks: Vec<Bytes> = chunkify(data, flag.clone());
+    let chunks: Vec<Bytes> = chunkify(data, &flag);
 
     for chunk in chunks {
         match flag {
