@@ -77,7 +77,7 @@ impl Prefix for Bytes {
                     let x_bytes: [u8; 4] = (data_len as u32).to_le_bytes();
                     bytes.extend(x_bytes);
                 }
-                _ => panic!("The data is out of range to prefix."),
+                _ => panic!("The data cannot be prefixed because it is too large."),
             }
             bytes.extend(self);
         }
@@ -108,7 +108,7 @@ impl Prefix for Bytes {
                 let data_len_bytes: [u8; 8] = (data_len as u64).to_le_bytes();
                 bytes.extend(data_len_bytes);
             }
-            _ => panic!("The data is out of range to prefix."),
+            _ => panic!("The data cannot be prefixed because it is too large."),
         }
         bytes.extend(self);
         bytes
