@@ -17,7 +17,7 @@ impl Prefix for Bytes {
         let data_len = self.len();
 
         if data_len == 1 && &self[0] <= &0x10 {
-            // Minimal push
+            // Check minimal push.
             // https://github.com/bitcoin/bitcoin/blob/master/src/script/script.cpp#L366
             match &self[0] {
                 // OP_0
