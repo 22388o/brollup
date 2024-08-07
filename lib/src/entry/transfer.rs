@@ -141,14 +141,3 @@ impl Serialize for Transfer {
         ))
     }
 }
-
-impl Sighash for Transfer {
-    fn sighash(&self, prev_state_hash: [u8; 32]) -> [u8; 32] {
-        let mut sighash_preimage = Vec::<u8>::new();
-
-        sighash_preimage.extend(prev_state_hash);
-        sighash_preimage.extend(self.serialize());
-
-        tagged_hash(sighash_preimage, HashTag::SighashTransfer)
-    }
-}
