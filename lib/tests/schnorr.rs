@@ -1,6 +1,6 @@
 #[cfg(test)]
 mod schnorr_tests {
-    use brollup::signature::schnorr::{schnorr_sign, SignError, SignFlag};
+    use brollup::signature::schnorr::{schnorr_sign, schnorr_verify, SignError, SignFlag};
 
     #[test]
     fn test_sign_with_even_key() -> Result<(), SignError> {
@@ -53,5 +53,28 @@ mod schnorr_tests {
                 }
             }
         }
+    }
+
+    #[test]
+    fn test_verify_schnorr() {
+        let message =
+            hex::decode("e97f06fabc231539119048bd3c55d0aa6015ed157532e6a5e6fb15aae331791d")
+                .unwrap();
+        let public_key =
+            hex::decode("dee61ab0f4cb3a993cb13c552e44f5abfbf1b377c08b0380da14de41234ea8bd")
+                .unwrap();
+
+        // corresponding secret key: 09f5dde60c19101b671a5e3f4e6f0c0aaa92814170edf7f6bc19b5a21e358a51
+
+        let signature = hex::decode("3cdbcc837e40a3b360f09387fd376e62b3f0c509b45a770adfd71f4006de72abbb8e6d1591f7a18165722d1aa035e1372532527fadf64ab71839728d8c2c468e").unwrap();
+
+        let verify = schnorr_verify(
+            public_key.try_into().unwrap(),
+            message.try_into().unwrap(),
+            signature.try_into().unwrap(),
+            SignFlag::EntrySign,
+        );
+
+        assert_eq!(verify, true);
     }
 }
