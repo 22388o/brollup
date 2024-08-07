@@ -38,8 +38,8 @@ pub fn schnorr_sign(
 
     let public_key = secret_key.base_point_mul();
 
-    // In this scope we assume supplied 'secret' parameter has_even_y(P), or otherwise it is invalid.
-    // We are not interested in negating the secret key if it has_odd_y(P). We simply return an InvalidSecretKey error.
+    // In this scope we assume supplied 'secret' parameter has_even_y(P).
+    // We are not interested in negating the secret key otherwise: we simply return an InvalidSecretKey error.
     if bool::from(public_key.parity()) == true {
         return Err(SignError::InvalidSecretKey);
     }
