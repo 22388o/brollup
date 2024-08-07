@@ -13,7 +13,7 @@ impl MaybeCommonType for super::value::ShortVal {}
 impl MaybeCommonType for super::value::LongVal {}
 
 #[derive(Clone, Copy)]
-pub enum MaybeCommon<T: MaybeCommonType + CompactPayloadEncoding> {
+pub enum MaybeCommon<T: MaybeCommonType> {
     Common(T, u8),
     Uncommon(T),
 }
