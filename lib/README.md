@@ -1,4 +1,4 @@
-# Bitcoin VM Library
+# Brollup Library
 Work in progress.
 
 - Taproot ✅
