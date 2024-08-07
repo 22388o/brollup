@@ -61,22 +61,22 @@ pub fn schnorr_sign(
             challenge_preimage.extend(public_nonce.serialize_xonly());
             challenge_preimage.extend(public_key.serialize_xonly());
             challenge_preimage.extend(message);
-            tagged_hash(challenge_preimage.to_vec(), HashTag::BIP0340Challenge)
+            tagged_hash(challenge_preimage, HashTag::BIP0340Challenge)
         }
         SignFlag::EntrySign => {
             // Do not follow BIP-340 for computing challange e.
             // Challange e is = H(m) instead of H(R||P||m).
-            tagged_hash(message.to_vec(), HashTag::EntryChallenge)
+            tagged_hash(message, HashTag::EntryChallenge)
         }
         SignFlag::ProtocolMessageSign => {
             // Do not follow BIP-340 for computing challange e.
             // Challange e is = H(m) instead of H(R||P||m).
-            tagged_hash(message.to_vec(), HashTag::ProtocolMessageChallenge)
+            tagged_hash(message, HashTag::ProtocolMessageChallenge)
         }
         SignFlag::CustomMessageSign => {
             // Do not follow BIP-340 for computing challange e.
             // Challange e is = H(m) instead of H(R||P||m).
-            tagged_hash(message.to_vec(), HashTag::CustomMessageChallenge)
+            tagged_hash(message, HashTag::CustomMessageChallenge)
         }
     };
 
