@@ -7,9 +7,11 @@ type Bytes = Vec<u8>;
 type Key = XOnlyPublicKey;
 
 use crate::{
+    hash::{tagged_hash, HashTag},
     serialize::{
         cpe::CompactPayloadEncoding,
         serialization::{Serialization, SerializationError},
+        sighash::Sighash,
     },
     valtype::{account::Account, maybe_common::MaybeCommon, value::ShortVal},
 };
@@ -137,5 +139,16 @@ impl Serialization for Transfer {
             to_account,
             amount_short_val,
         ))
+    }
+}
+
+impl Sighash for Transfer {
+    fn sighash(&self, prev_state_hash: [u8; 32]) -> [u8; 32] {
+        let mut sighash_preimage = Vec::<u8>::new();
+
+        sighash_preimage.extend(prev_state_hash);
+        sighash_preimage.extend(self.serialize());
+
+        tagged_hash(sighash_preimage, HashTag::SighashTransfer)
     }
 }
