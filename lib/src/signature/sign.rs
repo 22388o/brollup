@@ -48,7 +48,7 @@ pub fn schnorr_sign(
     let challange_e_bytes: [u8; 32] = match flag {
         SignFlag::BIP340Signing => {
             let public_key = secret_key.base_point_mul();
-            // Follows BIP-340 for computing challange e.
+            // Follow BIP-340 for computing challange e.
             // Challange e is = H(R||P||m).
             let mut challange_preimage = Vec::<u8>::with_capacity(96);
             challange_preimage.extend(public_nonce.serialize_xonly());
@@ -57,7 +57,7 @@ pub fn schnorr_sign(
             tagged_hash(challange_preimage.to_vec(), HashTag::BIP0340Challange)
         }
         SignFlag::EntrySigning => {
-            // Does not follow BIP-340 for computing challange e.
+            // Do not follow BIP-340 for computing challange e.
             // Challange e is = H(m) instead of H(R||P||m).
             tagged_hash(message.to_vec(), HashTag::BrollupChallenge)
         }
