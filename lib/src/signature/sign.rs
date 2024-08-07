@@ -80,7 +80,7 @@ pub fn schnorr_sign(
         }
     };
 
-    // challange e is = int(challange_e_bytes) mod n.
+    // Challange e is = int(challange_e_bytes) mod n.
     let challange_e = match MaybeScalar::reduce_from(&challange_e_bytes) {
         MaybeScalar::Zero => return Err(SignError::InvalidScalar),
         MaybeScalar::Valid(scalar) => scalar,
