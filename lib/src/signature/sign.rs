@@ -9,6 +9,7 @@ pub enum SignFlag {
     CustomMessageSign,
 }
 
+#[derive(Debug)]
 pub enum SignError {
     SignatureParseError,
     InvalidPrivateKey,
