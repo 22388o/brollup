@@ -2,13 +2,9 @@ use super::transfer::Transfer;
 use crate::{
     hash::{tagged_hash, HashTag},
     serialization::{cpe::CompactPayloadEncoding, serialize::Serialize, sighash::Sighash},
-    signature::{
-        nonce::deterministic_nonce,
-        sign::{Sign, SignError},
-    },
+    signature::sign::{schnorr_sign, Sign, SignError, SignFlag},
 };
 use bit_vec::BitVec;
-use secp::MaybeScalar;
 
 pub enum Entry {
     Transfer(Transfer),
@@ -40,26 +36,10 @@ impl Sighash for Entry {
 
 impl Sign for Entry {
     fn sign(&self, secret_key: [u8; 32], prev_state_hash: [u8; 32]) -> Result<[u8; 64], SignError> {
-        let secret_key_scalar = MaybeScalar::reduce_from(&secret_key);
+        // Message is the sighash of Entry.
+        let message = self.sighash(prev_state_hash);
 
-        // Entry signing does not follow BIP-340 for computing challange e. 
-        // Challange e is = H(m) instead of H(R||P||m).
-        let e = self.sighash(prev_state_hash);
-        let e_scalar = MaybeScalar::reduce_from(&e);
-
-        let deterministic_private_nonce = deterministic_nonce(secret_key, e);
-        let private_nonce_scalar = MaybeScalar::reduce_from(&deterministic_private_nonce);
-        let public_nonce = private_nonce_scalar.base_point_mul();
-
-        let s = private_nonce_scalar + secret_key_scalar * e_scalar;
-
-        let mut signature = Vec::<u8>::new();
-
-        signature.extend(public_nonce.serialize_xonly());
-        signature.extend(s.serialize());
-
-        signature
-            .try_into()
-            .map_err(|_| SignError::InvalidPrivateKey)
+        // Sign the message with the 'Entry Signing' method.
+        schnorr_sign(secret_key, message, SignFlag::EntrySigning)
     }
 }

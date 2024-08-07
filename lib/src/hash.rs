@@ -46,6 +46,8 @@ pub enum HashTag {
     SighashRecharge,
     SighashReserved,
     DeterministicNonce,
+    BIP0340Challange,
+    BrollupChallenge,
     CustomTag(String),
 }
 
@@ -56,13 +58,15 @@ pub fn tagged_hash(data: Bytes, tag: HashTag) -> [u8; 32] {
         HashTag::TapLeaf => Sha256::digest("TapLeaf"),
         HashTag::TapBranch => Sha256::digest("TapBranch"),
         HashTag::TapTweak => Sha256::digest("TapTweak"),
-        HashTag::SighashTransfer => Sha256::digest("SighashTransfer"),
-        HashTag::SighashCall => Sha256::digest("SighashCall"),
-        HashTag::SighashLiftup => Sha256::digest("SighashLiftup"),
-        HashTag::SighashLiftdown => Sha256::digest("SighashLiftdown"),
-        HashTag::SighashRecharge => Sha256::digest("SighashRecharge"),
-        HashTag::SighashReserved => Sha256::digest("SighashReserved"),
-        HashTag::DeterministicNonce => Sha256::digest("DeterministicNonce"),
+        HashTag::SighashTransfer => Sha256::digest("Brollup/sighashtransfer"),
+        HashTag::SighashCall => Sha256::digest("Brollup/sighashcall"),
+        HashTag::SighashLiftup => Sha256::digest("Brollup/sighashliftup"),
+        HashTag::SighashLiftdown => Sha256::digest("Brollup/sighashliftdown"),
+        HashTag::SighashRecharge => Sha256::digest("Brollup/sighashrecharge"),
+        HashTag::SighashReserved => Sha256::digest("Brollup/sighashreserved"),
+        HashTag::DeterministicNonce => Sha256::digest("Brollup/deterministicnonce"),
+        HashTag::BIP0340Challange => Sha256::digest("BIP0340/challenge"),
+        HashTag::BrollupChallenge => Sha256::digest("Brollup/challenge"),
         HashTag::CustomTag(tag) => Sha256::digest(tag),
     };
 
