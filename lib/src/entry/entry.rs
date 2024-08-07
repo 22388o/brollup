@@ -2,7 +2,7 @@ use super::transfer::Transfer;
 use crate::{
     hash::{tagged_hash, HashTag},
     serialization::{cpe::CompactPayloadEncoding, serialize::Serialize, sighash::Sighash},
-    signature::sign::{schnorr_sign, Sign, SignError, SignFlag},
+    signature::schnorr::{schnorr_sign, Sign, SignError, SignFlag},
 };
 use bit_vec::BitVec;
 
