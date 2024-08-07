@@ -14,6 +14,7 @@ pub enum SignError {
     SignatureParseError,
     InvalidScalar,
     InvalidPoint,
+    InvalidSecretKey,
 }
 pub trait Sign {
     fn sign(&self, secret_key: [u8; 32], prev_state_hash: [u8; 32]) -> Result<[u8; 64], SignError>;
@@ -35,19 +36,26 @@ pub fn schnorr_sign(
         MaybeScalar::Valid(scalar) => scalar,
     };
 
+    let public_key = secret_key.base_point_mul();
+
+    // In this scope we assume supplied 'secret' parameter has_even_y(P), or otherwise it is invalid.
+    // We are not interested in negating the secret key if it has_odd_y(P). We simply return an InvalidSecretKey error.
+    if bool::from(public_key.parity()) == true {
+        return Err(SignError::InvalidSecretKey);
+    }
+
     // Nonce generation is deterministic.
     // Secret nonce is = H(sk||m).
-    let private_nonce_bytes = deterministic_nonce(secret, message);
-    let private_nonce = match MaybeScalar::reduce_from(&private_nonce_bytes) {
+    let secret_nonce_bytes = deterministic_nonce(secret, message);
+    let secret_nonce = match MaybeScalar::reduce_from(&secret_nonce_bytes) {
         MaybeScalar::Zero => return Err(SignError::InvalidScalar),
         MaybeScalar::Valid(scalar) => scalar,
     };
-    let public_nonce = private_nonce.base_point_mul();
+    let public_nonce = secret_nonce.base_point_mul();
 
     // Compute the challenge e bytes based on whether it is a BIP-340 or a Brollup-native signing method.
     let challange_e_bytes: [u8; 32] = match flag {
         SignFlag::BIP340Sign => {
-            let public_key = secret_key.base_point_mul();
             // Follow BIP-340 for computing challenge e.
             // Challenge e is = H(R||P||m).
             let mut challenge_preimage = Vec::<u8>::with_capacity(96);
@@ -80,7 +88,7 @@ pub fn schnorr_sign(
     };
 
     // s commitment is = k + ed mod n.
-    let s_commitment = match private_nonce + challange_e * secret_key {
+    let s_commitment = match secret_nonce + challange_e * secret_key {
         MaybeScalar::Zero => return Err(SignError::InvalidScalar),
         MaybeScalar::Valid(scalar) => scalar,
     };
