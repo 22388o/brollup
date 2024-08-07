@@ -27,7 +27,7 @@ mod schnorr_tests {
 
     #[test]
     fn test_sign_with_odd_key() {
-        // We expect ddd key use to return SignError::InvalidSecretKey.
+        // We expect odd key use to return SignError::InvalidSecretKey.
         let message =
             hex::decode("e97f06fabc231539119048bd3c55d0aa6015ed157532e6a5e6fb15aae331791d")
                 .unwrap();
