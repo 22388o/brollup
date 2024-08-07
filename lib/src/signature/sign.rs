@@ -46,7 +46,7 @@ pub fn schnorr_sign(
     };
     let public_nonce = private_nonce.base_point_mul();
 
-    // Compute challenge e bytes based on whether it is a BIP-340 or some other signing method.
+    // Compute the challenge e bytes based on whether it is a BIP-340 or a Brollup-native signing method.
     let challange_e_bytes: [u8; 32] = match flag {
         SignFlag::BIP340Sign => {
             let public_key = secret_key.base_point_mul();
