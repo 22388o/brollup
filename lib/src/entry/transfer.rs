@@ -48,6 +48,24 @@ impl Transfer {
             }
         }
     }
+
+    pub fn set_to_common_index(&mut self, common_index: u8) {
+        let to = match self.to {
+            MaybeCommon::Uncommon(to) => to,
+            MaybeCommon::Common(to, _) => to,
+        };
+
+        self.to = MaybeCommon::Common(to, common_index);
+    }
+
+    pub fn set_amount_common_index(&mut self, common_index: u8) {
+        let amount = match self.amount {
+            MaybeCommon::Uncommon(amount) => amount,
+            MaybeCommon::Common(amount, _) => amount,
+        };
+
+        self.amount = MaybeCommon::Common(amount, common_index);
+    }
 }
 
 impl CompactPayloadEncoding for Transfer {
