@@ -95,6 +95,9 @@ impl Serialize for Transfer {
     fn serialize(&self) -> Bytes {
         let mut bytes = Vec::<u8>::new();
 
+        // Entry type: 0x00
+        bytes.push(0x00);
+
         // From
         let from = self.from.key().serialize();
         bytes.extend(from);
@@ -117,18 +120,24 @@ impl Serialize for Transfer {
     }
 
     fn from_bytes(bytes: Bytes) -> Result<Transfer, SerializeError> {
+        // Entry type: 0x00
+        let entry_type = &bytes[0..1];
+        if entry_type != &[0x00] {
+            return Err(SerializeError::EntryTypeError);
+        }
+
         // From
-        let from = &bytes[0..32];
+        let from = &bytes[1..33];
         let from_key = Key::from_slice(from).map_err(|_| SerializeError::KeyParseError)?;
         let from_account = Account::new(from_key);
 
         // To
-        let to = &bytes[32..64];
+        let to = &bytes[33..65];
         let to_key = Key::from_slice(to).map_err(|_| SerializeError::KeyParseError)?;
         let to_account = Account::new(to_key);
 
         // Amount
-        let amount: &[u8] = &bytes[64..68];
+        let amount: &[u8] = &bytes[65..69];
         let amount_u32 = u32::from_le_bytes([amount[0], amount[1], amount[2], amount[3]]);
         let amount_short_val = ShortVal::new(amount_u32);
 
