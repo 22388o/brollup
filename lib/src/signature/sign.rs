@@ -1,8 +1,6 @@
-use secp::MaybeScalar;
-
-use crate::hash::{tagged_hash, HashTag};
-
 use super::nonce::deterministic_nonce;
+use crate::hash::{tagged_hash, HashTag};
+use secp::MaybeScalar;
 
 pub enum SignFlag {
     BIP340Sign,
