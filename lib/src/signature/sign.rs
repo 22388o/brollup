@@ -5,8 +5,10 @@ use crate::hash::{tagged_hash, HashTag};
 use super::nonce::deterministic_nonce;
 
 pub enum SignFlag {
-    EntrySigning,
-    BIP340Signing,
+    BIP340Sign,
+    EntrySign,
+    ProtocolMessageSign,
+    CustomMessageSign,
 }
 
 pub enum SignError {
@@ -46,7 +48,7 @@ pub fn schnorr_sign(
 
     // Compute challenge e bytes based on whether it is a BIP-340 or a custom Brollup signing.
     let challange_e_bytes: [u8; 32] = match flag {
-        SignFlag::BIP340Signing => {
+        SignFlag::BIP340Sign => {
             let public_key = secret_key.base_point_mul();
             // Follow BIP-340 for computing challenge e.
             // Challenge e is = H(R||P||m).
@@ -56,10 +58,20 @@ pub fn schnorr_sign(
             challenge_preimage.extend(message);
             tagged_hash(challenge_preimage.to_vec(), HashTag::BIP0340Challenge)
         }
-        SignFlag::EntrySigning => {
+        SignFlag::EntrySign => {
             // Do not follow BIP-340 for computing challange e.
             // Challange e is = H(m) instead of H(R||P||m).
-            tagged_hash(message.to_vec(), HashTag::BrollupChallenge)
+            tagged_hash(message.to_vec(), HashTag::EntryChallenge)
+        }
+        SignFlag::ProtocolMessageSign => {
+            // Do not follow BIP-340 for computing challange e.
+            // Challange e is = H(m) instead of H(R||P||m).
+            tagged_hash(message.to_vec(), HashTag::ProtocolMessageChallenge)
+        }
+        SignFlag::CustomMessageSign => {
+            // Do not follow BIP-340 for computing challange e.
+            // Challange e is = H(m) instead of H(R||P||m).
+            tagged_hash(message.to_vec(), HashTag::CustomMessageChallenge)
         }
     };
 

@@ -40,6 +40,6 @@ impl Sign for Entry {
         let message = self.sighash(prev_state_hash);
 
         // Sign the message with the 'Entry Signing' method.
-        schnorr_sign(secret_key, message, SignFlag::EntrySigning)
+        schnorr_sign(secret_key, message, SignFlag::EntrySign)
     }
 }
