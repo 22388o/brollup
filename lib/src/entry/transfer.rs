@@ -33,6 +33,21 @@ impl Transfer {
             amount: MaybeCommon::Uncommon(amount),
         }
     }
+
+    pub fn set_from_account_index(&mut self, account_index: u32) {
+        self.from.set_account_index(account_index);
+    }
+
+    pub fn set_to_account_index(&mut self, account_index: u32) {
+        match self.to {
+            MaybeCommon::Uncommon(mut to) => {
+                to.set_account_index(account_index);
+            }
+            MaybeCommon::Common(mut to, _) => {
+                to.set_account_index(account_index);
+            }
+        }
+    }
 }
 
 impl CompactPayloadEncoding for Transfer {
