@@ -4,7 +4,7 @@ use bit_vec::BitVec;
 use musig2::secp256k1::{self, XOnlyPublicKey};
 
 use crate::entry::entry::Entry;
-use crate::musig2::keys_to_key_agg_ctx;
+use crate::signature::musig2::keys_to_key_agg_ctx;
 use crate::serialization::cpe::CompactPayloadEncoding;
 use crate::serialization::csv::CSVFlag;
 use crate::serialization::push::Push;

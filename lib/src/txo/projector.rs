@@ -1,7 +1,7 @@
 #![allow(dead_code)]
 
 use crate::{
-    musig2::keys_to_key_agg_ctx,
+    signature::musig2::keys_to_key_agg_ctx,
     serialization::csv::{to_csv_script_encode, CSVFlag},
     taproot::{TapLeaf, TapRoot, P2TR},
     well_known::operator,

@@ -1,6 +1,6 @@
 #![allow(dead_code)]
 
-use crate::{musig2::keys_to_key_agg_ctx, taproot::{TapRoot, P2TR}, well_known::operator};
+use crate::{signature::musig2::keys_to_key_agg_ctx, taproot::{TapRoot, P2TR}, well_known::operator};
 use musig2::{secp256k1::{self, PublicKey, XOnlyPublicKey}, KeyAggContext};
 
 type Bytes = Vec<u8>;
