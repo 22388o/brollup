@@ -42,6 +42,8 @@ impl Sign for Entry {
     fn sign(&self, secret_key: [u8; 32], prev_state_hash: [u8; 32]) -> Result<[u8; 64], SignError> {
         let secret_key_scalar = MaybeScalar::reduce_from(&secret_key);
 
+        // Entry signing does not follow BIP-340 for computing challange e. 
+        // Challange e is = H(m) instead of H(R||P||m).
         let e = self.sighash(prev_state_hash);
         let e_scalar = MaybeScalar::reduce_from(&e);
 
