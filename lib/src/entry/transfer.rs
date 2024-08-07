@@ -7,11 +7,9 @@ type Bytes = Vec<u8>;
 type Key = XOnlyPublicKey;
 
 use crate::{
-    hash::{tagged_hash, HashTag},
     serialization::{
         cpe::CompactPayloadEncoding,
         serialize::{Serialize, SerializeError},
-        sighash::Sighash,
     },
     valtype::{account::Account, maybe_common::MaybeCommon, value::ShortVal},
 };
