@@ -425,7 +425,7 @@ pub fn hash_tap_leaf(raw_script_vec: &Bytes, version: u8) -> [u8; 32] {
     data.extend(&[version]);
     data.extend(raw_script_vec.prefix_compact_size());
 
-    tagged_hash(data, HashTag::TapLeafTag)
+    tagged_hash(data, HashTag::TapLeaf)
 }
 
 pub fn hash_tap_branch(left_branch_vec: &Bytes, right_branch_vec: &Bytes) -> [u8; 32] {
@@ -434,7 +434,7 @@ pub fn hash_tap_branch(left_branch_vec: &Bytes, right_branch_vec: &Bytes) -> [u8
     data.extend(left_branch_vec);
     data.extend(right_branch_vec);
 
-    tagged_hash(data, HashTag::TapBranchTag)
+    tagged_hash(data, HashTag::TapBranch)
 }
 
 pub fn hash_tap_tweak(inner_key_vec: &Bytes, tweak_vec: &Bytes) -> [u8; 32] {
@@ -443,5 +443,5 @@ pub fn hash_tap_tweak(inner_key_vec: &Bytes, tweak_vec: &Bytes) -> [u8; 32] {
     data.extend(inner_key_vec);
     data.extend(tweak_vec);
 
-    tagged_hash(data, HashTag::TapTweakTag)
+    tagged_hash(data, HashTag::TapTweak)
 }
