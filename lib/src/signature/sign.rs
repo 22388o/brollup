@@ -12,7 +12,6 @@ pub enum SignFlag {
 #[derive(Debug)]
 pub enum SignError {
     SignatureParseError,
-    InvalidPrivateKey,
     InvalidScalar,
     InvalidPoint,
 }
