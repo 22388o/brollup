@@ -10,21 +10,21 @@ type Key = XOnlyPublicKey;
 #[derive(Clone, Copy)]
 pub struct Account {
     key: Key,
-    key_index: Option<u32>,
+    account_index: Option<u32>,
 }
 
 impl Account {
     pub fn new(key: Key) -> Account {
         Account {
             key,
-            key_index: None,
+            account_index: None,
         }
     }
 
-    pub fn new_compact(key: Key, index: u32) -> Account {
+    pub fn new_compact(key: Key, account_index: u32) -> Account {
         Account {
             key,
-            key_index: Some(index),
+            account_index: Some(account_index),
         }
     }
 
@@ -32,12 +32,12 @@ impl Account {
         self.key
     }
 
-    pub fn key_index(&self) -> Option<u32> {
-        self.key_index
+    pub fn account_index(&self) -> Option<u32> {
+        self.account_index
     }
 
-    pub fn set_key_index(&mut self, key_index: u32) {
-        self.key_index = Some(key_index);
+    pub fn set_account_index(&mut self, account_index: u32) {
+        self.account_index = Some(account_index);
     }
 }
 
@@ -45,7 +45,7 @@ impl CompactPayloadEncoding for Account {
     fn to_cpe(&self) -> BitVec {
         let mut bit_vec = BitVec::new();
 
-        match self.key_index {
+        match self.account_index {
             None => {
                 // Non-compact form
                 bit_vec.push(false);
