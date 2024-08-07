@@ -31,6 +31,14 @@ impl Account {
     pub fn key(&self) -> Key {
         self.key
     }
+
+    pub fn key_index(&self) -> Option<u32> {
+        self.key_index
+    }
+
+    pub fn set_key_index(&mut self, key_index: u32) {
+        self.key_index = Some(key_index);
+    }
 }
 
 impl CompactPayloadEncoding for Account {
