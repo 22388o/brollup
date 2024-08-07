@@ -36,9 +36,15 @@ pub fn hash_160(data: impl AsRef<[u8]>) -> [u8; 20] {
 }
 
 pub enum HashTag {
-    TapLeafTag,
-    TapBranchTag,
-    TapTweakTag,
+    TapLeaf,
+    TapBranch,
+    TapTweak,
+    SighashTransfer,
+    SighashCall,
+    SighashLiftup,
+    SighashLiftdown,
+    SighashRecharge,
+    SighashReserved,
     CustomTag(String),
 }
 
@@ -46,9 +52,15 @@ pub fn tagged_hash(data: Bytes, tag: HashTag) -> [u8; 32] {
     let mut preimage = Vec::<u8>::new();
 
     let tag_digest = match tag {
-        HashTag::TapLeafTag => Sha256::digest("TapLeaf"),
-        HashTag::TapBranchTag => Sha256::digest("TapBranch"),
-        HashTag::TapTweakTag => Sha256::digest("TapTweak"),
+        HashTag::TapLeaf => Sha256::digest("TapLeaf"),
+        HashTag::TapBranch => Sha256::digest("TapBranch"),
+        HashTag::TapTweak => Sha256::digest("TapTweak"),
+        HashTag::SighashTransfer => Sha256::digest("SighashTransfer"),
+        HashTag::SighashCall => Sha256::digest("SighashCall"),
+        HashTag::SighashLiftup => Sha256::digest("SighashLiftup"),
+        HashTag::SighashLiftdown => Sha256::digest("SighashLiftdown"),
+        HashTag::SighashRecharge => Sha256::digest("SighashRecharge"),
+        HashTag::SighashReserved => Sha256::digest("SighashReserved"),
         HashTag::CustomTag(tag) => Sha256::digest(tag),
     };
 
