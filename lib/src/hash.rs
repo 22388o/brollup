@@ -53,7 +53,7 @@ pub enum HashTag {
     CustomTag(String),
 }
 
-pub fn tagged_hash(data: Bytes, tag: HashTag) -> [u8; 32] {
+pub fn tagged_hash(data: impl AsRef<[u8]>, tag: HashTag) -> [u8; 32] {
     let mut preimage = Vec::<u8>::new();
 
     let tag_digest = match tag {
@@ -76,7 +76,7 @@ pub fn tagged_hash(data: Bytes, tag: HashTag) -> [u8; 32] {
 
     preimage.extend(tag_digest);
     preimage.extend(tag_digest);
-    preimage.extend(data);
+    preimage.extend(data.as_ref());
 
     sha_256(preimage)
 }
