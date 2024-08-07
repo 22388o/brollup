@@ -5,11 +5,11 @@ use musig2::secp256k1::{self, XOnlyPublicKey};
 
 use crate::entry::entry::Entry;
 use crate::musig2::keys_to_key_agg_ctx;
-use crate::serialize::cpe::CompactPayloadEncoding;
-use crate::serialize::csv::CSVFlag;
-use crate::serialize::push::Push;
+use crate::serialization::cpe::CompactPayloadEncoding;
+use crate::serialization::csv::CSVFlag;
+use crate::serialization::push::Push;
 use crate::taproot::{TapLeaf, P2TR};
-use crate::{hash::hash_160, serialize::csv::to_csv_script_encode, taproot::TapRoot};
+use crate::{hash::hash_160, serialization::csv::to_csv_script_encode, taproot::TapRoot};
 
 type Bytes = Vec<u8>;
 type Key = XOnlyPublicKey;

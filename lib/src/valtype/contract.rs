@@ -1,7 +1,7 @@
 #![allow(dead_code)]
 
 use super::value::ShortVal;
-use crate::serialize::cpe::CompactPayloadEncoding;
+use crate::serialization::cpe::CompactPayloadEncoding;
 use bit_vec::BitVec;
 
 #[derive(Clone, Copy)]

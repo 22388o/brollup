@@ -1,4 +1,4 @@
-pub mod serialize;
+pub mod serialization;
 pub mod taproot;
 pub mod txo;
 pub mod well_known;

@@ -2,7 +2,7 @@
 
 use bit_vec::BitVec;
 
-use crate::serialize::{cpe::CommonIndex, cpe::CompactPayloadEncoding};
+use crate::serialization::{cpe::CommonIndex, cpe::CompactPayloadEncoding};
 use std::u8;
 
 pub trait MaybeCommonType {}

@@ -1,7 +1,7 @@
 #![allow(dead_code)]
 
 use crate::hash::{tagged_hash, HashTag};
-use crate::serialize::prefix::Prefix;
+use crate::serialization::prefix::Prefix;
 use lazy_static::lazy_static;
 use musig2::secp256k1::{self, Parity, PublicKey, Scalar, Secp256k1, XOnlyPublicKey};
 use std::cmp::Ordering;

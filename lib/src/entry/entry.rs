@@ -1,5 +1,5 @@
 use super::transfer::Transfer;
-use crate::serialize::cpe::CompactPayloadEncoding;
+use crate::serialization::cpe::CompactPayloadEncoding;
 use bit_vec::BitVec;
 
 pub enum Entry {

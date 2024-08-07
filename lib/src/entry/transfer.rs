@@ -8,9 +8,9 @@ type Key = XOnlyPublicKey;
 
 use crate::{
     hash::{tagged_hash, HashTag},
-    serialize::{
+    serialization::{
         cpe::CompactPayloadEncoding,
-        serialization::{Serialization, SerializationError},
+        serialize::{Serialize, SerializeError},
         sighash::Sighash,
     },
     valtype::{account::Account, maybe_common::MaybeCommon, value::ShortVal},
@@ -93,7 +93,7 @@ impl CompactPayloadEncoding for Transfer {
     }
 }
 
-impl Serialization for Transfer {
+impl Serialize for Transfer {
     fn serialize(&self) -> Bytes {
         let mut bytes = Vec::<u8>::new();
 
@@ -118,15 +118,15 @@ impl Serialization for Transfer {
         bytes
     }
 
-    fn from_bytes(bytes: Bytes) -> Result<Transfer, SerializationError> {
+    fn from_bytes(bytes: Bytes) -> Result<Transfer, SerializeError> {
         // From
         let from = &bytes[0..32];
-        let from_key = Key::from_slice(from).map_err(|_| SerializationError::KeyParseError)?;
+        let from_key = Key::from_slice(from).map_err(|_| SerializeError::KeyParseError)?;
         let from_account = Account::new(from_key);
 
         // To
         let to = &bytes[32..64];
-        let to_key = Key::from_slice(to).map_err(|_| SerializationError::KeyParseError)?;
+        let to_key = Key::from_slice(to).map_err(|_| SerializeError::KeyParseError)?;
         let to_account = Account::new(to_key);
 
         // Amount
