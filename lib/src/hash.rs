@@ -45,6 +45,7 @@ pub enum HashTag {
     SighashLiftdown,
     SighashRecharge,
     SighashReserved,
+    DeterministicNonce,
     CustomTag(String),
 }
 
@@ -61,6 +62,7 @@ pub fn tagged_hash(data: Bytes, tag: HashTag) -> [u8; 32] {
         HashTag::SighashLiftdown => Sha256::digest("SighashLiftdown"),
         HashTag::SighashRecharge => Sha256::digest("SighashRecharge"),
         HashTag::SighashReserved => Sha256::digest("SighashReserved"),
+        HashTag::DeterministicNonce => Sha256::digest("DeterministicNonce"),
         HashTag::CustomTag(tag) => Sha256::digest(tag),
     };
 

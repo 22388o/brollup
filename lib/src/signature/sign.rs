@@ -1,9 +1,3 @@
-use secp::Scalar;
-
-pub fn random_scalar() -> Scalar {
-    Scalar::two()
-}
-
 pub enum SignError {
     InvalidPrivateKey,
 }
