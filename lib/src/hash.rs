@@ -46,7 +46,7 @@ pub enum HashTag {
     SighashRecharge,
     SighashReserved,
     DeterministicNonce,
-    BIP0340Challange,
+    BIP0340Challenge,
     BrollupChallenge,
     CustomTag(String),
 }
@@ -65,7 +65,7 @@ pub fn tagged_hash(data: Bytes, tag: HashTag) -> [u8; 32] {
         HashTag::SighashRecharge => Sha256::digest("Brollup/sighashrecharge"),
         HashTag::SighashReserved => Sha256::digest("Brollup/sighashreserved"),
         HashTag::DeterministicNonce => Sha256::digest("Brollup/deterministicnonce"),
-        HashTag::BIP0340Challange => Sha256::digest("BIP0340/challenge"),
+        HashTag::BIP0340Challenge => Sha256::digest("BIP0340/challenge"),
         HashTag::BrollupChallenge => Sha256::digest("Brollup/challenge"),
         HashTag::CustomTag(tag) => Sha256::digest(tag),
     };
