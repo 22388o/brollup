@@ -3,7 +3,7 @@ use crate::{
     hash::{tagged_hash, HashTag},
     serialization::{cpe::CompactPayloadEncoding, serialize::Serialize, sighash::Sighash},
     signature::{
-        deterministic_nonce::deterministic_nonce,
+        nonce::deterministic_nonce,
         sign::{Sign, SignError},
     },
 };
