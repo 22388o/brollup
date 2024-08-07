@@ -25,11 +25,6 @@ pub fn schnorr_sign(
     message: [u8; 32],
     flag: SignFlag,
 ) -> Result<[u8; 64], SignError> {
-    // Check if the message is a valid scalar.
-    if let MaybeScalar::Zero = MaybeScalar::reduce_from(&message) {
-        return Err(SignError::InvalidScalar);
-    }
-
     // Check if the secret key is a valid scalar.
     let secret_key = match MaybeScalar::reduce_from(&secret) {
         MaybeScalar::Zero => return Err(SignError::InvalidScalar),
