@@ -47,11 +47,15 @@ pub fn schnorr_sign(
     // Nonce generation is deterministic.
     // Secret nonce is = H(sk||m).
     let secret_nonce_bytes = deterministic_nonce(secret, message);
-    let secret_nonce = match MaybeScalar::reduce_from(&secret_nonce_bytes) {
+    let mut secret_nonce = match MaybeScalar::reduce_from(&secret_nonce_bytes) {
         MaybeScalar::Zero => return Err(SignError::InvalidScalar),
         MaybeScalar::Valid(scalar) => scalar,
     };
-    let public_nonce = secret_nonce.base_point_mul();
+    let mut public_nonce = secret_nonce.base_point_mul();
+
+    // Negate the nonce if it has_odd_y(R).
+    secret_nonce = secret_nonce.negate_if(public_nonce.parity());
+    public_nonce = public_nonce.negate_if(public_nonce.parity());
 
     // Compute the challenge e bytes based on whether it is a BIP-340 or a Brollup-native signing method.
     let challange_e_bytes: [u8; 32] = match flag {
