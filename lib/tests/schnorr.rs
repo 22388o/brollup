@@ -40,9 +40,9 @@ mod schnorr_tests {
         let signature = hex::decode("3cdbcc837e40a3b360f09387fd376e62b3f0c509b45a770adfd71f4006de72abbb8e6d1591f7a18165722d1aa035e1372532527fadf64ab71839728d8c2c468e").unwrap();
 
         schnorr_verify(
-            &public_key.try_into().unwrap(),
-            &message.try_into().unwrap(),
-            &signature.try_into().unwrap(),
+            public_key.try_into().unwrap(),
+            message.try_into().unwrap(),
+            signature.try_into().unwrap(),
             SignFlag::EntrySign,
         )
     }

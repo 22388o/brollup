@@ -30,11 +30,11 @@ pub trait IntoPoint {
     fn into_point(&self) -> Result<Point, SchnorrError>;
 }
 
-impl IntoPoint for &[u8; 32] {
+impl IntoPoint for [u8; 32] {
     fn into_point(&self) -> Result<Point, SchnorrError> {
         let mut point_bytes = Vec::with_capacity(33);
         point_bytes.push(0x02);
-        point_bytes.extend(self.as_ref());
+        point_bytes.extend(self);
 
         let point = match MaybePoint::from_slice(&point_bytes) {
             Ok(maybe_point) => match maybe_point {
@@ -54,10 +54,10 @@ pub trait IntoScalar {
     fn into_scalar(&self) -> Result<Scalar, SchnorrError>;
 }
 
-impl IntoScalar for &[u8; 32] {
+impl IntoScalar for [u8; 32] {
     fn into_scalar(&self) -> Result<Scalar, SchnorrError> {
         let mut scalar_bytes = Vec::with_capacity(32);
-        scalar_bytes.extend(self.as_ref());
+        scalar_bytes.extend(self);
 
         let scalar = match MaybeScalar::from_slice(&scalar_bytes) {
             Ok(maybe_scalar) => match maybe_scalar {
@@ -74,15 +74,12 @@ impl IntoScalar for &[u8; 32] {
 }
 
 pub fn schnorr_sign(
-    secret: [u8; 32],
-    message: [u8; 32],
+    secret_key_bytes: [u8; 32],
+    message_bytes: [u8; 32],
     flag: SignFlag,
 ) -> Result<[u8; 64], SchnorrError> {
     // Check if the secret key is a valid scalar.
-    let mut secret_key = match MaybeScalar::reduce_from(&secret) {
-        MaybeScalar::Zero => return Err(SchnorrError::InvalidScalar),
-        MaybeScalar::Valid(scalar) => scalar,
-    };
+    let mut secret_key = secret_key_bytes.into_scalar()?;
 
     let mut public_key = secret_key.base_point_mul();
 
@@ -92,11 +89,9 @@ pub fn schnorr_sign(
 
     // Nonce generation is deterministic.
     // Secret nonce is = H(sk||m).
-    let secret_nonce_bytes = deterministic_nonce(secret, message);
-    let mut secret_nonce = match MaybeScalar::reduce_from(&secret_nonce_bytes) {
-        MaybeScalar::Zero => return Err(SchnorrError::InvalidScalar),
-        MaybeScalar::Valid(scalar) => scalar,
-    };
+    let secret_nonce_bytes = deterministic_nonce(secret_key_bytes, message_bytes);
+    let mut secret_nonce = secret_nonce_bytes.into_scalar()?;
+
     let mut public_nonce = secret_nonce.base_point_mul();
 
     // Negate the nonce if it has_odd_y(R).
@@ -111,31 +106,28 @@ pub fn schnorr_sign(
             let mut challenge_preimage = Vec::<u8>::with_capacity(96);
             challenge_preimage.extend(public_nonce.serialize_xonly());
             challenge_preimage.extend(public_key.serialize_xonly());
-            challenge_preimage.extend(message);
+            challenge_preimage.extend(message_bytes);
             tagged_hash(challenge_preimage, HashTag::BIP0340Challenge)
         }
         SignFlag::EntrySign => {
             // Do not follow BIP-340 for computing challange e.
             // Challange e is = H(m) instead of H(R||P||m).
-            tagged_hash(message, HashTag::EntryChallenge)
+            tagged_hash(message_bytes, HashTag::EntryChallenge)
         }
         SignFlag::ProtocolMessageSign => {
             // Do not follow BIP-340 for computing challange e.
             // Challange e is = H(m) instead of H(R||P||m).
-            tagged_hash(message, HashTag::ProtocolMessageChallenge)
+            tagged_hash(message_bytes, HashTag::ProtocolMessageChallenge)
         }
         SignFlag::CustomMessageSign => {
             // Do not follow BIP-340 for computing challange e.
             // Challange e is = H(m) instead of H(R||P||m).
-            tagged_hash(message, HashTag::CustomMessageChallenge)
+            tagged_hash(message_bytes, HashTag::CustomMessageChallenge)
         }
     };
 
     // Challange e is = int(challange_e_bytes) mod n.
-    let challange_e = match MaybeScalar::reduce_from(&challange_e_bytes) {
-        MaybeScalar::Zero => return Err(SchnorrError::InvalidScalar),
-        MaybeScalar::Valid(scalar) => scalar,
-    };
+    let challange_e = challange_e_bytes.into_scalar()?;
 
     // s commitment is = k + ed mod n.
     let s_commitment = match secret_nonce + challange_e * secret_key {
@@ -159,16 +151,16 @@ pub fn schnorr_sign(
 }
 
 pub fn schnorr_verify(
-    public_key_bytes: &[u8; 32],
-    message_bytes: &[u8; 32],
-    signature_bytes: &[u8; 64],
+    public_key_bytes: [u8; 32],
+    message_bytes: [u8; 32],
+    signature_bytes: [u8; 64],
     flag: SignFlag,
 ) -> Result<(), SchnorrError> {
     // Public key
     let public_key = public_key_bytes.into_point()?;
 
     // Parse public nonce bytes
-    let public_nonce_bytes: &[u8; 32] = &signature_bytes[0..32]
+    let public_nonce_bytes: [u8; 32] = signature_bytes[0..32]
         .try_into()
         .map_err(|_| SchnorrError::NonceParseError)?;
 
@@ -204,10 +196,10 @@ pub fn schnorr_verify(
     };
 
     // Challange e is = int(challange_e_bytes) mod n.
-    let challange_e = (&challange_e_bytes).into_scalar()?;
+    let challange_e = challange_e_bytes.into_scalar()?;
 
     // Parse s commitment bytes
-    let s_commitment_bytes: &[u8; 32] = &signature_bytes[32..64]
+    let s_commitment_bytes: [u8; 32] = signature_bytes[32..64]
         .try_into()
         .map_err(|_| SchnorrError::SignatureParseError)?;
 
