@@ -12,7 +12,6 @@ pub enum SignFlag {
 #[derive(Debug)]
 pub enum SecpError {
     SignatureParseError,
-    NonceParseError,
     InvalidSignature,
     InvalidScalar,
     InvalidPoint,
@@ -162,7 +161,7 @@ pub fn schnorr_verify(
     // Parse public nonce bytes
     let public_nonce_bytes: [u8; 32] = signature_bytes[0..32]
         .try_into()
-        .map_err(|_| SecpError::NonceParseError)?;
+        .map_err(|_| SecpError::SignatureParseError)?;
 
     // Public nonce
     let public_nonce = public_nonce_bytes.into_point()?;
