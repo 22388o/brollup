@@ -10,7 +10,7 @@ pub enum SignFlag {
 }
 
 #[derive(Debug)]
-pub enum SchnorrError {
+pub enum SecpError {
     SignatureParseError,
     NonceParseError,
     InvalidSignature,
@@ -23,15 +23,15 @@ pub trait Sign {
         &self,
         secret_key: [u8; 32],
         prev_state_hash: [u8; 32],
-    ) -> Result<[u8; 64], SchnorrError>;
+    ) -> Result<[u8; 64], SecpError>;
 }
 
 pub trait IntoPoint {
-    fn into_point(&self) -> Result<Point, SchnorrError>;
+    fn into_point(&self) -> Result<Point, SecpError>;
 }
 
 impl IntoPoint for [u8; 32] {
-    fn into_point(&self) -> Result<Point, SchnorrError> {
+    fn into_point(&self) -> Result<Point, SecpError> {
         let mut point_bytes = Vec::with_capacity(33);
         point_bytes.push(0x02);
         point_bytes.extend(self);
@@ -39,11 +39,11 @@ impl IntoPoint for [u8; 32] {
         let point = match MaybePoint::from_slice(&point_bytes) {
             Ok(maybe_point) => match maybe_point {
                 MaybePoint::Infinity => {
-                    return Err(SchnorrError::InvalidPoint);
+                    return Err(SecpError::InvalidPoint);
                 }
                 MaybePoint::Valid(point) => point,
             },
-            Err(_) => return Err(SchnorrError::InvalidPoint),
+            Err(_) => return Err(SecpError::InvalidPoint),
         };
 
         Ok(point)
@@ -51,22 +51,22 @@ impl IntoPoint for [u8; 32] {
 }
 
 pub trait IntoScalar {
-    fn into_scalar(&self) -> Result<Scalar, SchnorrError>;
+    fn into_scalar(&self) -> Result<Scalar, SecpError>;
 }
 
 impl IntoScalar for [u8; 32] {
-    fn into_scalar(&self) -> Result<Scalar, SchnorrError> {
+    fn into_scalar(&self) -> Result<Scalar, SecpError> {
         let mut scalar_bytes = Vec::with_capacity(32);
         scalar_bytes.extend(self);
 
         let scalar = match MaybeScalar::from_slice(&scalar_bytes) {
             Ok(maybe_scalar) => match maybe_scalar {
                 MaybeScalar::Zero => {
-                    return Err(SchnorrError::InvalidScalar);
+                    return Err(SecpError::InvalidScalar);
                 }
                 MaybeScalar::Valid(point) => point,
             },
-            Err(_) => return Err(SchnorrError::InvalidScalar),
+            Err(_) => return Err(SecpError::InvalidScalar),
         };
 
         Ok(scalar)
@@ -77,7 +77,7 @@ pub fn schnorr_sign(
     secret_key_bytes: [u8; 32],
     message_bytes: [u8; 32],
     flag: SignFlag,
-) -> Result<[u8; 64], SchnorrError> {
+) -> Result<[u8; 64], SecpError> {
     // Check if the secret key is a valid scalar.
     let mut secret_key = secret_key_bytes.into_scalar()?;
 
@@ -131,7 +131,7 @@ pub fn schnorr_sign(
 
     // s commitment is = k + ed mod n.
     let s_commitment = match secret_nonce + challange_e * secret_key {
-        MaybeScalar::Zero => return Err(SchnorrError::InvalidScalar),
+        MaybeScalar::Zero => return Err(SecpError::InvalidScalar),
         MaybeScalar::Valid(scalar) => scalar,
     };
 
@@ -147,7 +147,7 @@ pub fn schnorr_sign(
     // Signature is = bytes(R) || bytes((k + ed) mod n).
     signature
         .try_into()
-        .map_err(|_| SchnorrError::SignatureParseError)
+        .map_err(|_| SecpError::SignatureParseError)
 }
 
 pub fn schnorr_verify(
@@ -155,14 +155,14 @@ pub fn schnorr_verify(
     message_bytes: [u8; 32],
     signature_bytes: [u8; 64],
     flag: SignFlag,
-) -> Result<(), SchnorrError> {
+) -> Result<(), SecpError> {
     // Public key
     let public_key = public_key_bytes.into_point()?;
 
     // Parse public nonce bytes
     let public_nonce_bytes: [u8; 32] = signature_bytes[0..32]
         .try_into()
-        .map_err(|_| SchnorrError::NonceParseError)?;
+        .map_err(|_| SecpError::NonceParseError)?;
 
     // Public nonce
     let public_nonce = public_nonce_bytes.into_point()?;
@@ -201,20 +201,20 @@ pub fn schnorr_verify(
     // Parse s commitment bytes
     let s_commitment_bytes: [u8; 32] = signature_bytes[32..64]
         .try_into()
-        .map_err(|_| SchnorrError::SignatureParseError)?;
+        .map_err(|_| SecpError::SignatureParseError)?;
 
     // S commitment
     let s_commitment = s_commitment_bytes.into_scalar()?;
 
     let equation = match public_nonce + challange_e * public_key {
         MaybePoint::Infinity => {
-            return Err(SchnorrError::InvalidPoint);
+            return Err(SecpError::InvalidPoint);
         }
         MaybePoint::Valid(point) => point,
     };
 
     match s_commitment.base_point_mul() == equation {
-        false => return Err(SchnorrError::InvalidSignature),
+        false => return Err(SecpError::InvalidSignature),
         true => return Ok(()),
     }
 }

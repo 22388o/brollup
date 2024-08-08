@@ -1,9 +1,9 @@
 #[cfg(test)]
 mod schnorr_tests {
-    use brollup::signature::schnorr::{schnorr_sign, schnorr_verify, SchnorrError, SignFlag};
+    use brollup::signature::schnorr::{schnorr_sign, schnorr_verify, SecpError, SignFlag};
 
     #[test]
-    fn test_sign_schnorr() -> Result<(), SchnorrError> {
+    fn test_sign_schnorr() -> Result<(), SecpError> {
         let message =
             hex::decode("e97f06fabc231539119048bd3c55d0aa6015ed157532e6a5e6fb15aae331791d")
                 .unwrap();
@@ -26,7 +26,7 @@ mod schnorr_tests {
     }
 
     #[test]
-    fn test_verify_schnorr() -> Result<(), SchnorrError> {
+    fn test_verify_schnorr() -> Result<(), SecpError> {
         let message =
             hex::decode("e97f06fabc231539119048bd3c55d0aa6015ed157532e6a5e6fb15aae331791d")
                 .unwrap();

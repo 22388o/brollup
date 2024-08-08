@@ -2,7 +2,7 @@ use super::transfer::Transfer;
 use crate::{
     hash::{tagged_hash, HashTag},
     serialization::{cpe::CompactPayloadEncoding, serialize::Serialize, sighash::Sighash},
-    signature::schnorr::{schnorr_sign, Sign, SchnorrError, SignFlag},
+    signature::schnorr::{schnorr_sign, Sign, SecpError, SignFlag},
 };
 use bit_vec::BitVec;
 
@@ -35,7 +35,7 @@ impl Sighash for Entry {
 }
 
 impl Sign for Entry {
-    fn sign(&self, secret_key: [u8; 32], prev_state_hash: [u8; 32]) -> Result<[u8; 64], SchnorrError> {
+    fn sign(&self, secret_key: [u8; 32], prev_state_hash: [u8; 32]) -> Result<[u8; 64], SecpError> {
         // Message is the sighash of Entry.
         let message = self.sighash(prev_state_hash);
 
