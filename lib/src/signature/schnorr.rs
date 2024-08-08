@@ -26,18 +26,16 @@ pub fn schnorr_sign(
     flag: SignFlag,
 ) -> Result<[u8; 64], SignError> {
     // Check if the secret key is a valid scalar.
-    let secret_key = match MaybeScalar::reduce_from(&secret) {
+    let mut secret_key = match MaybeScalar::reduce_from(&secret) {
         MaybeScalar::Zero => return Err(SignError::InvalidScalar),
         MaybeScalar::Valid(scalar) => scalar,
     };
 
-    let public_key = secret_key.base_point_mul();
+    let mut public_key = secret_key.base_point_mul();
 
-    // In this scope we assume supplied 'secret' parameter has_even_y(P).
-    // We are not interested in negating the secret key otherwise: we simply return an InvalidSecretKey error.
-    if bool::from(public_key.parity()) == true {
-        return Err(SignError::InvalidSecretKey);
-    }
+    // Negate the secret key if it has_odd_y(R).
+    secret_key = secret_key.negate_if(public_key.parity());
+    public_key = public_key.negate_if(public_key.parity());
 
     // Nonce generation is deterministic.
     // Secret nonce is = H(sk||m).
