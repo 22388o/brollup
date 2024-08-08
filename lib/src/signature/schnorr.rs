@@ -1,6 +1,6 @@
 use super::nonce::deterministic_nonce;
 use crate::hash::{tagged_hash, HashTag};
-use secp::{MaybePoint, MaybeScalar};
+use secp::{MaybePoint, MaybeScalar, Point, Scalar};
 
 pub enum SignFlag {
     BIP340Sign,
@@ -10,23 +10,77 @@ pub enum SignFlag {
 }
 
 #[derive(Debug)]
-pub enum SignError {
+pub enum SchnorrError {
     SignatureParseError,
+    NonceParseError,
+    InvalidSignature,
     InvalidScalar,
     InvalidPoint,
 }
+
 pub trait Sign {
-    fn sign(&self, secret_key: [u8; 32], prev_state_hash: [u8; 32]) -> Result<[u8; 64], SignError>;
+    fn sign(
+        &self,
+        secret_key: [u8; 32],
+        prev_state_hash: [u8; 32],
+    ) -> Result<[u8; 64], SchnorrError>;
+}
+
+pub trait IntoPoint {
+    fn into_point(&self) -> Result<Point, SchnorrError>;
+}
+
+impl IntoPoint for &[u8; 32] {
+    fn into_point(&self) -> Result<Point, SchnorrError> {
+        let mut point_bytes = Vec::with_capacity(33);
+        point_bytes.push(0x02);
+        point_bytes.extend(self.as_ref());
+
+        let point = match MaybePoint::from_slice(&point_bytes) {
+            Ok(maybe_point) => match maybe_point {
+                MaybePoint::Infinity => {
+                    return Err(SchnorrError::InvalidPoint);
+                }
+                MaybePoint::Valid(point) => point,
+            },
+            Err(_) => return Err(SchnorrError::InvalidPoint),
+        };
+
+        Ok(point)
+    }
+}
+
+pub trait IntoScalar {
+    fn into_scalar(&self) -> Result<Scalar, SchnorrError>;
+}
+
+impl IntoScalar for &[u8; 32] {
+    fn into_scalar(&self) -> Result<Scalar, SchnorrError> {
+        let mut scalar_bytes = Vec::with_capacity(32);
+        scalar_bytes.extend(self.as_ref());
+
+        let scalar = match MaybeScalar::from_slice(&scalar_bytes) {
+            Ok(maybe_scalar) => match maybe_scalar {
+                MaybeScalar::Zero => {
+                    return Err(SchnorrError::InvalidScalar);
+                }
+                MaybeScalar::Valid(point) => point,
+            },
+            Err(_) => return Err(SchnorrError::InvalidScalar),
+        };
+
+        Ok(scalar)
+    }
 }
 
 pub fn schnorr_sign(
     secret: [u8; 32],
     message: [u8; 32],
     flag: SignFlag,
-) -> Result<[u8; 64], SignError> {
+) -> Result<[u8; 64], SchnorrError> {
     // Check if the secret key is a valid scalar.
     let mut secret_key = match MaybeScalar::reduce_from(&secret) {
-        MaybeScalar::Zero => return Err(SignError::InvalidScalar),
+        MaybeScalar::Zero => return Err(SchnorrError::InvalidScalar),
         MaybeScalar::Valid(scalar) => scalar,
     };
 
@@ -40,7 +94,7 @@ pub fn schnorr_sign(
     // Secret nonce is = H(sk||m).
     let secret_nonce_bytes = deterministic_nonce(secret, message);
     let mut secret_nonce = match MaybeScalar::reduce_from(&secret_nonce_bytes) {
-        MaybeScalar::Zero => return Err(SignError::InvalidScalar),
+        MaybeScalar::Zero => return Err(SchnorrError::InvalidScalar),
         MaybeScalar::Valid(scalar) => scalar,
     };
     let mut public_nonce = secret_nonce.base_point_mul();
@@ -79,13 +133,13 @@ pub fn schnorr_sign(
 
     // Challange e is = int(challange_e_bytes) mod n.
     let challange_e = match MaybeScalar::reduce_from(&challange_e_bytes) {
-        MaybeScalar::Zero => return Err(SignError::InvalidScalar),
+        MaybeScalar::Zero => return Err(SchnorrError::InvalidScalar),
         MaybeScalar::Valid(scalar) => scalar,
     };
 
     // s commitment is = k + ed mod n.
     let s_commitment = match secret_nonce + challange_e * secret_key {
-        MaybeScalar::Zero => return Err(SignError::InvalidScalar),
+        MaybeScalar::Zero => return Err(SchnorrError::InvalidScalar),
         MaybeScalar::Valid(scalar) => scalar,
     };
 
@@ -101,44 +155,25 @@ pub fn schnorr_sign(
     // Signature is = bytes(R) || bytes((k + ed) mod n).
     signature
         .try_into()
-        .map_err(|_| SignError::SignatureParseError)
+        .map_err(|_| SchnorrError::SignatureParseError)
 }
 
 pub fn schnorr_verify(
-    public_key: [u8; 32],
-    message: [u8; 32],
-    signature: [u8; 64],
+    public_key_bytes: &[u8; 32],
+    message_bytes: &[u8; 32],
+    signature_bytes: &[u8; 64],
     flag: SignFlag,
-) -> bool {
-    // Parse public key bytes
-    let mut public_key_bytes = vec![0x02];
-    public_key_bytes.extend(&public_key);
-
+) -> Result<(), SchnorrError> {
     // Public key
-    let public_key = match MaybePoint::from_slice(&public_key_bytes) {
-        Ok(maybe_point) => match maybe_point {
-            MaybePoint::Infinity => {
-                return false;
-            }
-            MaybePoint::Valid(point) => point,
-        },
-        Err(_) => return false,
-    };
+    let public_key = public_key_bytes.into_point()?;
 
     // Parse public nonce bytes
-    let mut public_nonce_bytes = vec![0x02];
-    public_nonce_bytes.extend(&signature[0..32]);
+    let public_nonce_bytes: &[u8; 32] = &signature_bytes[0..32]
+        .try_into()
+        .map_err(|_| SchnorrError::NonceParseError)?;
 
     // Public nonce
-    let public_nonce = match MaybePoint::from_slice(&public_nonce_bytes) {
-        Ok(maybe_point) => match maybe_point {
-            MaybePoint::Infinity => {
-                return false;
-            }
-            MaybePoint::Valid(point) => point,
-        },
-        Err(_) => return false,
-    };
+    let public_nonce = public_nonce_bytes.into_point()?;
 
     // Compute the challenge e bytes based on whether it is a BIP-340 or a Brollup-native signing method.
     let challange_e_bytes: [u8; 32] = match flag {
@@ -148,50 +183,46 @@ pub fn schnorr_verify(
             let mut challenge_preimage = Vec::<u8>::with_capacity(96);
             challenge_preimage.extend(public_nonce.serialize_xonly());
             challenge_preimage.extend(public_key.serialize_xonly());
-            challenge_preimage.extend(message);
+            challenge_preimage.extend(message_bytes);
             tagged_hash(challenge_preimage, HashTag::BIP0340Challenge)
         }
         SignFlag::EntrySign => {
             // Do not follow BIP-340 for computing challange e.
             // Challange e is = H(m) instead of H(R||P||m).
-            tagged_hash(message, HashTag::EntryChallenge)
+            tagged_hash(message_bytes, HashTag::EntryChallenge)
         }
         SignFlag::ProtocolMessageSign => {
             // Do not follow BIP-340 for computing challange e.
             // Challange e is = H(m) instead of H(R||P||m).
-            tagged_hash(message, HashTag::ProtocolMessageChallenge)
+            tagged_hash(message_bytes, HashTag::ProtocolMessageChallenge)
         }
         SignFlag::CustomMessageSign => {
             // Do not follow BIP-340 for computing challange e.
             // Challange e is = H(m) instead of H(R||P||m).
-            tagged_hash(message, HashTag::CustomMessageChallenge)
+            tagged_hash(message_bytes, HashTag::CustomMessageChallenge)
         }
     };
 
     // Challange e is = int(challange_e_bytes) mod n.
-    let challange_e = match MaybeScalar::reduce_from(&challange_e_bytes) {
-        MaybeScalar::Zero => return false,
-        MaybeScalar::Valid(scalar) => scalar,
-    };
+    let challange_e = (&challange_e_bytes).into_scalar()?;
 
     // Parse s commitment bytes
-    let s_commitment_bytes = &signature[32..64];
+    let s_commitment_bytes: &[u8; 32] = &signature_bytes[32..64]
+        .try_into()
+        .map_err(|_| SchnorrError::SignatureParseError)?;
 
     // S commitment
-    let s_commitment = match MaybeScalar::from_slice(s_commitment_bytes) {
-        Result::Ok(maybe_scalar) => match maybe_scalar {
-            MaybeScalar::Valid(scalar) => scalar,
-            MaybeScalar::Zero => return false,
-        },
-        Result::Err(_) => return false,
-    };
+    let s_commitment = s_commitment_bytes.into_scalar()?;
 
     let equation = match public_nonce + challange_e * public_key {
         MaybePoint::Infinity => {
-            return false;
+            return Err(SchnorrError::InvalidPoint);
         }
         MaybePoint::Valid(point) => point,
     };
 
-    s_commitment.base_point_mul() == equation
+    match s_commitment.base_point_mul() == equation {
+        false => return Err(SchnorrError::InvalidSignature),
+        true => return Ok(()),
+    }
 }
