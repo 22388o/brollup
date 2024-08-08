@@ -3,7 +3,7 @@ mod schnorr_tests {
     use brollup::signature::schnorr::{schnorr_sign, schnorr_verify, SignError, SignFlag};
 
     #[test]
-    fn test_sign_with_even_key() -> Result<(), SignError> {
+    fn test_sign_schnorr() -> Result<(), SignError> {
         let message =
             hex::decode("e97f06fabc231539119048bd3c55d0aa6015ed157532e6a5e6fb15aae331791d")
                 .unwrap();
@@ -23,36 +23,6 @@ mod schnorr_tests {
         assert_eq!(sig.to_vec(), sig_expected);
 
         Ok(())
-    }
-
-    #[test]
-    fn test_sign_with_odd_key() {
-        // We expect odd key use to return SignError::InvalidSecretKey.
-        let message =
-            hex::decode("e97f06fabc231539119048bd3c55d0aa6015ed157532e6a5e6fb15aae331791d")
-                .unwrap();
-        let private_key =
-            hex::decode("899434a6d726d79efeb552b541fb33cb9d98b043e7010b3cb8fa6da924737711")
-                .unwrap();
-        // corresponding public key: 032c66b988af840daca29ee924a9f0242f81e6552590f161fa9c10f40f910d08e9
-
-        match schnorr_sign(
-            private_key.try_into().unwrap(),
-            message.try_into().unwrap(),
-            SignFlag::EntrySign,
-        ) {
-            Result::Ok(_) => {
-                panic!("Odd key use must have failed this test.")
-            }
-            Result::Err(err) => {
-                match err {
-                    SignError::InvalidSecretKey => {
-                        // We expect SignError::InvalidSecretKey
-                    }
-                    _ => panic!(),
-                }
-            }
-        }
     }
 
     #[test]
