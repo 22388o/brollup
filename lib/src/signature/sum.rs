@@ -1,4 +1,5 @@
 use super::into::IntoPoint;
+use super::into::IntoScalar;
 use super::schnorr::SecpError;
 use secp::MaybePoint;
 use secp::MaybeScalar;
@@ -22,6 +23,19 @@ pub fn sum_scalars(scalars: Vec<Scalar>) -> Result<Scalar, SecpError> {
     Ok(sum)
 }
 
+pub fn sum_scalars_bytes(scalars_bytes: Vec<[u8; 32]>) -> Result<[u8; 32], SecpError> {
+    let mut scalars = Vec::<Scalar>::with_capacity(scalars_bytes.len());
+
+    for scalar_bytes in scalars_bytes {
+        let scalar = scalar_bytes.into_scalar()?;
+        scalars.push(scalar);
+    }
+
+    let sum = sum_scalars(scalars)?;
+
+    Ok(sum.serialize())
+}
+
 pub fn sum_points(points: Vec<Point>) -> Result<Point, SecpError> {
     if points.len() == 0 {
         return Err(SecpError::InvalidPoint);
@@ -39,15 +53,31 @@ pub fn sum_points(points: Vec<Point>) -> Result<Point, SecpError> {
     Ok(sum)
 }
 
-pub fn sum_public_keys(public_keys: Vec<[u8; 32]>) -> Result<[u8; 33], SecpError> {
-    let mut points = Vec::<Point>::with_capacity(public_keys.len());
+pub fn sum_points_bytes(points_bytes: Vec<[u8; 32]>) -> Result<[u8; 33], SecpError> {
+    let mut points = Vec::<Point>::with_capacity(points_bytes.len());
 
-    for public_key in public_keys {
-        let public_key_point = public_key.into_point()?;
-        points.push(public_key_point);
+    for point_bytes in points_bytes {
+        let point = point_bytes.into_point()?;
+        points.push(point);
     }
 
     let sum = sum_points(points)?;
 
     Ok(sum.serialize())
+}
+
+pub fn sum_public_keys(public_keys: Vec<[u8; 32]>) -> Result<[u8; 33], SecpError> {
+    sum_points_bytes(public_keys)
+}
+
+pub fn sum_public_nonces(public_nonces: Vec<[u8; 32]>) -> Result<[u8; 33], SecpError> {
+    sum_points_bytes(public_nonces)
+}
+
+pub fn sum_commitments(s_commitments: Vec<[u8; 32]>) -> Result<[u8; 32], SecpError> {
+    sum_scalars_bytes(s_commitments)
+}
+
+pub fn sum_challanges(challanges: Vec<[u8; 32]>) -> Result<[u8; 32], SecpError> {
+    sum_scalars_bytes(challanges)
 }
