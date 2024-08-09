@@ -1,7 +1,7 @@
 use crate::hash::{tagged_hash, HashTag};
-use secp::{MaybePoint, MaybeScalar, Point};
+use secp::{MaybePoint, MaybeScalar, Point, Scalar};
 
-use super::into::{IntoPoint, IntoScalar};
+use super::into::{IntoPoint, IntoScalar, IntoUncrompressedPublicKey, IntoUncrompressedSignature};
 
 pub enum SignFlag {
     BIP340Sign,
@@ -124,17 +124,38 @@ pub fn schnorr_sign(
         .map_err(|_| SecpError::SignatureParseError)
 }
 
-pub fn schnorr_verify(
-    public_key_bytes: [u8; 32],
+fn schnorr_verify_internal(
+    public_key: Point,
+    public_nonce: Point,
+    challange: Scalar,
+    commitment: Scalar,
+) -> Result<(), SecpError> {
+    // Check if the equation (R + eP) is a valid point.
+    let equation = match public_nonce + challange * public_key {
+        MaybePoint::Infinity => {
+            return Err(SecpError::InvalidPoint);
+        }
+        MaybePoint::Valid(point) => point,
+    };
+
+    // Check if the equation (R + eP) equals to sG.
+    match commitment.base_point_mul() == equation {
+        false => return Err(SecpError::InvalidSignature),
+        true => return Ok(()),
+    }
+}
+
+pub fn schnorr_verify_uncompressed(
+    public_key_bytes: [u8; 33],
     message_bytes: [u8; 32],
-    signature_bytes: [u8; 64],
+    signature_bytes: [u8; 65],
     flag: SignFlag,
 ) -> Result<(), SecpError> {
     // Check if the public key (P) is a valid point.
     let public_key = public_key_bytes.into_point()?;
 
     // Parse public nonce (R) bytes.
-    let public_nonce_bytes: [u8; 32] = (&signature_bytes[0..32])
+    let public_nonce_bytes: [u8; 33] = (&signature_bytes[0..33])
         .try_into()
         .map_err(|_| SecpError::SignatureParseError)?;
 
@@ -149,24 +170,32 @@ pub fn schnorr_verify(
     let challange = challange_array.into_scalar()?;
 
     // Parse commitment (s) bytes.
-    let commitment_bytes: [u8; 32] = (&signature_bytes[32..64])
+    let commitment_bytes: [u8; 32] = (&signature_bytes[33..65])
         .try_into()
         .map_err(|_| SecpError::SignatureParseError)?;
 
     // Check if commitment (s) is a valid scalar.
     let commitment = commitment_bytes.into_scalar()?;
 
-    // Check if the equation (R + eP) is a valid point.
-    let equation = match public_nonce + challange * public_key {
-        MaybePoint::Infinity => {
-            return Err(SecpError::InvalidPoint);
-        }
-        MaybePoint::Valid(point) => point,
-    };
+    schnorr_verify_internal(public_key, challange, public_nonce, commitment)
+}
 
-    // Check if the equation (R + eP) equals to sG.
-    match commitment.base_point_mul() == equation {
-        false => return Err(SecpError::InvalidSignature),
-        true => return Ok(()),
-    }
+pub fn schnorr_verify_compressed(
+    public_key_bytes: [u8; 32],
+    message_bytes: [u8; 32],
+    signature_bytes: [u8; 64],
+    flag: SignFlag,
+) -> Result<(), SecpError> {
+    // Parse compressed public key bytes.
+    let public_key_bytes_uncompressed = public_key_bytes.into_uncompressed_public_key()?;
+
+    // Parse compressed signature bytes.
+    let signature_bytes_uncompressed = signature_bytes.into_uncompressed_signature()?;
+
+    schnorr_verify_uncompressed(
+        public_key_bytes_uncompressed,
+        message_bytes,
+        signature_bytes_uncompressed,
+        flag,
+    )
 }

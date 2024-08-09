@@ -4,7 +4,7 @@ mod secp_tests {
         serialization::conversion::IntoByteArray,
         signature::{
             into::{IntoPoint, IntoScalar},
-            schnorr::{schnorr_sign, schnorr_verify, SecpError, SignFlag},
+            schnorr::{schnorr_sign, schnorr_verify_compressed, SecpError, SignFlag},
             sum::{sum_points, sum_scalars},
         },
     };
@@ -50,7 +50,7 @@ mod secp_tests {
 
         let signature = hex::decode("3cdbcc837e40a3b360f09387fd376e62b3f0c509b45a770adfd71f4006de72ab5facfd42b58fb4852a09228690349fac690b3cb261ff57f208e38c6c2a387e14").unwrap();
 
-        schnorr_verify(
+        schnorr_verify_compressed(
             public_key
                 .into_byte_array_32()
                 .map_err(|_| SecpError::SignatureParseError)?,

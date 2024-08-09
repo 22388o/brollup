@@ -1,9 +1,8 @@
+use super::schnorr::SecpError;
 use secp::MaybePoint;
 use secp::MaybeScalar;
 use secp::Point;
 use secp::Scalar;
-
-use super::schnorr::SecpError;
 
 pub fn sum_scalars(scalars: Vec<Scalar>) -> Result<Scalar, SecpError> {
     if scalars.len() == 0 {
