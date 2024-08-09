@@ -1,4 +1,3 @@
-use super::nonce::deterministic_nonce;
 use crate::hash::{tagged_hash, HashTag};
 use secp::{MaybePoint, MaybeScalar, Point, Scalar};
 
@@ -66,6 +65,15 @@ impl IntoScalar for [u8; 32] {
 
         Ok(scalar)
     }
+}
+
+fn deterministic_nonce(secret_key: [u8; 32], message: [u8; 32]) -> [u8; 32] {
+    let mut preimage = Vec::<u8>::new();
+
+    preimage.extend(secret_key);
+    preimage.extend(message);
+    
+    tagged_hash(preimage, HashTag::DeterministicNonce)
 }
 
 fn compute_challenge_bytes(
@@ -158,11 +166,11 @@ pub fn schnorr_verify(
     signature_bytes: [u8; 64],
     flag: SignFlag,
 ) -> Result<(), SecpError> {
-    // Check if the public key (P) is a valid point.
+// Check if the public key (P) is a valid point.
     let public_key = public_key_bytes.into_point()?;
 
     // Parse public nonce (R) bytes.
-    let public_nonce_bytes: [u8; 32] = signature_bytes[0..32]
+    let public_nonce_bytes: [u8; 32] = (&signature_bytes[0..32])
         .try_into()
         .map_err(|_| SecpError::SignatureParseError)?;
 
@@ -177,7 +185,7 @@ pub fn schnorr_verify(
     let challange = challange_bytes.into_scalar()?;
 
     // Parse commitment (s) bytes.
-    let commitment_bytes: [u8; 32] = signature_bytes[32..64]
+    let commitment_bytes: [u8; 32] = (&signature_bytes[32..64])
         .try_into()
         .map_err(|_| SecpError::SignatureParseError)?;
 
