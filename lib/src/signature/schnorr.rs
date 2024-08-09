@@ -164,7 +164,7 @@ pub fn schnorr_verify(
         MaybePoint::Valid(point) => point,
     };
 
-    // Check if the equation (R + eP) point equals to sG point.
+    // Check if the equation (R + eP) equals to sG.
     match commitment.base_point_mul() == equation {
         false => return Err(SecpError::InvalidSignature),
         true => return Ok(()),
