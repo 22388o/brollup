@@ -1,7 +1,7 @@
 use crate::hash::{tagged_hash, HashTag};
 use secp::{MaybePoint, MaybeScalar, Point};
 
-use super::into::{IntoByteArray, IntoPoint, IntoScalar};
+use super::into::{IntoPoint, IntoScalar};
 
 pub enum SignFlag {
     BIP340Sign,
@@ -16,9 +16,6 @@ pub enum SecpError {
     InvalidScalar,
     InvalidPoint,
     SignatureParseError,
-    MessageParseError,
-    SecretKeyParseError,
-    PublicKeyParseError,
 }
 
 pub trait SignEntry {
@@ -113,7 +110,9 @@ pub fn schnorr_sign(
     signature.extend(commitment.serialize());
 
     // Signature is = bytes(R) || bytes((k + ed) mod n).
-    signature.into_signature_byte_array()
+    signature
+        .try_into()
+        .map_err(|_| SecpError::SignatureParseError)
 }
 
 pub fn schnorr_verify(
