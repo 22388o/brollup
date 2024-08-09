@@ -62,12 +62,12 @@ fn compute_challenge(
 }
 
 fn deterministic_nonce(secret_key: [u8; 32], message: [u8; 32]) -> [u8; 32] {
-    let mut preimage = Vec::<u8>::new();
+    let mut secret_nonce_preimage = Vec::<u8>::new();
 
-    preimage.extend(secret_key);
-    preimage.extend(message);
+    secret_nonce_preimage.extend(secret_key);
+    secret_nonce_preimage.extend(message);
 
-    tagged_hash(preimage, HashTag::DeterministicNonce)
+    tagged_hash(secret_nonce_preimage, HashTag::DeterministicNonce)
 }
 
 pub fn schnorr_sign(
