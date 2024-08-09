@@ -38,8 +38,11 @@ fn compute_challenge(
             return tagged_hash(challenge_preimage, HashTag::BIP0340Challenge);
         }
         SignFlag::EntrySign => {
-            // Do not follow BIP-340. Challange (e) bytes is = H(m).
-            return tagged_hash(message_bytes, HashTag::EntryChallenge);
+            // Do not follow BIP-340. Challange (e) bytes is = H(P||m).
+            let mut challenge_preimage = Vec::<u8>::with_capacity(64);
+            challenge_preimage.extend(public_key.serialize_xonly());
+            challenge_preimage.extend(message_bytes);
+            return tagged_hash(challenge_preimage, HashTag::EntryChallenge);
         }
         SignFlag::ProtocolMessageSign => {
             // Do not follow BIP-340. Challange (e) bytes is = H(m).
