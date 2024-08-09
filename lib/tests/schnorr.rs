@@ -1,6 +1,6 @@
 #[cfg(test)]
 mod schnorr_tests {
-    use brollup::signature::{into::IntoArray, schnorr::{schnorr_sign, schnorr_verify, SecpError, SignFlag}};
+    use brollup::signature::{into::IntoByteArray, schnorr::{schnorr_sign, schnorr_verify, SecpError, SignFlag}};
 
     #[test]
     fn test_sign_schnorr() -> Result<(), SecpError> {
@@ -15,8 +15,8 @@ mod schnorr_tests {
         let sig_expected = hex::decode("3cdbcc837e40a3b360f09387fd376e62b3f0c509b45a770adfd71f4006de72abbb8e6d1591f7a18165722d1aa035e1372532527fadf64ab71839728d8c2c468e").unwrap();
 
         let sig = schnorr_sign(
-            private_key.into_secret_key_array()?,
-            message.into_message_array()?,
+            private_key.into_secret_key_byte_array()?,
+            message.into_message_byte_array()?,
             SignFlag::EntrySign,
         )?;
 
@@ -40,9 +40,9 @@ mod schnorr_tests {
         let signature = hex::decode("3cdbcc837e40a3b360f09387fd376e62b3f0c509b45a770adfd71f4006de72abbb8e6d1591f7a18165722d1aa035e1372532527fadf64ab71839728d8c2c468e").unwrap();
 
         schnorr_verify(
-            public_key.into_public_key_array()?,
-            message.into_message_array()?,
-            signature.into_signature_array()?,
+            public_key.into_public_key_byte_array()?,
+            message.into_message_byte_array()?,
+            signature.into_signature_byte_array()?,
             SignFlag::EntrySign,
         )
     }

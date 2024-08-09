@@ -1,7 +1,7 @@
 use crate::hash::{tagged_hash, HashTag};
 use secp::{MaybePoint, MaybeScalar, Point};
 
-use super::into::{IntoArray, IntoPoint, IntoScalar};
+use super::into::{IntoByteArray, IntoPoint, IntoScalar};
 
 pub enum SignFlag {
     BIP340Sign,
@@ -25,7 +25,7 @@ pub trait SignEntry {
     fn sign(&self, secret_key: [u8; 32], prev_state_hash: [u8; 32]) -> Result<[u8; 64], SecpError>;
 }
 
-fn compute_challenge_bytes(
+fn compute_challenge(
     public_nonce: Point,
     public_key: Point,
     message_bytes: [u8; 32],
@@ -65,12 +65,12 @@ fn deterministic_nonce(secret_key: [u8; 32], message: [u8; 32]) -> [u8; 32] {
 }
 
 pub fn schnorr_sign(
-    secret_key_array: [u8; 32],
-    message_array: [u8; 32],
+    secret_key_bytes: [u8; 32],
+    message_bytes: [u8; 32],
     flag: SignFlag,
 ) -> Result<[u8; 64], SecpError> {
     // Check if the secret key (d) is a valid scalar.
-    let mut secret_key = secret_key_array.into_scalar()?;
+    let mut secret_key = secret_key_bytes.into_scalar()?;
 
     // Public key (P) is = dG.
     let public_key = secret_key.base_point_mul();
@@ -79,7 +79,7 @@ pub fn schnorr_sign(
     secret_key = secret_key.negate_if(public_key.parity());
 
     // Nonce generation is deterministic. Secret nonce (k) is = H(sk||m).
-    let secret_nonce_bytes = deterministic_nonce(secret_key_array, message_array);
+    let secret_nonce_bytes = deterministic_nonce(secret_key_bytes, message_bytes);
 
     // Check if the secret nonce (k) is a valid scalar.
     let mut secret_nonce = secret_nonce_bytes.into_scalar()?;
@@ -91,11 +91,11 @@ pub fn schnorr_sign(
     secret_nonce = secret_nonce.negate_if(public_nonce.parity());
 
     // Compute the challenge (e) bytes depending on the signing method.
-    let challange_bytes: [u8; 32] =
-        compute_challenge_bytes(public_nonce, public_key, message_array, flag);
+    let challange_array: [u8; 32] =
+        compute_challenge(public_nonce, public_key, message_bytes, flag);
 
     // Challange (e) is = int(challange_bytes) mod n.
-    let challange = challange_bytes.into_scalar()?;
+    let challange = challange_array.into_scalar()?;
 
     // Commitment (s) is = k + ed mod n.
     let commitment = match secret_nonce + challange * secret_key {
@@ -113,20 +113,20 @@ pub fn schnorr_sign(
     signature.extend(commitment.serialize());
 
     // Signature is = bytes(R) || bytes((k + ed) mod n).
-    signature.into_signature_array()
+    signature.into_signature_byte_array()
 }
 
 pub fn schnorr_verify(
-    public_key_array: [u8; 32],
-    message_array: [u8; 32],
-    signature_array: [u8; 64],
+    public_key_bytes: [u8; 32],
+    message_bytes: [u8; 32],
+    signature_bytes: [u8; 64],
     flag: SignFlag,
 ) -> Result<(), SecpError> {
     // Check if the public key (P) is a valid point.
-    let public_key = public_key_array.into_point()?;
+    let public_key = public_key_bytes.into_point()?;
 
     // Parse public nonce (R) bytes.
-    let public_nonce_bytes: [u8; 32] = (&signature_array[0..32])
+    let public_nonce_bytes: [u8; 32] = (&signature_bytes[0..32])
         .try_into()
         .map_err(|_| SecpError::SignatureParseError)?;
 
@@ -134,14 +134,14 @@ pub fn schnorr_verify(
     let public_nonce = public_nonce_bytes.into_point()?;
 
     // Compute the challenge (e) bytes depending on the signing method.
-    let challange_bytes: [u8; 32] =
-        compute_challenge_bytes(public_nonce, public_key, message_array, flag);
+    let challange_array: [u8; 32] =
+        compute_challenge(public_nonce, public_key, message_bytes, flag);
 
     // Challange (e) is = int(challange_bytes) mod n.
-    let challange = challange_bytes.into_scalar()?;
+    let challange = challange_array.into_scalar()?;
 
     // Parse commitment (s) bytes.
-    let commitment_bytes: [u8; 32] = (&signature_array[32..64])
+    let commitment_bytes: [u8; 32] = (&signature_bytes[32..64])
         .try_into()
         .map_err(|_| SecpError::SignatureParseError)?;
 
