@@ -1,5 +1,7 @@
 use crate::hash::{tagged_hash, HashTag};
-use secp::{MaybePoint, MaybeScalar, Point, Scalar};
+use secp::{MaybePoint, MaybeScalar, Point};
+
+use super::into::{IntoBytes, IntoPoint, IntoScalar};
 
 pub enum SignFlag {
     BIP340Sign,
@@ -10,61 +12,17 @@ pub enum SignFlag {
 
 #[derive(Debug)]
 pub enum SecpError {
-    SignatureParseError,
     InvalidSignature,
     InvalidScalar,
     InvalidPoint,
+    SignatureParseError,
+    MessageParseError,
+    SecretKeyParseError,
+    PublicKeyParseError,
 }
 
 pub trait SignEntry {
     fn sign(&self, secret_key: [u8; 32], prev_state_hash: [u8; 32]) -> Result<[u8; 64], SecpError>;
-}
-
-pub trait IntoPoint {
-    fn into_point(&self) -> Result<Point, SecpError>;
-}
-
-impl IntoPoint for [u8; 32] {
-    fn into_point(&self) -> Result<Point, SecpError> {
-        let mut point_bytes = Vec::with_capacity(33);
-        point_bytes.push(0x02);
-        point_bytes.extend(self);
-
-        let point = match MaybePoint::from_slice(&point_bytes) {
-            Ok(maybe_point) => match maybe_point {
-                MaybePoint::Infinity => {
-                    return Err(SecpError::InvalidPoint);
-                }
-                MaybePoint::Valid(point) => point,
-            },
-            Err(_) => return Err(SecpError::InvalidPoint),
-        };
-
-        Ok(point)
-    }
-}
-
-pub trait IntoScalar {
-    fn into_scalar(&self) -> Result<Scalar, SecpError>;
-}
-
-impl IntoScalar for [u8; 32] {
-    fn into_scalar(&self) -> Result<Scalar, SecpError> {
-        let mut scalar_bytes = Vec::with_capacity(32);
-        scalar_bytes.extend(self);
-
-        let scalar = match MaybeScalar::from_slice(&scalar_bytes) {
-            Ok(maybe_scalar) => match maybe_scalar {
-                MaybeScalar::Zero => {
-                    return Err(SecpError::InvalidScalar);
-                }
-                MaybeScalar::Valid(point) => point,
-            },
-            Err(_) => return Err(SecpError::InvalidScalar),
-        };
-
-        Ok(scalar)
-    }
 }
 
 fn compute_challenge_bytes(
@@ -155,9 +113,7 @@ pub fn schnorr_sign(
     signature.extend(commitment.serialize());
 
     // Signature is = bytes(R) || bytes((k + ed) mod n).
-    signature
-        .try_into()
-        .map_err(|_| SecpError::SignatureParseError)
+    signature.into_signature_bytes()
 }
 
 pub fn schnorr_verify(
@@ -166,7 +122,7 @@ pub fn schnorr_verify(
     signature_bytes: [u8; 64],
     flag: SignFlag,
 ) -> Result<(), SecpError> {
-// Check if the public key (P) is a valid point.
+    // Check if the public key (P) is a valid point.
     let public_key = public_key_bytes.into_point()?;
 
     // Parse public nonce (R) bytes.
@@ -200,7 +156,7 @@ pub fn schnorr_verify(
         MaybePoint::Valid(point) => point,
     };
 
-    // Check if the equation (R + eP) equals to sG. 
+    // Check if the equation (R + eP) point equals to sG point.
     match commitment.base_point_mul() == equation {
         false => return Err(SecpError::InvalidSignature),
         true => return Ok(()),
