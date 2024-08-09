@@ -8,7 +8,7 @@ mod secp_tests {
                 schnorr_sign, verify_schnorr_compressed, verify_schnorr_uncompressed, SecpError,
                 SignFlag,
             },
-            sum::{sum_points, sum_scalars},
+            sum::{sum_points, sum_public_keys, sum_scalars},
         },
     };
 
@@ -145,6 +145,34 @@ mod secp_tests {
             hex::decode("60dadabf8a850d6f4d6ffa8ec4777bdb085e3dbb49fe6122bed3d2c3c7e0e1e3")
                 .map_err(|_| SecpError::InvalidPoint)?;
         let expected_sum = expected_sum_vec.into_point()?;
+
+        assert_eq!(sum, expected_sum);
+
+        Ok(())
+    }
+
+    #[test]
+    fn test_sum_public_keys() -> Result<(), SecpError> {
+        let public_key_1_bytes =
+            hex::decode("6c7216fbdd2d4f41cbb2cd16c5aad7cf142298aac5581c7d2ec2555f3e64c7c2")
+                .map_err(|_| SecpError::InvalidPoint)?;
+
+        let public_key_1 = public_key_1_bytes.into_byte_array_32().map_err(|_| SecpError::InvalidPoint)?;
+
+        let public_key_2_bytes =
+            hex::decode("7af79ebb34707a350f375066dc7c1ba206cfc49d3963a9b4573af6ad5394402d")
+                .map_err(|_| SecpError::InvalidPoint)?;
+
+        let public_key_2 = public_key_2_bytes.into_byte_array_32().map_err(|_| SecpError::InvalidPoint)?;
+
+        let points = vec![public_key_1, public_key_2];
+
+        let sum = sum_public_keys(points)?;
+
+        let expected_sum_vec =
+            hex::decode("03336ac1ea270659d5783b57f24338ae3a24d904e036083d3bdce1b27b97b434d1")
+                .map_err(|_| SecpError::InvalidPoint)?;
+        let expected_sum = expected_sum_vec.into_byte_array_33().map_err(|_| SecpError::InvalidPoint)?;
 
         assert_eq!(sum, expected_sum);
 

@@ -1,3 +1,4 @@
+use super::into::IntoPoint;
 use super::schnorr::SecpError;
 use secp::MaybePoint;
 use secp::MaybeScalar;
@@ -36,4 +37,17 @@ pub fn sum_points(points: Vec<Point>) -> Result<Point, SecpError> {
     }
 
     Ok(sum)
+}
+
+pub fn sum_public_keys(public_keys: Vec<[u8; 32]>) -> Result<[u8; 33], SecpError> {
+    let mut points = Vec::<Point>::with_capacity(public_keys.len());
+
+    for public_key in public_keys {
+        let public_key_point = public_key.into_point()?;
+        points.push(public_key_point);
+    }
+
+    let sum = sum_points(points)?;
+
+    Ok(sum.serialize())
 }
