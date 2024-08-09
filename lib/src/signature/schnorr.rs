@@ -18,11 +18,7 @@ pub enum SecpError {
 }
 
 pub trait SignEntry {
-    fn sign(
-        &self,
-        secret_key: [u8; 32],
-        prev_state_hash: [u8; 32],
-    ) -> Result<[u8; 64], SecpError>;
+    fn sign(&self, secret_key: [u8; 32], prev_state_hash: [u8; 32]) -> Result<[u8; 64], SecpError>;
 }
 
 pub trait IntoPoint {
@@ -72,6 +68,36 @@ impl IntoScalar for [u8; 32] {
     }
 }
 
+fn compute_challenge_bytes(
+    public_nonce: Point,
+    public_key: Point,
+    message_bytes: [u8; 32],
+    flag: SignFlag,
+) -> [u8; 32] {
+    match flag {
+        SignFlag::BIP340Sign => {
+            // Follow BIP-340. Challenge e bytes is = H(R||P||m).
+            let mut challenge_preimage = Vec::<u8>::with_capacity(96);
+            challenge_preimage.extend(public_nonce.serialize_xonly());
+            challenge_preimage.extend(public_key.serialize_xonly());
+            challenge_preimage.extend(message_bytes);
+            return tagged_hash(challenge_preimage, HashTag::BIP0340Challenge);
+        }
+        SignFlag::EntrySign => {
+            // Do not follow BIP-340. Challange (e) bytes is = H(m).
+            return tagged_hash(message_bytes, HashTag::EntryChallenge);
+        }
+        SignFlag::ProtocolMessageSign => {
+            // Do not follow BIP-340. Challange (e) bytes is = H(m).
+            return tagged_hash(message_bytes, HashTag::ProtocolMessageChallenge);
+        }
+        SignFlag::CustomMessageSign => {
+            // Do not follow BIP-340. Challange (e) bytes is = H(m).
+            return tagged_hash(message_bytes, HashTag::CustomMessageChallenge);
+        }
+    };
+}
+
 pub fn schnorr_sign(
     secret_key_bytes: [u8; 32],
     message_bytes: [u8; 32],
@@ -80,7 +106,7 @@ pub fn schnorr_sign(
     // Check if the secret key (d) is a valid scalar.
     let mut secret_key = secret_key_bytes.into_scalar()?;
 
-    // Public key (P) is = d * G.
+    // Public key (P) is = dG.
     let public_key = secret_key.base_point_mul();
 
     // Negate the secret key (d) if it has odd public key.
@@ -92,37 +118,17 @@ pub fn schnorr_sign(
     // Check if the secret nonce (k) is a valid scalar.
     let mut secret_nonce = secret_nonce_bytes.into_scalar()?;
 
-    // Public nonce (R) is = k * G.
+    // Public nonce (R) is = kG.
     let public_nonce = secret_nonce.base_point_mul();
 
     // Negate the secret nonce (k) if it has odd public key.
     secret_nonce = secret_nonce.negate_if(public_nonce.parity());
 
     // Compute the challenge (e) bytes depending on the signing method.
-    let challange_bytes: [u8; 32] = match flag {
-        SignFlag::BIP340Sign => {
-            // Follow BIP-340. Challenge e bytes is = H(R||P||m).
-            let mut challenge_preimage = Vec::<u8>::with_capacity(96);
-            challenge_preimage.extend(public_nonce.serialize_xonly());
-            challenge_preimage.extend(public_key.serialize_xonly());
-            challenge_preimage.extend(message_bytes);
-            tagged_hash(challenge_preimage, HashTag::BIP0340Challenge)
-        }
-        SignFlag::EntrySign => {
-            // Do not follow BIP-340. Challange (e) bytes is = H(m).
-            tagged_hash(message_bytes, HashTag::EntryChallenge)
-        }
-        SignFlag::ProtocolMessageSign => {
-            // Do not follow BIP-340. Challange (e) bytes is = H(m).
-            tagged_hash(message_bytes, HashTag::ProtocolMessageChallenge)
-        }
-        SignFlag::CustomMessageSign => {
-            // Do not follow BIP-340. Challange (e) bytes is = H(m).
-            tagged_hash(message_bytes, HashTag::CustomMessageChallenge)
-        }
-    };
+    let challange_bytes: [u8; 32] =
+        compute_challenge_bytes(public_nonce, public_key, message_bytes, flag);
 
-    // Challange (e) is = int(challange_e_bytes) mod n.
+    // Challange (e) is = int(challange_bytes) mod n.
     let challange = challange_bytes.into_scalar()?;
 
     // Commitment (s) is = k + ed mod n.
@@ -152,64 +158,42 @@ pub fn schnorr_verify(
     signature_bytes: [u8; 64],
     flag: SignFlag,
 ) -> Result<(), SecpError> {
-    // Public key
+    // Check if the public key (P) is a valid point.
     let public_key = public_key_bytes.into_point()?;
 
-    // Parse public nonce bytes
+    // Parse public nonce (R) bytes.
     let public_nonce_bytes: [u8; 32] = signature_bytes[0..32]
         .try_into()
         .map_err(|_| SecpError::SignatureParseError)?;
 
-    // Public nonce
+    // Check if the public nonce (R) is a valid point.
     let public_nonce = public_nonce_bytes.into_point()?;
 
-    // Compute the challenge e bytes based on whether it is a BIP-340 or a Brollup-native signing method.
-    let challange_e_bytes: [u8; 32] = match flag {
-        SignFlag::BIP340Sign => {
-            // Follow BIP-340 for computing challenge e.
-            // Challenge e is = H(R||P||m).
-            let mut challenge_preimage = Vec::<u8>::with_capacity(96);
-            challenge_preimage.extend(public_nonce.serialize_xonly());
-            challenge_preimage.extend(public_key.serialize_xonly());
-            challenge_preimage.extend(message_bytes);
-            tagged_hash(challenge_preimage, HashTag::BIP0340Challenge)
-        }
-        SignFlag::EntrySign => {
-            // Do not follow BIP-340 for computing challange e.
-            // Challange e is = H(m) instead of H(R||P||m).
-            tagged_hash(message_bytes, HashTag::EntryChallenge)
-        }
-        SignFlag::ProtocolMessageSign => {
-            // Do not follow BIP-340 for computing challange e.
-            // Challange e is = H(m) instead of H(R||P||m).
-            tagged_hash(message_bytes, HashTag::ProtocolMessageChallenge)
-        }
-        SignFlag::CustomMessageSign => {
-            // Do not follow BIP-340 for computing challange e.
-            // Challange e is = H(m) instead of H(R||P||m).
-            tagged_hash(message_bytes, HashTag::CustomMessageChallenge)
-        }
-    };
+    // Compute the challenge (e) bytes depending on the signing method.
+    let challange_bytes: [u8; 32] =
+        compute_challenge_bytes(public_nonce, public_key, message_bytes, flag);
 
-    // Challange e is = int(challange_e_bytes) mod n.
-    let challange_e = challange_e_bytes.into_scalar()?;
+    // Challange (e) is = int(challange_bytes) mod n.
+    let challange = challange_bytes.into_scalar()?;
 
-    // Parse s commitment bytes
-    let s_commitment_bytes: [u8; 32] = signature_bytes[32..64]
+    // Parse commitment (s) bytes.
+    let commitment_bytes: [u8; 32] = signature_bytes[32..64]
         .try_into()
         .map_err(|_| SecpError::SignatureParseError)?;
 
-    // S commitment
-    let s_commitment = s_commitment_bytes.into_scalar()?;
+    // Check if commitment (s) is a valid scalar.
+    let commitment = commitment_bytes.into_scalar()?;
 
-    let equation = match public_nonce + challange_e * public_key {
+    // Check if the equation (k + ed mod n) is a valid point.
+    let equation = match public_nonce + challange * public_key {
         MaybePoint::Infinity => {
             return Err(SecpError::InvalidPoint);
         }
         MaybePoint::Valid(point) => point,
     };
 
-    match s_commitment.base_point_mul() == equation {
+    // Check if the equation (k + ed mod n) equals to sG. 
+    match commitment.base_point_mul() == equation {
         false => return Err(SecpError::InvalidSignature),
         true => return Ok(()),
     }
