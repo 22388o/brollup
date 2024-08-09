@@ -87,7 +87,7 @@ pub fn schnorr_sign(
     // Public nonce (R) is = kG.
     let public_nonce = secret_nonce.base_point_mul();
 
-    // Negate the secret nonce (k) if it has odd public key.
+    // Negate the secret nonce (k) if it has odd public nonce.
     secret_nonce = secret_nonce.negate_if(public_nonce.parity());
 
     // Compute the challenge (e) bytes depending on the signing method.
