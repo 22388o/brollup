@@ -184,7 +184,7 @@ pub fn schnorr_verify(
     // Check if commitment (s) is a valid scalar.
     let commitment = commitment_bytes.into_scalar()?;
 
-    // Check if the equation (k + ed mod n) is a valid point.
+    // Check if the equation (R + eP) is a valid point.
     let equation = match public_nonce + challange * public_key {
         MaybePoint::Infinity => {
             return Err(SecpError::InvalidPoint);
@@ -192,7 +192,7 @@ pub fn schnorr_verify(
         MaybePoint::Valid(point) => point,
     };
 
-    // Check if the equation (k + ed mod n) equals to sG. 
+    // Check if the equation (R + eP) equals to sG. 
     match commitment.base_point_mul() == equation {
         false => return Err(SecpError::InvalidSignature),
         true => return Ok(()),
