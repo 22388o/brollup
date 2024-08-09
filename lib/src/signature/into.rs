@@ -1,8 +1,6 @@
 use super::schnorr::SecpError;
 use secp::{MaybePoint, MaybeScalar, Point, Scalar};
 
-type Bytes = Vec<u8>;
-
 pub trait IntoPoint {
     fn into_point(&self) -> Result<Point, SecpError>;
 }
@@ -18,7 +16,7 @@ pub trait IntoBytes {
     fn into_signature_bytes(&self) -> Result<[u8; 64], SecpError>;
 }
 
-impl IntoBytes for Bytes {
+impl IntoBytes for Vec<u8> {
     fn into_secret_key_bytes(&self) -> Result<[u8; 32], SecpError> {
         let mut vec = Vec::<u8>::new();
         vec.extend(self);
