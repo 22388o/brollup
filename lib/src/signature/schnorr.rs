@@ -1,7 +1,7 @@
 use crate::hash::{tagged_hash, HashTag};
 use secp::{MaybePoint, MaybeScalar, Point};
 
-use super::into::{IntoBytes, IntoPoint, IntoScalar};
+use super::into::{IntoArray, IntoPoint, IntoScalar};
 
 pub enum SignFlag {
     BIP340Sign,
@@ -113,7 +113,7 @@ pub fn schnorr_sign(
     signature.extend(commitment.serialize());
 
     // Signature is = bytes(R) || bytes((k + ed) mod n).
-    signature.into_signature_bytes()
+    signature.into_signature_array()
 }
 
 pub fn schnorr_verify(

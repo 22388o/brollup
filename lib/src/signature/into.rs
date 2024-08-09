@@ -9,15 +9,15 @@ pub trait IntoScalar {
     fn into_scalar(&self) -> Result<Scalar, SecpError>;
 }
 
-pub trait IntoBytes {
-    fn into_secret_key_bytes(&self) -> Result<[u8; 32], SecpError>;
-    fn into_message_bytes(&self) -> Result<[u8; 32], SecpError>;
-    fn into_public_key_bytes(&self) -> Result<[u8; 32], SecpError>;
-    fn into_signature_bytes(&self) -> Result<[u8; 64], SecpError>;
+pub trait IntoArray {
+    fn into_secret_key_array(&self) -> Result<[u8; 32], SecpError>;
+    fn into_message_array(&self) -> Result<[u8; 32], SecpError>;
+    fn into_public_key_array(&self) -> Result<[u8; 32], SecpError>;
+    fn into_signature_array(&self) -> Result<[u8; 64], SecpError>;
 }
 
-impl IntoBytes for Vec<u8> {
-    fn into_secret_key_bytes(&self) -> Result<[u8; 32], SecpError> {
+impl IntoArray for Vec<u8> {
+    fn into_secret_key_array(&self) -> Result<[u8; 32], SecpError> {
         let mut vec = Vec::<u8>::new();
         vec.extend(self);
         let bytes_32: [u8; 32] = vec
@@ -27,7 +27,7 @@ impl IntoBytes for Vec<u8> {
         Ok(bytes_32)
     }
 
-    fn into_message_bytes(&self) -> Result<[u8; 32], SecpError> {
+    fn into_message_array(&self) -> Result<[u8; 32], SecpError> {
         let mut vec = Vec::<u8>::new();
         vec.extend(self);
         let bytes_32: [u8; 32] = vec
@@ -37,7 +37,7 @@ impl IntoBytes for Vec<u8> {
         Ok(bytes_32)
     }
 
-    fn into_public_key_bytes(&self) -> Result<[u8; 32], SecpError> {
+    fn into_public_key_array(&self) -> Result<[u8; 32], SecpError> {
         let mut vec = Vec::<u8>::new();
         vec.extend(self);
         let bytes_32: [u8; 32] = vec
@@ -47,7 +47,7 @@ impl IntoBytes for Vec<u8> {
         Ok(bytes_32)
     }
 
-    fn into_signature_bytes(&self) -> Result<[u8; 64], SecpError> {
+    fn into_signature_array(&self) -> Result<[u8; 64], SecpError> {
         let mut vec = Vec::<u8>::new();
         vec.extend(self);
         let bytes_64: [u8; 64] = vec
