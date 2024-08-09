@@ -28,7 +28,7 @@ impl IntoByteArray for Vec<u8> {
     fn into_message_byte_array(&self) -> Result<[u8; 32], SecpError> {
         let mut vec = Vec::<u8>::with_capacity(32);
         vec.extend(self);
-        let bytes_32: [u8; 32] = vec.try_into().map_err(|_| SecpError::SecretKeyParseError)?;
+        let bytes_32: [u8; 32] = vec.try_into().map_err(|_| SecpError::MessageParseError)?;
 
         Ok(bytes_32)
     }
@@ -36,7 +36,7 @@ impl IntoByteArray for Vec<u8> {
     fn into_public_key_byte_array(&self) -> Result<[u8; 32], SecpError> {
         let mut vec = Vec::<u8>::with_capacity(32);
         vec.extend(self);
-        let bytes_32: [u8; 32] = vec.try_into().map_err(|_| SecpError::SecretKeyParseError)?;
+        let bytes_32: [u8; 32] = vec.try_into().map_err(|_| SecpError::PublicKeyParseError)?;
 
         Ok(bytes_32)
     }
@@ -44,7 +44,7 @@ impl IntoByteArray for Vec<u8> {
     fn into_signature_byte_array(&self) -> Result<[u8; 64], SecpError> {
         let mut vec = Vec::<u8>::with_capacity(64);
         vec.extend(self);
-        let bytes_64: [u8; 64] = vec.try_into().map_err(|_| SecpError::SecretKeyParseError)?;
+        let bytes_64: [u8; 64] = vec.try_into().map_err(|_| SecpError::SignatureParseError)?;
 
         Ok(bytes_64)
     }
