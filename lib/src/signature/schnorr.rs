@@ -20,12 +20,11 @@ pub trait SignEntry {
     fn sign(&self, secret_key: [u8; 32], prev_state_hash: [u8; 32]) -> Result<[u8; 64], SecpError>;
 }
 
-pub trait Into {
+pub trait IntoPoint {
     fn into_point(&self) -> Result<Point, SecpError>;
-    fn into_scalar(&self) -> Result<Scalar, SecpError>;
 }
 
-impl Into for [u8; 32] {
+impl IntoPoint for [u8; 32] {
     fn into_point(&self) -> Result<Point, SecpError> {
         let mut point_bytes = Vec::with_capacity(33);
         point_bytes.push(0x02);
@@ -43,7 +42,13 @@ impl Into for [u8; 32] {
 
         Ok(point)
     }
+}
 
+pub trait IntoScalar {
+    fn into_scalar(&self) -> Result<Scalar, SecpError>;
+}
+
+impl IntoScalar for [u8; 32] {
     fn into_scalar(&self) -> Result<Scalar, SecpError> {
         let mut scalar_bytes = Vec::with_capacity(32);
         scalar_bytes.extend(self);
@@ -60,15 +65,6 @@ impl Into for [u8; 32] {
 
         Ok(scalar)
     }
-}
-
-fn deterministic_nonce(secret_key: [u8; 32], message: [u8; 32]) -> [u8; 32] {
-    let mut preimage = Vec::<u8>::new();
-
-    preimage.extend(secret_key);
-    preimage.extend(message);
-
-    tagged_hash(preimage, HashTag::DeterministicNonce)
 }
 
 fn compute_challenge_bytes(
@@ -99,6 +95,15 @@ fn compute_challenge_bytes(
             return tagged_hash(message_bytes, HashTag::CustomMessageChallenge);
         }
     };
+}
+
+fn deterministic_nonce(secret_key: [u8; 32], message: [u8; 32]) -> [u8; 32] {
+    let mut preimage = Vec::<u8>::new();
+
+    preimage.extend(secret_key);
+    preimage.extend(message);
+
+    tagged_hash(preimage, HashTag::DeterministicNonce)
 }
 
 pub fn schnorr_sign(
@@ -161,7 +166,7 @@ pub fn schnorr_verify(
     signature_bytes: [u8; 64],
     flag: SignFlag,
 ) -> Result<(), SecpError> {
-    // Check if the public key (P) is a valid point.
+// Check if the public key (P) is a valid point.
     let public_key = public_key_bytes.into_point()?;
 
     // Parse public nonce (R) bytes.
@@ -195,7 +200,7 @@ pub fn schnorr_verify(
         MaybePoint::Valid(point) => point,
     };
 
-    // Check if the equation (R + eP) equals to sG.
+    // Check if the equation (R + eP) equals to sG. 
     match commitment.base_point_mul() == equation {
         false => return Err(SecpError::InvalidSignature),
         true => return Ok(()),
