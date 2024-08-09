@@ -124,7 +124,7 @@ pub fn schnorr_sign(
         .map_err(|_| SecpError::SignatureParseError)
 }
 
-fn schnorr_verify_internal(
+fn verify_schnorr_internal(
     public_key: Point,
     public_nonce: Point,
     challange: Scalar,
@@ -145,7 +145,7 @@ fn schnorr_verify_internal(
     }
 }
 
-pub fn schnorr_verify_uncompressed(
+pub fn verify_schnorr_uncompressed(
     public_key_bytes: [u8; 33],
     message_bytes: [u8; 32],
     signature_bytes: [u8; 65],
@@ -177,10 +177,10 @@ pub fn schnorr_verify_uncompressed(
     // Check if commitment (s) is a valid scalar.
     let commitment = commitment_bytes.into_scalar()?;
 
-    schnorr_verify_internal(public_key, public_nonce, challange, commitment)
+    verify_schnorr_internal(public_key, public_nonce, challange, commitment)
 }
 
-pub fn schnorr_verify_compressed(
+pub fn verify_schnorr_compressed(
     public_key_bytes: [u8; 32],
     message_bytes: [u8; 32],
     signature_bytes: [u8; 64],
@@ -192,7 +192,7 @@ pub fn schnorr_verify_compressed(
     // Parse compressed signature bytes.
     let signature_bytes_uncompressed = signature_bytes.into_uncompressed_signature()?;
 
-    schnorr_verify_uncompressed(
+    verify_schnorr_uncompressed(
         public_key_bytes_uncompressed,
         message_bytes,
         signature_bytes_uncompressed,
