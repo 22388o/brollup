@@ -8,6 +8,7 @@ pub trait IntoByteArray {
     fn into_byte_array_32(&self) -> Result<[u8; 32], ParseError>;
     fn into_byte_array_33(&self) -> Result<[u8; 33], ParseError>;
     fn into_byte_array_64(&self) -> Result<[u8; 64], ParseError>;
+    fn into_byte_array_65(&self) -> Result<[u8; 65], ParseError>;
 }
 
 impl IntoByteArray for Vec<u8> {
@@ -33,5 +34,13 @@ impl IntoByteArray for Vec<u8> {
         let bytes_64: [u8; 64] = vec.try_into().map_err(|_| ParseError::ParseError64)?;
 
         Ok(bytes_64)
+    }
+
+    fn into_byte_array_65(&self) -> Result<[u8; 65], ParseError> {
+        let mut vec = Vec::<u8>::with_capacity(65);
+        vec.extend(self);
+        let bytes_65: [u8; 65] = vec.try_into().map_err(|_| ParseError::ParseError64)?;
+
+        Ok(bytes_65)
     }
 }
