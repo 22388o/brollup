@@ -77,31 +77,31 @@ pub fn schnorr_sign(
     message_bytes: [u8; 32],
     flag: SignFlag,
 ) -> Result<[u8; 64], SecpError> {
-    // Check if the secret key is a valid scalar.
+    // Check if the secret key (d) is a valid scalar.
     let mut secret_key = secret_key_bytes.into_scalar()?;
 
-    let mut public_key = secret_key.base_point_mul();
+    // Public key (P) is = d * G.
+    let public_key = secret_key.base_point_mul();
 
-    // Negate the secret key if it has_odd_y(R).
+    // Negate the secret key (d) if it has odd public key.
     secret_key = secret_key.negate_if(public_key.parity());
-    public_key = public_key.negate_if(public_key.parity());
 
-    // Nonce generation is deterministic.
-    // Secret nonce is = H(sk||m).
+    // Nonce generation is deterministic. Secret nonce (k) is = H(sk||m).
     let secret_nonce_bytes = deterministic_nonce(secret_key_bytes, message_bytes);
+
+    // Check if the secret nonce (k) is a valid scalar.
     let mut secret_nonce = secret_nonce_bytes.into_scalar()?;
 
-    let mut public_nonce = secret_nonce.base_point_mul();
+    // Public nonce (R) is = k * G.
+    let public_nonce = secret_nonce.base_point_mul();
 
-    // Negate the nonce if it has_odd_y(R).
+    // Negate the secret nonce (k) if it has odd public key.
     secret_nonce = secret_nonce.negate_if(public_nonce.parity());
-    public_nonce = public_nonce.negate_if(public_nonce.parity());
 
-    // Compute the challenge e bytes based on whether it is a BIP-340 or a Brollup-native signing method.
-    let challange_e_bytes: [u8; 32] = match flag {
+    // Compute the challenge (e) bytes depending on the signing method.
+    let challange_bytes: [u8; 32] = match flag {
         SignFlag::BIP340Sign => {
-            // Follow BIP-340 for computing challenge e.
-            // Challenge e is = H(R||P||m).
+            // Follow BIP-340. Challenge e bytes is = H(R||P||m).
             let mut challenge_preimage = Vec::<u8>::with_capacity(96);
             challenge_preimage.extend(public_nonce.serialize_xonly());
             challenge_preimage.extend(public_key.serialize_xonly());
@@ -109,39 +109,36 @@ pub fn schnorr_sign(
             tagged_hash(challenge_preimage, HashTag::BIP0340Challenge)
         }
         SignFlag::EntrySign => {
-            // Do not follow BIP-340 for computing challange e.
-            // Challange e is = H(m) instead of H(R||P||m).
+            // Do not follow BIP-340. Challange (e) bytes is = H(m).
             tagged_hash(message_bytes, HashTag::EntryChallenge)
         }
         SignFlag::ProtocolMessageSign => {
-            // Do not follow BIP-340 for computing challange e.
-            // Challange e is = H(m) instead of H(R||P||m).
+            // Do not follow BIP-340. Challange (e) bytes is = H(m).
             tagged_hash(message_bytes, HashTag::ProtocolMessageChallenge)
         }
         SignFlag::CustomMessageSign => {
-            // Do not follow BIP-340 for computing challange e.
-            // Challange e is = H(m) instead of H(R||P||m).
+            // Do not follow BIP-340. Challange (e) bytes is = H(m).
             tagged_hash(message_bytes, HashTag::CustomMessageChallenge)
         }
     };
 
-    // Challange e is = int(challange_e_bytes) mod n.
-    let challange_e = challange_e_bytes.into_scalar()?;
+    // Challange (e) is = int(challange_e_bytes) mod n.
+    let challange = challange_bytes.into_scalar()?;
 
-    // s commitment is = k + ed mod n.
-    let s_commitment = match secret_nonce + challange_e * secret_key {
+    // Commitment (s) is = k + ed mod n.
+    let commitment = match secret_nonce + challange * secret_key {
         MaybeScalar::Zero => return Err(SecpError::InvalidScalar),
         MaybeScalar::Valid(scalar) => scalar,
     };
 
-    // Initialize the signature vector with a 64 bytes capacity
+    // Initialize the signature with a capacity of 64 bytes.
     let mut signature = Vec::<u8>::with_capacity(64);
 
-    // Add public nonce: R (32 bytes)
+    // Add public nonce (R) 32 bytes.
     signature.extend(public_nonce.serialize_xonly());
 
-    // Add s commitment: s (32 bytes)
-    signature.extend(s_commitment.serialize());
+    // Add commitment (s) 32 bytes.
+    signature.extend(commitment.serialize());
 
     // Signature is = bytes(R) || bytes((k + ed) mod n).
     signature
