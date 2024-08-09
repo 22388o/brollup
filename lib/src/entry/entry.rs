@@ -36,10 +36,10 @@ impl Sighash for Entry {
 
 impl SignEntry for Entry {
     fn sign(&self, secret_key: [u8; 32], prev_state_hash: [u8; 32]) -> Result<[u8; 64], SecpError> {
-        // Message is the sighash of Entry.
+        // Message is the sighash of the entry.
         let message = self.sighash(prev_state_hash);
 
-        // Sign the message with the 'Entry Signing' method.
+        // Sign the message with the entry signing method.
         schnorr_sign(secret_key, message, SignFlag::EntrySign)
     }
 }
