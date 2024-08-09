@@ -14,7 +14,6 @@ use crate::{
     valtype::{account::Account, maybe_common::MaybeCommon, value::ShortVal},
 };
 
-#[derive(Clone, Copy)]
 pub struct Transfer {
     from: Account,
     to: MaybeCommon<Account>,
