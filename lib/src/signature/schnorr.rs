@@ -177,7 +177,7 @@ pub fn schnorr_verify_uncompressed(
     // Check if commitment (s) is a valid scalar.
     let commitment = commitment_bytes.into_scalar()?;
 
-    schnorr_verify_internal(public_key, challange, public_nonce, commitment)
+    schnorr_verify_internal(public_key, public_nonce, challange, commitment)
 }
 
 pub fn schnorr_verify_compressed(
