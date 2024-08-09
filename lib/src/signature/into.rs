@@ -1,3 +1,5 @@
+use crate::serialization::conversion::IntoByteArray;
+
 use super::schnorr::SecpError;
 use secp::{MaybePoint, MaybeScalar, Point, Scalar};
 
@@ -29,6 +31,22 @@ impl IntoPoint for [u8; 32] {
     }
 }
 
+impl IntoPoint for Vec<u8> {
+    fn into_point(&self) -> Result<Point, SecpError> {
+        if self.len() != 32 {
+            return Err(SecpError::InvalidPoint);
+        }
+
+        let mut bytes = Vec::<u8>::with_capacity(32);
+        bytes.extend(self);
+
+        let ba = bytes
+            .into_byte_array_32()
+            .map_err(|_| SecpError::InvalidPoint)?;
+        ba.into_point()
+    }
+}
+
 impl IntoScalar for [u8; 32] {
     fn into_scalar(&self) -> Result<Scalar, SecpError> {
         let mut scalar_bytes = Vec::with_capacity(32);
@@ -45,5 +63,21 @@ impl IntoScalar for [u8; 32] {
         };
 
         Ok(scalar)
+    }
+}
+
+impl IntoScalar for Vec<u8> {
+    fn into_scalar(&self) -> Result<Scalar, SecpError> {
+        if self.len() != 32 {
+            return Err(SecpError::InvalidPoint);
+        }
+
+        let mut bytes = Vec::<u8>::with_capacity(32);
+        bytes.extend(self);
+
+        let ba = bytes
+            .into_byte_array_32()
+            .map_err(|_| SecpError::InvalidPoint)?;
+        ba.into_scalar()
     }
 }

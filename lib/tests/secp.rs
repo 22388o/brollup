@@ -3,11 +3,11 @@ mod secp_tests {
     use brollup::{
         serialization::conversion::IntoByteArray,
         signature::{
+            into::{IntoPoint, IntoScalar},
             schnorr::{schnorr_sign, schnorr_verify, SecpError, SignFlag},
-            sum::sum_scalars,
+            sum::{sum_points, sum_scalars},
         },
     };
-    use secp::Scalar;
 
     #[test]
     fn test_sign_schnorr() -> Result<(), SecpError> {
@@ -68,24 +68,24 @@ mod secp_tests {
     fn test_sum_scalars() -> Result<(), SecpError> {
         let scalar_1_bytes =
             hex::decode("d798d1fac6bd4bb1c11f50312760351013379a0ab6f0a8c0af8a506b96b2525a")
-                .unwrap();
+                .map_err(|_| SecpError::InvalidScalar)?;
 
-        let scalar_1 = Scalar::from_slice(&scalar_1_bytes).unwrap();
+        let scalar_1 = scalar_1_bytes.into_scalar()?;
 
         let scalar_2_bytes =
             hex::decode("fa22dfe1da9013b3c1145040acae9089e0c08bc1c1a0719614f4b73add6f6ef5")
-                .unwrap();
+                .map_err(|_| SecpError::InvalidScalar)?;
 
-        let scalar_2 = Scalar::from_slice(&scalar_2_bytes).unwrap();
+        let scalar_2 = scalar_2_bytes.into_scalar()?;
 
         let scalars = vec![scalar_1, scalar_2];
 
         let sum = sum_scalars(scalars)?;
 
-        let expected_sum_vec =
+        let expected_sum_bytes =
             hex::decode("d1bbb1dca14d5f658233a071d40ec59b394948e5c9487a1b04aca919a3eb800e")
-                .unwrap();
-        let expected_sum = Scalar::from_slice(&expected_sum_vec).unwrap();
+                .map_err(|_| SecpError::InvalidScalar)?;
+        let expected_sum = expected_sum_bytes.into_scalar()?;
 
         assert_eq!(sum, expected_sum);
 
@@ -93,33 +93,27 @@ mod secp_tests {
     }
 
     #[test]
-    fn test_sum_scalars_2() -> Result<(), SecpError> {
-        let scalar_1_bytes =
-            hex::decode("d798d1fac6bd4bb1c11f50312760351013379a0ab6f0a8c0af8a506b96b2525a")
-                .unwrap();
+    fn test_sum_points() -> Result<(), SecpError> {
+        let point_1_bytes =
+            hex::decode("7759eb7a3182a6e5ab4818ab2bbbb79d1aa93b16e0ef1f2b1141614a9c8402a5")
+                .map_err(|_| SecpError::InvalidPoint)?;
 
-        let scalar_1 = Scalar::from_slice(&scalar_1_bytes).unwrap();
+        let point_1 = point_1_bytes.into_point()?;
 
-        let scalar_2_bytes =
-            hex::decode("fa22dfe1da9013b3c1145040acae9089e0c08bc1c1a0719614f4b73add6f6ef5")
-                .unwrap();
+        let point_2_bytes =
+            hex::decode("2be00f329e405edacf4beaf1f235e1c38df8dc3a280b92573216cb8e98cc5f3c")
+                .map_err(|_| SecpError::InvalidPoint)?;
 
-        let scalar_2 = Scalar::from_slice(&scalar_2_bytes).unwrap();
+        let point_2 = point_2_bytes.into_point()?;
 
-        let scalar_3_bytes =
-            hex::decode("94455e3ed9f716bea425ef99b51fae47128769a1a0cd04244221e4e14631ab83")
-                .unwrap();
+        let points = vec![point_1, point_2];
 
-        let scalar_3 = Scalar::from_slice(&scalar_3_bytes).unwrap();
-
-        let scalars = vec![scalar_1, scalar_2, scalar_3];
-
-        let sum = sum_scalars(scalars)?;
+        let sum = sum_points(points)?;
 
         let expected_sum_vec =
-            hex::decode("6601101b7b4476242659900b892e73e39121d5a0baccde0386fc2f6e19e6ea50")
-                .unwrap();
-        let expected_sum = Scalar::from_slice(&expected_sum_vec).unwrap();
+            hex::decode("60dadabf8a850d6f4d6ffa8ec4777bdb085e3dbb49fe6122bed3d2c3c7e0e1e3")
+                .map_err(|_| SecpError::InvalidPoint)?;
+        let expected_sum = expected_sum_vec.into_point()?;
 
         assert_eq!(sum, expected_sum);
 
