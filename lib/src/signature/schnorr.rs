@@ -17,7 +17,7 @@ pub enum SecpError {
     InvalidPoint,
 }
 
-pub trait Sign {
+pub trait SignEntry {
     fn sign(
         &self,
         secret_key: [u8; 32],
