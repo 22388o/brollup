@@ -11,36 +11,6 @@ pub trait IntoScalar {
     fn into_scalar(&self) -> Result<Scalar, SecpError>;
 }
 
-pub trait IntoUncrompressedPublicKey {
-    fn into_uncompressed_public_key(&self) -> Result<[u8; 33], SecpError>;
-}
-
-pub trait IntoUncrompressedSignature {
-    fn into_uncompressed_signature(&self) -> Result<[u8; 65], SecpError>;
-}
-
-impl IntoUncrompressedPublicKey for [u8; 32] {
-    fn into_uncompressed_public_key(&self) -> Result<[u8; 33], SecpError> {
-    let mut combined = [0u8; 33];
-
-    combined[..1].copy_from_slice(&[0x02]);
-    combined[1..].copy_from_slice(self);
-
-    Ok(combined)
-    }
-}
-
-impl IntoUncrompressedSignature for [u8; 64] {
-    fn into_uncompressed_signature(&self) -> Result<[u8; 65], SecpError> {
-    let mut combined = [0u8; 65];
-
-    combined[..1].copy_from_slice(&[0x02]);
-    combined[1..].copy_from_slice(self);
-
-    Ok(combined)
-    }
-}
-
 impl IntoPoint for [u8; 32] {
     fn into_point(&self) -> Result<Point, SecpError> {
         let mut point_bytes = Vec::with_capacity(33);
