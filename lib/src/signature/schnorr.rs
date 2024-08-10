@@ -265,9 +265,12 @@ pub fn verify_schnorr_batch(
         MaybePoint::Valid(point) => point,
     };
 
-    // Check if the equation (R + eP) equals to sG.
-    match commitment.base_point_mul() == equation_even {
-        false => match commitment.base_point_mul() == equation_odd {
+    // sG
+    let commitment_times_generator = commitment.base_point_mul();
+
+    // Check if either one of the equations (R + eP) equal to sG.
+    match commitment_times_generator == equation_even {
+        false => match commitment_times_generator == equation_odd {
             false => return Err(SecpError::InvalidSignature),
             true => return Ok(()),
         },
