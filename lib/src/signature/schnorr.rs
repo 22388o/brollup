@@ -1,8 +1,12 @@
 use crate::hash::{tagged_hash, HashTag};
 use secp::{MaybePoint, MaybeScalar, Point, Scalar};
 
-use super::into::{IntoPoint, IntoScalar, IntoUncrompressedPublicKey, IntoUncrompressedSignature};
+use super::{
+    into::{IntoPoint, IntoScalar, IntoUncrompressedPublicKey, IntoUncrompressedSignature},
+    sum::{sum_points, sum_scalars},
+};
 
+#[derive(Clone, Copy)]
 pub enum SignFlag {
     BIP340Sign,
     EntrySign,
@@ -22,7 +26,7 @@ pub trait SignEntry {
     fn sign(&self, secret_key: [u8; 32], prev_state_hash: [u8; 32]) -> Result<[u8; 64], SecpError>;
 }
 
-fn compute_challenge(
+pub fn compute_challenge(
     public_nonce: Point,
     public_key: Point,
     message_bytes: [u8; 32],
@@ -124,7 +128,7 @@ pub fn schnorr_sign(
         .map_err(|_| SecpError::SignatureParseError)
 }
 
-fn verify_schnorr_internal(
+pub fn verify_schnorr(
     public_key: Point,
     public_nonce: Point,
     challange: Scalar,
@@ -177,7 +181,7 @@ pub fn verify_schnorr_uncompressed(
     // Check if commitment (s) is a valid scalar.
     let commitment = commitment_bytes.into_scalar()?;
 
-    verify_schnorr_internal(public_key, public_nonce, challange, commitment)
+    verify_schnorr(public_key, public_nonce, challange, commitment)
 }
 
 pub fn verify_schnorr_compressed(
@@ -198,4 +202,46 @@ pub fn verify_schnorr_compressed(
         signature_bytes_uncompressed,
         flag,
     )
+}
+
+pub fn verify_schnorr_sum(
+    signature_sum: [u8; 65],
+    public_keys: Vec<[u8; 32]>,
+    messages: Vec<[u8; 32]>,
+    flag: SignFlag,
+) -> Result<(), SecpError> {
+    let len = messages.len();
+    let mut challenges = Vec::<Scalar>::with_capacity(len);
+    let mut public_key_points = Vec::<Point>::with_capacity(len);
+
+    for index in 0..len {
+        let public_key = public_keys[index].into_point()?;
+        let message = messages[index];
+
+        // Placeholder..
+        let public_nonce = public_key;
+
+        let challenge_bytes: [u8; 32] = compute_challenge(public_nonce, public_key, message, flag);
+        let challenge = challenge_bytes.into_scalar()?;
+
+        challenges.push(challenge);
+        public_key_points.push(public_key);
+    }
+
+    let challenges_sum = sum_scalars(challenges)?;
+    let public_keys_sum = sum_points(public_key_points)?;
+
+    // Parse public nonce (R).
+    let public_nonce_bytes: [u8; 33] = (&signature_sum)[0..33]
+        .try_into()
+        .map_err(|_| SecpError::InvalidPoint)?;
+    let public_nonce = public_nonce_bytes.into_point()?;
+
+    // Parse commitment (s).
+    let commitment_bytes: [u8; 32] = (&signature_sum)[33..65]
+        .try_into()
+        .map_err(|_| SecpError::InvalidScalar)?;
+    let commitment = commitment_bytes.into_scalar()?;
+
+    verify_schnorr(public_keys_sum, public_nonce, challenges_sum, commitment)
 }
