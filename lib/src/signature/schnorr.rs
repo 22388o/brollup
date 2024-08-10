@@ -20,10 +20,6 @@ pub enum SecpError {
     SignatureParseError,
 }
 
-pub trait SignEntry {
-    fn sign(&self, secret_key: [u8; 32], prev_state_hash: [u8; 32]) -> Result<[u8; 64], SecpError>;
-}
-
 pub fn compute_challenge(
     public_nonce: Option<Point>,
     public_key: Option<Point>,

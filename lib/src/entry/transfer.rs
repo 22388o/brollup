@@ -33,6 +33,10 @@ impl Transfer {
         }
     }
 
+    pub fn msg_sender(&self) -> Account {
+        self.from
+    }
+
     pub fn set_from_account_index(&mut self, account_index: u32) {
         self.from.set_account_index(account_index);
     }
