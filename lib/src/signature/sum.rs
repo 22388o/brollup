@@ -82,7 +82,7 @@ pub fn sum_challanges(challanges: Vec<[u8; 32]>) -> Result<[u8; 32], SecpError> 
     sum_scalars_bytes(challanges)
 }
 
-pub fn sum_signatures(signatures: Vec<[u8; 64]>) -> Result<[u8; 65], SecpError> {
+pub fn sum_signatures(signatures: Vec<[u8; 64]>) -> Result<[u8; 64], SecpError> {
     let mut public_nonces = Vec::<[u8; 32]>::with_capacity(signatures.len());
     let mut commitments = Vec::<[u8; 32]>::with_capacity(signatures.len());
 
@@ -101,10 +101,10 @@ pub fn sum_signatures(signatures: Vec<[u8; 64]>) -> Result<[u8; 65], SecpError> 
     let public_nonces_sum = sum_public_nonces(public_nonces)?;
     let commitments_sum = sum_commitments(commitments)?;
 
-    let mut signature = [0u8; 65];
+    let mut signature = [0u8; 64];
 
-    signature[..33].copy_from_slice(&public_nonces_sum);
-    signature[33..].copy_from_slice(&commitments_sum);
+    signature[..32].copy_from_slice(&public_nonces_sum[1..33]);
+    signature[32..].copy_from_slice(&commitments_sum);
 
     Ok(signature)
 }

@@ -1,4 +1,5 @@
 use crate::hash::{tagged_hash, HashTag};
+use ::secp256k1::Secp256k1;
 use secp::{MaybePoint, MaybeScalar, Point, Scalar};
 
 use super::into::{IntoPoint, IntoScalar, IntoUncrompressedPublicKey, IntoUncrompressedSignature};
@@ -198,7 +199,16 @@ fn verify_schnorr_batch_internal(
     }
 
     // Check if the equation (R + eP) is a valid point.
-    let equation = match public_nonce + challenge_times_pubkey_sum {
+    let equation_even = match public_nonce + challenge_times_pubkey_sum {
+        MaybePoint::Infinity => {
+            return Err(SecpError::InvalidPoint);
+        }
+        MaybePoint::Valid(point) => point,
+    };
+
+    let ctx = Secp256k1::new();
+
+    let equation_odd = match public_nonce.negate(&ctx) + challenge_times_pubkey_sum {
         MaybePoint::Infinity => {
             return Err(SecpError::InvalidPoint);
         }
@@ -206,8 +216,11 @@ fn verify_schnorr_batch_internal(
     };
 
     // Check if the equation (R + eP) equals to sG.
-    match commitment.base_point_mul() == equation {
-        false => return Err(SecpError::InvalidSignature),
+    match commitment.base_point_mul() == equation_even {
+        false => match commitment.base_point_mul() == equation_odd {
+            false => return Err(SecpError::InvalidSignature),
+            true => return Ok(()),
+        },
         true => return Ok(()),
     }
 }
@@ -268,7 +281,7 @@ pub fn verify_schnorr_compressed(
 }
 
 pub fn verify_schnorr_batch(
-    signature_sum: [u8; 65],
+    signature_sum: [u8; 64],
     public_keys: Vec<[u8; 32]>,
     messages: Vec<[u8; 32]>,
     flag: SignFlag,
@@ -294,13 +307,13 @@ pub fn verify_schnorr_batch(
     }
 
     // Parse public nonce (R).
-    let public_nonce_bytes: [u8; 33] = (&signature_sum)[0..33]
+    let public_nonce_bytes: [u8; 32] = (&signature_sum)[0..32]
         .try_into()
         .map_err(|_| SecpError::InvalidPoint)?;
     let public_nonce = public_nonce_bytes.into_point()?;
 
     // Parse commitment (s).
-    let commitment_bytes: [u8; 32] = (&signature_sum)[33..65]
+    let commitment_bytes: [u8; 32] = (&signature_sum)[32..64]
         .try_into()
         .map_err(|_| SecpError::InvalidScalar)?;
     let commitment = commitment_bytes.into_scalar()?;
