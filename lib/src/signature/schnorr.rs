@@ -148,74 +148,6 @@ pub fn sign_schnorr(
         .map_err(|_| SecpError::SignatureParseError)
 }
 
-fn verify_schnorr_internal(
-    public_key: Point,
-    public_nonce: Point,
-    challange: Scalar,
-    commitment: Scalar,
-) -> Result<(), SecpError> {
-    // Check if the equation (R + eP) is a valid point.
-    let equation = match public_nonce + challange * public_key {
-        MaybePoint::Infinity => {
-            return Err(SecpError::InvalidPoint);
-        }
-        MaybePoint::Valid(point) => point,
-    };
-
-    // Check if the equation (R + eP) equals to sG.
-    match commitment.base_point_mul() == equation {
-        false => return Err(SecpError::InvalidSignature),
-        true => return Ok(()),
-    }
-}
-
-fn verify_schnorr_batch_internal(
-    public_keys: Vec<Point>,
-    challenges: Vec<Scalar>,
-    public_nonce: Point,
-    commitment: Scalar,
-) -> Result<(), SecpError> {
-    if public_keys.len() == 0 {
-        return Err(SecpError::InvalidPoint);
-    }
-
-    let mut challenge_times_pubkey_sum = challenges[0] * public_keys[0];
-
-    for index in 1..challenges.len() {
-        challenge_times_pubkey_sum =
-            match challenge_times_pubkey_sum + challenges[index] * public_keys[index] {
-                MaybePoint::Infinity => return Err(SecpError::InvalidPoint),
-                MaybePoint::Valid(point) => point,
-            }
-    }
-
-    // Check if the equation (R + eP) is a valid point.
-    let equation_even = match public_nonce + challenge_times_pubkey_sum {
-        MaybePoint::Infinity => {
-            return Err(SecpError::InvalidPoint);
-        }
-        MaybePoint::Valid(point) => point,
-    };
-
-    let ctx = Secp256k1::new();
-
-    let equation_odd = match public_nonce.negate(&ctx) + challenge_times_pubkey_sum {
-        MaybePoint::Infinity => {
-            return Err(SecpError::InvalidPoint);
-        }
-        MaybePoint::Valid(point) => point,
-    };
-
-    // Check if the equation (R + eP) equals to sG.
-    match commitment.base_point_mul() == equation_even {
-        false => match commitment.base_point_mul() == equation_odd {
-            false => return Err(SecpError::InvalidSignature),
-            true => return Ok(()),
-        },
-        true => return Ok(()),
-    }
-}
-
 pub fn verify_schnorr(
     public_key_bytes: [u8; 32],
     message_bytes: [u8; 32],
@@ -248,7 +180,19 @@ pub fn verify_schnorr(
     // Check if commitment (s) is a valid scalar.
     let commitment = commitment_bytes.into_scalar()?;
 
-    verify_schnorr_internal(public_key, public_nonce, challange, commitment)
+    // Check if the equation (R + eP) is a valid point.
+    let equation = match public_nonce + challange * public_key {
+        MaybePoint::Infinity => {
+            return Err(SecpError::InvalidPoint);
+        }
+        MaybePoint::Valid(point) => point,
+    };
+
+    // Check if the equation (R + eP) equals to sG.
+    match commitment.base_point_mul() == equation {
+        false => return Err(SecpError::InvalidSignature),
+        true => return Ok(()),
+    }
 }
 
 pub fn verify_schnorr_batch(
@@ -289,5 +233,39 @@ pub fn verify_schnorr_batch(
         .map_err(|_| SecpError::InvalidScalar)?;
     let commitment = commitment_bytes.into_scalar()?;
 
-    verify_schnorr_batch_internal(public_key_points, challenges, public_nonce, commitment)
+    let mut challenge_times_pubkey_sum = challenges[0] * public_key_points[0];
+
+    for index in 1..challenges.len() {
+        challenge_times_pubkey_sum =
+            match challenge_times_pubkey_sum + challenges[index] * public_key_points[index] {
+                MaybePoint::Infinity => return Err(SecpError::InvalidPoint),
+                MaybePoint::Valid(point) => point,
+            }
+    }
+
+    // Check if the equation (R + eP) is a valid point.
+    let equation_even = match public_nonce + challenge_times_pubkey_sum {
+        MaybePoint::Infinity => {
+            return Err(SecpError::InvalidPoint);
+        }
+        MaybePoint::Valid(point) => point,
+    };
+
+    let ctx = Secp256k1::new();
+
+    let equation_odd = match public_nonce.negate(&ctx) + challenge_times_pubkey_sum {
+        MaybePoint::Infinity => {
+            return Err(SecpError::InvalidPoint);
+        }
+        MaybePoint::Valid(point) => point,
+    };
+
+    // Check if the equation (R + eP) equals to sG.
+    match commitment.base_point_mul() == equation_even {
+        false => match commitment.base_point_mul() == equation_odd {
+            false => return Err(SecpError::InvalidSignature),
+            true => return Ok(()),
+        },
+        true => return Ok(()),
+    }
 }
