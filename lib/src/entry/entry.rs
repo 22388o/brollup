@@ -2,7 +2,7 @@ use super::transfer::Transfer;
 use crate::{
     hash::{tagged_hash, HashTag},
     serialization::{cpe::CompactPayloadEncoding, serialize::Serialize, sighash::Sighash},
-    signature::schnorr::{schnorr_sign, verify_schnorr, verify_schnorr_batch, SecpError, SignFlag},
+    signature::schnorr::{sign_schnorr, verify_schnorr, verify_schnorr_batch, SecpError, SignFlag},
 };
 use bit_vec::BitVec;
 
@@ -58,7 +58,7 @@ impl EntrySignature for Entry {
         let message = self.sighash(prev_state_hash);
 
         // Sign the message with the entry signing method.
-        schnorr_sign(secret_key, message, SignFlag::EntrySign)
+        sign_schnorr(secret_key, message, SignFlag::EntrySign)
     }
 
     fn verify(&self, signature: [u8; 64], prev_state_hash: [u8; 32]) -> Result<(), SecpError> {

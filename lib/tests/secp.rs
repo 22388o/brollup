@@ -5,7 +5,7 @@ mod secp_tests {
         signature::{
             into::{IntoPoint, IntoScalar},
             schnorr::{
-                schnorr_sign, verify_schnorr_batch, verify_schnorr, SecpError, SignFlag,
+                sign_schnorr, verify_schnorr_batch, verify_schnorr, SecpError, SignFlag,
             },
             sum::{sum_points, sum_public_keys, sum_scalars, sum_signatures},
         },
@@ -23,7 +23,7 @@ mod secp_tests {
 
         let sig_expected = hex::decode("3cdbcc837e40a3b360f09387fd376e62b3f0c509b45a770adfd71f4006de72ab5facfd42b58fb4852a09228690349fac690b3cb261ff57f208e38c6c2a387e14").unwrap();
 
-        let sig: [u8; 64] = schnorr_sign(
+        let sig: [u8; 64] = sign_schnorr(
             private_key
                 .into_byte_array_32()
                 .map_err(|_| SecpError::SignatureParseError)?,
@@ -170,7 +170,7 @@ mod secp_tests {
                 .unwrap();
 
         // challange 52179be064184d2cdc410173e8406d05b0d4c0412875af8a02326af06ae5fb75
-        let signature_1 = schnorr_sign(
+        let signature_1 = sign_schnorr(
             private_key_1
                 .into_byte_array_32()
                 .map_err(|_| SecpError::InvalidScalar)?,
@@ -192,7 +192,7 @@ mod secp_tests {
                 .unwrap();
 
         // challenge cb39065f0eb03d8f8a0a11dd43c8515f7ff79198d5654742c830be6f1b3e3af9
-        let signature_2 = schnorr_sign(
+        let signature_2 = sign_schnorr(
             private_key_2
                 .into_byte_array_32()
                 .map_err(|_| SecpError::InvalidScalar)?,

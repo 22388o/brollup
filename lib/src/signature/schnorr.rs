@@ -94,7 +94,7 @@ fn deterministic_nonce(secret_key: [u8; 32], message: [u8; 32]) -> [u8; 32] {
     tagged_hash(secret_nonce_preimage, HashTag::DeterministicNonce)
 }
 
-pub fn schnorr_sign(
+pub fn sign_schnorr(
     secret_key_bytes: [u8; 32],
     message_bytes: [u8; 32],
     flag: SignFlag,
