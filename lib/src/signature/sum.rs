@@ -92,7 +92,7 @@ pub fn sum_signatures(signatures: Vec<[u8; 64]>) -> Result<[u8; 65], SecpError> 
             .map_err(|_| SecpError::InvalidPoint)?;
         public_nonces.push(public_nonce);
 
-        let commitment: [u8; 32] = (&signature[0..32])
+        let commitment: [u8; 32] = (&signature[32..64])
             .try_into()
             .map_err(|_| SecpError::InvalidScalar)?;
         commitments.push(commitment);

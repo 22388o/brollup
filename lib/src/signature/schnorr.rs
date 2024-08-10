@@ -101,14 +101,16 @@ pub fn schnorr_sign(
     secret_nonce = secret_nonce.negate_if(public_nonce.parity());
 
     // Compute the challenge (e) bytes depending on the signing method.
-    let challange_array: [u8; 32] =
+    let challenge_array: [u8; 32] =
         compute_challenge(public_nonce, public_key, message_bytes, flag);
 
     // Challange (e) is = int(challange_bytes) mod n.
-    let challange = challange_array.into_scalar()?;
+    let challenge = challenge_array.into_scalar()?;
+
+    println!("challenge is: {}", hex::encode(challenge.serialize().to_vec()));
 
     // Commitment (s) is = k + ed mod n.
-    let commitment = match secret_nonce + challange * secret_key {
+    let commitment = match secret_nonce + challenge * secret_key {
         MaybeScalar::Zero => return Err(SecpError::InvalidScalar),
         MaybeScalar::Valid(scalar) => scalar,
     };
@@ -134,6 +136,12 @@ pub fn verify_schnorr(
     challange: Scalar,
     commitment: Scalar,
 ) -> Result<(), SecpError> {
+
+    println!("inter commitment is: {}", hex::encode(commitment.serialize().to_vec()));
+    println!("inter public_key is: {}", hex::encode(public_key.serialize().to_vec()));
+    println!("inter public_nonce is: {}", hex::encode(public_nonce.serialize().to_vec()));
+    println!("inter challange is: {}", hex::encode(challange.serialize().to_vec()));
+
     // Check if the equation (R + eP) is a valid point.
     let equation = match public_nonce + challange * public_key {
         MaybePoint::Infinity => {
@@ -224,12 +232,18 @@ pub fn verify_schnorr_sum(
         let challenge_bytes: [u8; 32] = compute_challenge(public_nonce, public_key, message, flag);
         let challenge = challenge_bytes.into_scalar()?;
 
+        println!("challenge is: {}", hex::encode(challenge.serialize().to_vec()));
+
         challenges.push(challenge);
         public_key_points.push(public_key);
     }
 
     let challenges_sum = sum_scalars(challenges)?;
     let public_keys_sum = sum_points(public_key_points)?;
+
+    println!("challenges_sum sum is: {}", hex::encode(challenges_sum.serialize().to_vec()));
+
+    println!("pubkeys sum is: {}", public_keys_sum.to_string());
 
     // Parse public nonce (R).
     let public_nonce_bytes: [u8; 33] = (&signature_sum)[0..33]
@@ -242,6 +256,10 @@ pub fn verify_schnorr_sum(
         .try_into()
         .map_err(|_| SecpError::InvalidScalar)?;
     let commitment = commitment_bytes.into_scalar()?;
+
+    println!("public_nonce is: {}", public_nonce.to_string());
+
+    println!("commitment is: {}", hex::encode(commitment.serialize().to_vec()));
 
     verify_schnorr(public_keys_sum, public_nonce, challenges_sum, commitment)
 }

@@ -5,10 +5,10 @@ mod secp_tests {
         signature::{
             into::{IntoPoint, IntoScalar},
             schnorr::{
-                schnorr_sign, verify_schnorr_compressed, verify_schnorr_uncompressed, SecpError,
-                SignFlag,
+                schnorr_sign, verify_schnorr_compressed, verify_schnorr_sum,
+                verify_schnorr_uncompressed, SecpError, SignFlag,
             },
-            sum::{sum_points, sum_public_keys, sum_scalars},
+            sum::{sum_points, sum_public_keys, sum_scalars, sum_signatures},
         },
     };
 
@@ -157,13 +157,17 @@ mod secp_tests {
             hex::decode("6c7216fbdd2d4f41cbb2cd16c5aad7cf142298aac5581c7d2ec2555f3e64c7c2")
                 .map_err(|_| SecpError::InvalidPoint)?;
 
-        let public_key_1 = public_key_1_bytes.into_byte_array_32().map_err(|_| SecpError::InvalidPoint)?;
+        let public_key_1 = public_key_1_bytes
+            .into_byte_array_32()
+            .map_err(|_| SecpError::InvalidPoint)?;
 
         let public_key_2_bytes =
             hex::decode("7af79ebb34707a350f375066dc7c1ba206cfc49d3963a9b4573af6ad5394402d")
                 .map_err(|_| SecpError::InvalidPoint)?;
 
-        let public_key_2 = public_key_2_bytes.into_byte_array_32().map_err(|_| SecpError::InvalidPoint)?;
+        let public_key_2 = public_key_2_bytes
+            .into_byte_array_32()
+            .map_err(|_| SecpError::InvalidPoint)?;
 
         let points = vec![public_key_1, public_key_2];
 
@@ -172,10 +176,134 @@ mod secp_tests {
         let expected_sum_vec =
             hex::decode("03336ac1ea270659d5783b57f24338ae3a24d904e036083d3bdce1b27b97b434d1")
                 .map_err(|_| SecpError::InvalidPoint)?;
-        let expected_sum = expected_sum_vec.into_byte_array_33().map_err(|_| SecpError::InvalidPoint)?;
+        let expected_sum = expected_sum_vec
+            .into_byte_array_33()
+            .map_err(|_| SecpError::InvalidPoint)?;
 
         assert_eq!(sum, expected_sum);
 
         Ok(())
+    }
+
+    #[test]
+    fn test_sum_batch() -> Result<(), SecpError> {
+        // 1
+        let private_key_1 =
+            hex::decode("d38886109880885909e45cf3cb3a13d8c7f72d454183b1724cb947180f9bcacb")
+                .unwrap();
+        let public_key_1 =
+            hex::decode("49e92a044a315ad848951c4f135727259a6e44645813730284315a4ac7ea488a")
+                .unwrap();
+        let message_1 =
+            hex::decode("e8ebbbaf6c4a1b1860b175cf6a8df2f9ab35897f3063aa9302e458d68c659719")
+                .unwrap();
+
+                // challange 52179be064184d2cdc410173e8406d05b0d4c0412875af8a02326af06ae5fb75
+        let signature_1 = schnorr_sign(
+            private_key_1
+                .into_byte_array_32()
+                .map_err(|_| SecpError::InvalidScalar)?,
+            message_1
+                .into_byte_array_32()
+                .map_err(|_| SecpError::InvalidScalar)?,
+            SignFlag::EntrySign,
+        )?;
+
+        println!("sig 1 is {}", hex::encode(signature_1.to_vec()));
+        // signature is:
+
+        
+        // 2a90b5a56d17ef31b7ec54cfee9d4b064e300bd5ebc4aa5ff5142471c8bf949c64dd3f73df7f426e2aa52edfef1dfaf07b0e4db6f9e858c2d263cce651052df6
+
+
+        // lets verify internally first
+
+        let res = verify_schnorr_compressed(
+            public_key_1
+                .into_byte_array_32()
+                .map_err(|_| SecpError::SignatureParseError)?,
+                message_1
+                .into_byte_array_32()
+                .map_err(|_| SecpError::SignatureParseError)?,
+                signature_1,
+            SignFlag::EntrySign,
+        )?;
+
+        println!("passed 1 succefsully");
+
+
+
+
+
+
+
+
+        // 2
+        let private_key_2 =
+            hex::decode("4806c330785dece02c5cdbc3484b2f42aab4b0edff45c015f3f8d5c511f4afc5")
+                .unwrap();
+        let public_key_2 =
+            hex::decode("0d93be6ad9a4b07c5d77c8d0224ea4f6162a896ffe6a439f2a33308d20ef605f")
+                .unwrap();
+        let message_2 =
+            hex::decode("c6fbb265fa443c72a63a3571efabbd4551765d54e223a4d5e16dc95ffca67863")
+                .unwrap();
+
+                // challenge cb39065f0eb03d8f8a0a11dd43c8515f7ff79198d5654742c830be6f1b3e3af9
+        let signature_2 = schnorr_sign(
+            private_key_2
+                .into_byte_array_32()
+                .map_err(|_| SecpError::InvalidScalar)?,
+            message_2
+                .into_byte_array_32()
+                .map_err(|_| SecpError::InvalidScalar)?,
+            SignFlag::EntrySign,
+        )?;
+
+        println!("sig 2 is {}", hex::encode(signature_2.to_vec()));
+        // signature is:
+        // 22a1b9feed7b78a736bac62c19dc2e198a5d1d9cb8850df574f35fa7e60def26126f795b184bcab507e6ff5946f9fe1ef9555ad2c921adf16d35d0bf909d8de8
+
+        let res2 = verify_schnorr_compressed(
+            public_key_2
+                .into_byte_array_32()
+                .map_err(|_| SecpError::SignatureParseError)?,
+                message_2
+                .into_byte_array_32()
+                .map_err(|_| SecpError::SignatureParseError)?,
+                signature_2,
+            SignFlag::EntrySign,
+        )?;
+
+        println!("passed 2 succefsully");
+
+
+        let signatures = vec![signature_1, signature_2];
+
+        let agg_sig = sum_signatures(signatures)?;
+
+        println!("aggsig is: {}", hex::encode(agg_sig.to_vec()));
+        // agg sig is:
+        // 02cd8b9ecb3a8d7e9c0f540df86ba8a455a680bfcc4c153a9c40706ddc3fe6a8c2774cb8cef7cb0d23328c2e393617f90f7463a889c30a06b43f999da5e1a2bbde
+
+        let pubkeys = vec![
+            public_key_1
+                .into_byte_array_32()
+                .map_err(|_| SecpError::InvalidScalar)?,
+            public_key_2
+                .into_byte_array_32()
+                .map_err(|_| SecpError::InvalidScalar)?,
+        ];
+
+        let messages = vec![
+            message_1
+                .into_byte_array_32()
+                .map_err(|_| SecpError::InvalidScalar)?,
+            message_2
+                .into_byte_array_32()
+                .map_err(|_| SecpError::InvalidScalar)?,
+        ];
+
+        verify_schnorr_sum(agg_sig, pubkeys, messages, SignFlag::EntrySign)
     }
 }
