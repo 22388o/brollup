@@ -183,6 +183,10 @@ fn verify_schnorr_batch_internal(
     public_nonce: Point,
     commitment: Scalar,
 ) -> Result<(), SecpError> {
+    if public_keys.len() == 0 {
+        return Err(SecpError::InvalidPoint);
+    }
+
     let mut challenge_times_pubkey_sum = challenges[0] * public_keys[0];
 
     for index in 1..challenges.len() {
@@ -270,6 +274,11 @@ pub fn verify_schnorr_batch(
     flag: SignFlag,
 ) -> Result<(), SecpError> {
     let len = messages.len();
+
+    if len == 0 {
+        return Err(SecpError::InvalidPoint);
+    }
+
     let mut challenges = Vec::<Scalar>::with_capacity(len);
     let mut public_key_points = Vec::<Point>::with_capacity(len);
 
