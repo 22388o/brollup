@@ -2,7 +2,7 @@ use super::transfer::Transfer;
 use crate::{
     hash::{tagged_hash, HashTag},
     serialization::{cpe::CompactPayloadEncoding, serialize::Serialize, sighash::Sighash},
-    signature::schnorr::{schnorr_sign, verify_schnorr, SecpError, SignFlag},
+    signature::schnorr::{schnorr_sign, verify_schnorr, verify_schnorr_batch, SecpError, SignFlag},
 };
 use bit_vec::BitVec;
 
@@ -45,6 +45,29 @@ impl Sighash for Entry {
 pub trait EntrySignature {
     fn sign(&self, secret_key: [u8; 32], prev_state_hash: [u8; 32]) -> Result<[u8; 64], SecpError>;
     fn verify(&self, signature: [u8; 64], prev_state_hash: [u8; 32]) -> Result<(), SecpError>;
+}
+
+pub trait BatchVerification {
+    fn batch_verify(&self, signature: [u8; 64], prev_state_hash: [u8; 32])
+        -> Result<(), SecpError>;
+}
+
+impl BatchVerification for Vec<Entry> {
+    fn batch_verify(
+        &self,
+        signature_sum: [u8; 64],
+        prev_state_hash: [u8; 32],
+    ) -> Result<(), SecpError> {
+        let mut messages = Vec::<[u8; 32]>::with_capacity(self.len());
+        let mut public_keys = Vec::<[u8; 32]>::with_capacity(self.len());
+
+        for entry in self {
+            messages.push(entry.sighash(prev_state_hash));
+            public_keys.push(entry.msg_sender());
+        }
+
+        verify_schnorr_batch(signature_sum, public_keys, messages, SignFlag::EntrySign)
+    }
 }
 
 impl EntrySignature for Entry {
