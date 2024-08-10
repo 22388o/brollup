@@ -233,8 +233,10 @@ pub fn verify_schnorr_batch(
         .map_err(|_| SecpError::InvalidScalar)?;
     let commitment = commitment_bytes.into_scalar()?;
 
+    // e1P1
     let mut challenge_times_pubkey_sum = challenges[0] * public_key_points[0];
 
+    // e2P2..enPn
     for index in 1..challenges.len() {
         challenge_times_pubkey_sum =
             match challenge_times_pubkey_sum + challenges[index] * public_key_points[index] {
@@ -243,7 +245,10 @@ pub fn verify_schnorr_batch(
             }
     }
 
-    // Check if the equation (R + eP) is a valid point.
+    // The aggregate signature sum can have a public nonce that is either even or odd.
+    // To avoid dealing with the parity bit, we check the signature against both possible equations.
+
+    // Check if the equation (R + eP) is a valid point where the y-coordinate of R is even.
     let equation_even = match public_nonce + challenge_times_pubkey_sum {
         MaybePoint::Infinity => {
             return Err(SecpError::InvalidPoint);
@@ -251,8 +256,8 @@ pub fn verify_schnorr_batch(
         MaybePoint::Valid(point) => point,
     };
 
+    // Check if the equation (R + eP) is a valid point where the y-coordinate of R is odd.
     let ctx = Secp256k1::new();
-
     let equation_odd = match public_nonce.negate(&ctx) + challenge_times_pubkey_sum {
         MaybePoint::Infinity => {
             return Err(SecpError::InvalidPoint);
