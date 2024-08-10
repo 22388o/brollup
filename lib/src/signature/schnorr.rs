@@ -179,15 +179,15 @@ fn verify_schnorr_internal(
 
 fn verify_schnorr_batch_internal(
     public_keys: Vec<Point>,
+    challenges: Vec<Scalar>,
     public_nonce: Point,
-    challanges: Vec<Scalar>,
     commitment: Scalar,
 ) -> Result<(), SecpError> {
-    let mut challenge_times_pubkey_sum = challanges[0] * public_keys[0];
+    let mut challenge_times_pubkey_sum = challenges[0] * public_keys[0];
 
-    for index in 1..challanges.len() {
+    for index in 1..challenges.len() {
         challenge_times_pubkey_sum =
-            match challenge_times_pubkey_sum + challanges[index] * public_keys[index] {
+            match challenge_times_pubkey_sum + challenges[index] * public_keys[index] {
                 MaybePoint::Infinity => return Err(SecpError::InvalidPoint),
                 MaybePoint::Valid(point) => point,
             }
@@ -296,5 +296,5 @@ pub fn verify_schnorr_batch(
         .map_err(|_| SecpError::InvalidScalar)?;
     let commitment = commitment_bytes.into_scalar()?;
 
-    verify_schnorr_batch_internal(public_key_points, public_nonce, challenges, commitment)
+    verify_schnorr_batch_internal(public_key_points, challenges, public_nonce, commitment)
 }
