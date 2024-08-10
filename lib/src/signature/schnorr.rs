@@ -1,10 +1,7 @@
 use crate::hash::{tagged_hash, HashTag};
 use secp::{MaybePoint, MaybeScalar, Point, Scalar};
 
-use super::{
-    into::{IntoPoint, IntoScalar, IntoUncrompressedPublicKey, IntoUncrompressedSignature},
-    sum::{sum_points, sum_scalars},
-};
+use super::into::{IntoPoint, IntoScalar, IntoUncrompressedPublicKey, IntoUncrompressedSignature};
 
 #[derive(Clone, Copy)]
 pub enum SignFlag {
@@ -27,40 +24,66 @@ pub trait SignEntry {
 }
 
 pub fn compute_challenge(
-    public_nonce: Point,
-    public_key: Point,
+    public_nonce: Option<Point>,
+    public_key: Option<Point>,
     message_bytes: [u8; 32],
     flag: SignFlag,
-) -> [u8; 32] {
+) -> Result<[u8; 32], SecpError> {
     match flag {
         SignFlag::BIP340Sign => {
             // Follow BIP-340. Challenge e bytes is = H(R||P||m).
+
+            let public_nonce = match public_nonce {
+                None => return Err(SecpError::InvalidPoint),
+                Some(point) => point,
+            };
+
+            let public_key = match public_key {
+                None => return Err(SecpError::InvalidPoint),
+                Some(point) => point,
+            };
+
             let mut challenge_preimage = Vec::<u8>::with_capacity(96);
             challenge_preimage.extend(public_nonce.serialize_xonly());
             challenge_preimage.extend(public_key.serialize_xonly());
             challenge_preimage.extend(message_bytes);
-            return tagged_hash(challenge_preimage, HashTag::BIP0340Challenge);
+            return Ok(tagged_hash(challenge_preimage, HashTag::BIP0340Challenge));
         }
 
         SignFlag::EntrySign => {
             // Do not follow BIP-340. Challange (e) bytes is = H(P||m).
+
+            let public_key = match public_key {
+                None => return Err(SecpError::InvalidPoint),
+                Some(point) => point,
+            };
+
             let mut challenge_preimage = Vec::<u8>::with_capacity(64);
             challenge_preimage.extend(public_key.serialize_xonly());
             challenge_preimage.extend(message_bytes);
-            return tagged_hash(challenge_preimage, HashTag::EntryChallenge);
+            return Ok(tagged_hash(challenge_preimage, HashTag::EntryChallenge));
         }
 
         SignFlag::ProtocolMessageSign => {
             // Do not follow BIP-340. Challange (e) bytes is = H(P||m).
+
+            let public_key = match public_key {
+                None => return Err(SecpError::InvalidPoint),
+                Some(point) => point,
+            };
+
             let mut challenge_preimage = Vec::<u8>::with_capacity(64);
             challenge_preimage.extend(public_key.serialize_xonly());
             challenge_preimage.extend(message_bytes);
-            return tagged_hash(challenge_preimage, HashTag::ProtocolMessageChallenge);
+            return Ok(tagged_hash(
+                challenge_preimage,
+                HashTag::ProtocolMessageChallenge,
+            ));
         }
 
         SignFlag::CustomMessageSign => {
             // Do not follow BIP-340. Challange (e) bytes is = H(m).
-            return tagged_hash(message_bytes, HashTag::CustomMessageChallenge);
+            return Ok(tagged_hash(message_bytes, HashTag::CustomMessageChallenge));
         }
     };
 }
@@ -102,12 +125,15 @@ pub fn schnorr_sign(
 
     // Compute the challenge (e) bytes depending on the signing method.
     let challenge_array: [u8; 32] =
-        compute_challenge(public_nonce, public_key, message_bytes, flag);
+        compute_challenge(Some(public_nonce), Some(public_key), message_bytes, flag)?;
 
     // Challange (e) is = int(challange_bytes) mod n.
     let challenge = challenge_array.into_scalar()?;
 
-    println!("challenge is: {}", hex::encode(challenge.serialize().to_vec()));
+    println!(
+        "challenge is: {}",
+        hex::encode(challenge.serialize().to_vec())
+    );
 
     // Commitment (s) is = k + ed mod n.
     let commitment = match secret_nonce + challenge * secret_key {
@@ -130,20 +156,42 @@ pub fn schnorr_sign(
         .map_err(|_| SecpError::SignatureParseError)
 }
 
-pub fn verify_schnorr(
+fn verify_schnorr_internal(
     public_key: Point,
     public_nonce: Point,
     challange: Scalar,
     commitment: Scalar,
 ) -> Result<(), SecpError> {
-
-    println!("inter commitment is: {}", hex::encode(commitment.serialize().to_vec()));
-    println!("inter public_key is: {}", hex::encode(public_key.serialize().to_vec()));
-    println!("inter public_nonce is: {}", hex::encode(public_nonce.serialize().to_vec()));
-    println!("inter challange is: {}", hex::encode(challange.serialize().to_vec()));
-
     // Check if the equation (R + eP) is a valid point.
     let equation = match public_nonce + challange * public_key {
+        MaybePoint::Infinity => {
+            return Err(SecpError::InvalidPoint);
+        }
+        MaybePoint::Valid(point) => point,
+    };
+
+    // Check if the equation (R + eP) equals to sG.
+    match commitment.base_point_mul() == equation {
+        false => return Err(SecpError::InvalidSignature),
+        true => return Ok(()),
+    }
+}
+
+fn verify_schnorr_batch_internal(
+    public_keys: Vec<Point>,
+    public_nonce: Point,
+    challanges: Vec<Scalar>,
+    commitment: Scalar,
+) -> Result<(), SecpError> {
+    let mut first_challenge_times_pubkey = challanges[0] * public_keys[0];
+
+    for index in 1..challanges.len() {
+        first_challenge_times_pubkey =
+            (first_challenge_times_pubkey + challanges[index] * public_keys[index]).unwrap();
+    }
+
+    // Check if the equation (R + eP) is a valid point.
+    let equation = match public_nonce + first_challenge_times_pubkey {
         MaybePoint::Infinity => {
             return Err(SecpError::InvalidPoint);
         }
@@ -176,7 +224,7 @@ pub fn verify_schnorr_uncompressed(
 
     // Compute the challenge (e) bytes depending on the signing method.
     let challange_array: [u8; 32] =
-        compute_challenge(public_nonce, public_key, message_bytes, flag);
+        compute_challenge(Some(public_nonce), Some(public_key), message_bytes, flag)?;
 
     // Challange (e) is = int(challange_bytes) mod n.
     let challange = challange_array.into_scalar()?;
@@ -189,7 +237,7 @@ pub fn verify_schnorr_uncompressed(
     // Check if commitment (s) is a valid scalar.
     let commitment = commitment_bytes.into_scalar()?;
 
-    verify_schnorr(public_key, public_nonce, challange, commitment)
+    verify_schnorr_internal(public_key, public_nonce, challange, commitment)
 }
 
 pub fn verify_schnorr_compressed(
@@ -212,7 +260,7 @@ pub fn verify_schnorr_compressed(
     )
 }
 
-pub fn verify_schnorr_sum(
+pub fn verify_schnorr_batch(
     signature_sum: [u8; 65],
     public_keys: Vec<[u8; 32]>,
     messages: Vec<[u8; 32]>,
@@ -226,24 +274,12 @@ pub fn verify_schnorr_sum(
         let public_key = public_keys[index].into_point()?;
         let message = messages[index];
 
-        // Placeholder..
-        let public_nonce = public_key;
-
-        let challenge_bytes: [u8; 32] = compute_challenge(public_nonce, public_key, message, flag);
+        let challenge_bytes = compute_challenge(None, Some(public_key), message, flag)?;
         let challenge = challenge_bytes.into_scalar()?;
-
-        println!("challenge is: {}", hex::encode(challenge.serialize().to_vec()));
 
         challenges.push(challenge);
         public_key_points.push(public_key);
     }
-
-    let challenges_sum = sum_scalars(challenges)?;
-    let public_keys_sum = sum_points(public_key_points)?;
-
-    println!("challenges_sum sum is: {}", hex::encode(challenges_sum.serialize().to_vec()));
-
-    println!("pubkeys sum is: {}", public_keys_sum.to_string());
 
     // Parse public nonce (R).
     let public_nonce_bytes: [u8; 33] = (&signature_sum)[0..33]
@@ -257,9 +293,5 @@ pub fn verify_schnorr_sum(
         .map_err(|_| SecpError::InvalidScalar)?;
     let commitment = commitment_bytes.into_scalar()?;
 
-    println!("public_nonce is: {}", public_nonce.to_string());
-
-    println!("commitment is: {}", hex::encode(commitment.serialize().to_vec()));
-
-    verify_schnorr(public_keys_sum, public_nonce, challenges_sum, commitment)
+    verify_schnorr_batch_internal(public_key_points, public_nonce, challenges, commitment)
 }
