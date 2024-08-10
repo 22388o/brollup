@@ -183,15 +183,18 @@ fn verify_schnorr_batch_internal(
     challanges: Vec<Scalar>,
     commitment: Scalar,
 ) -> Result<(), SecpError> {
-    let mut first_challenge_times_pubkey = challanges[0] * public_keys[0];
+    let mut challenge_times_pubkey_sum = challanges[0] * public_keys[0];
 
     for index in 1..challanges.len() {
-        first_challenge_times_pubkey =
-            (first_challenge_times_pubkey + challanges[index] * public_keys[index]).unwrap();
+        challenge_times_pubkey_sum =
+            match challenge_times_pubkey_sum + challanges[index] * public_keys[index] {
+                MaybePoint::Infinity => return Err(SecpError::InvalidPoint),
+                MaybePoint::Valid(point) => point,
+            }
     }
 
     // Check if the equation (R + eP) is a valid point.
-    let equation = match public_nonce + first_challenge_times_pubkey {
+    let equation = match public_nonce + challenge_times_pubkey_sum {
         MaybePoint::Infinity => {
             return Err(SecpError::InvalidPoint);
         }
