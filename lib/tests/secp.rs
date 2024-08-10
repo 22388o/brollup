@@ -5,8 +5,7 @@ mod secp_tests {
         signature::{
             into::{IntoPoint, IntoScalar},
             schnorr::{
-                schnorr_sign, verify_schnorr_batch, verify_schnorr_compressed,
-                verify_schnorr_uncompressed, SecpError, SignFlag,
+                schnorr_sign, verify_schnorr_batch, verify_schnorr, SecpError, SignFlag,
             },
             sum::{sum_points, sum_public_keys, sum_scalars, sum_signatures},
         },
@@ -40,7 +39,7 @@ mod secp_tests {
     }
 
     #[test]
-    fn test_verify_schnorr_compressed() -> Result<(), SecpError> {
+    fn test_verify_schnorr() -> Result<(), SecpError> {
         let message =
             hex::decode("e97f06fabc231539119048bd3c55d0aa6015ed157532e6a5e6fb15aae331791d")
                 .unwrap();
@@ -53,7 +52,7 @@ mod secp_tests {
 
         let signature = hex::decode("3cdbcc837e40a3b360f09387fd376e62b3f0c509b45a770adfd71f4006de72ab5facfd42b58fb4852a09228690349fac690b3cb261ff57f208e38c6c2a387e14").unwrap();
 
-        verify_schnorr_compressed(
+        verify_schnorr(
             public_key
                 .into_byte_array_32()
                 .map_err(|_| SecpError::SignatureParseError)?,
@@ -62,34 +61,6 @@ mod secp_tests {
                 .map_err(|_| SecpError::SignatureParseError)?,
             signature
                 .into_byte_array_64()
-                .map_err(|_| SecpError::SignatureParseError)?,
-            SignFlag::EntrySign,
-        )
-    }
-
-    #[test]
-    fn test_verify_schnorr_uncompressed() -> Result<(), SecpError> {
-        let message =
-            hex::decode("e97f06fabc231539119048bd3c55d0aa6015ed157532e6a5e6fb15aae331791d")
-                .unwrap();
-
-        let public_key =
-            hex::decode("02dee61ab0f4cb3a993cb13c552e44f5abfbf1b377c08b0380da14de41234ea8bd")
-                .unwrap();
-
-        // corresponding secret key: 09f5dde60c19101b671a5e3f4e6f0c0aaa92814170edf7f6bc19b5a21e358a51
-
-        let signature = hex::decode("023cdbcc837e40a3b360f09387fd376e62b3f0c509b45a770adfd71f4006de72ab5facfd42b58fb4852a09228690349fac690b3cb261ff57f208e38c6c2a387e14").unwrap();
-
-        verify_schnorr_uncompressed(
-            public_key
-                .into_byte_array_33()
-                .map_err(|_| SecpError::SignatureParseError)?,
-            message
-                .into_byte_array_32()
-                .map_err(|_| SecpError::SignatureParseError)?,
-            signature
-                .into_byte_array_65()
                 .map_err(|_| SecpError::SignatureParseError)?,
             SignFlag::EntrySign,
         )
@@ -186,7 +157,7 @@ mod secp_tests {
     }
 
     #[test]
-    fn test_verify_batch() -> Result<(), SecpError> {
+    fn test_verify_schnorr_batch() -> Result<(), SecpError> {
         // 1
         let private_key_1 =
             hex::decode("d38886109880885909e45cf3cb3a13d8c7f72d454183b1724cb947180f9bcacb")

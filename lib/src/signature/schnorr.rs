@@ -2,7 +2,7 @@ use crate::hash::{tagged_hash, HashTag};
 use ::secp256k1::Secp256k1;
 use secp::{MaybePoint, MaybeScalar, Point, Scalar};
 
-use super::into::{IntoPoint, IntoScalar, IntoUncrompressedPublicKey, IntoUncrompressedSignature};
+use super::into::{IntoPoint, IntoScalar};
 
 #[derive(Clone, Copy)]
 pub enum SignFlag {
@@ -131,11 +131,6 @@ pub fn schnorr_sign(
     // Challange (e) is = int(challange_bytes) mod n.
     let challenge = challenge_array.into_scalar()?;
 
-    println!(
-        "challenge is: {}",
-        hex::encode(challenge.serialize().to_vec())
-    );
-
     // Commitment (s) is = k + ed mod n.
     let commitment = match secret_nonce + challenge * secret_key {
         MaybeScalar::Zero => return Err(SecpError::InvalidScalar),
@@ -225,17 +220,17 @@ fn verify_schnorr_batch_internal(
     }
 }
 
-pub fn verify_schnorr_uncompressed(
-    public_key_bytes: [u8; 33],
+pub fn verify_schnorr(
+    public_key_bytes: [u8; 32],
     message_bytes: [u8; 32],
-    signature_bytes: [u8; 65],
+    signature_bytes: [u8; 64],
     flag: SignFlag,
 ) -> Result<(), SecpError> {
     // Check if the public key (P) is a valid point.
     let public_key = public_key_bytes.into_point()?;
 
     // Parse public nonce (R) bytes.
-    let public_nonce_bytes: [u8; 33] = (&signature_bytes[0..33])
+    let public_nonce_bytes: [u8; 32] = (&signature_bytes[0..32])
         .try_into()
         .map_err(|_| SecpError::SignatureParseError)?;
 
@@ -250,7 +245,7 @@ pub fn verify_schnorr_uncompressed(
     let challange = challange_array.into_scalar()?;
 
     // Parse commitment (s) bytes.
-    let commitment_bytes: [u8; 32] = (&signature_bytes[33..65])
+    let commitment_bytes: [u8; 32] = (&signature_bytes[32..64])
         .try_into()
         .map_err(|_| SecpError::SignatureParseError)?;
 
@@ -258,26 +253,6 @@ pub fn verify_schnorr_uncompressed(
     let commitment = commitment_bytes.into_scalar()?;
 
     verify_schnorr_internal(public_key, public_nonce, challange, commitment)
-}
-
-pub fn verify_schnorr_compressed(
-    public_key_bytes: [u8; 32],
-    message_bytes: [u8; 32],
-    signature_bytes: [u8; 64],
-    flag: SignFlag,
-) -> Result<(), SecpError> {
-    // Parse compressed public key bytes.
-    let public_key_bytes_uncompressed = public_key_bytes.into_uncompressed_public_key()?;
-
-    // Parse compressed signature bytes.
-    let signature_bytes_uncompressed = signature_bytes.into_uncompressed_signature()?;
-
-    verify_schnorr_uncompressed(
-        public_key_bytes_uncompressed,
-        message_bytes,
-        signature_bytes_uncompressed,
-        flag,
-    )
 }
 
 pub fn verify_schnorr_batch(
