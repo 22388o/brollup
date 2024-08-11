@@ -1,7 +1,7 @@
 #![allow(dead_code)]
 
 use crate::{
-    encoding::csv::{to_csv_script_encode, CSVFlag},
+    encoding::csv::{CSVEncode, CSVFlag},
     taproot::{TapLeaf, TapRoot, P2TR},
 };
 use musig2::secp256k1::{self, XOnlyPublicKey};
@@ -42,7 +42,7 @@ fn taproot(&self) -> Result<TapRoot, secp256k1::Error> {
 
         // Add degrading timelock
         let days: u8 = DEGRADING_PERIOD_START_AT - i;
-        tap_script.extend(to_csv_script_encode(CSVFlag::Days(days)));
+        tap_script.extend(Bytes::csv_script(CSVFlag::Days(days)));
 
         // Push to_self key
         tap_script.push(0x20);

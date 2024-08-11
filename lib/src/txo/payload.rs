@@ -6,10 +6,10 @@ use musig2::secp256k1::{self, XOnlyPublicKey};
 use crate::entry::entry::Entry;
 use crate::signature::musig2::keys_to_key_agg_ctx;
 use crate::encoding::cpe::CompactPayloadEncoding;
-use crate::encoding::csv::CSVFlag;
+use crate::encoding::csv::{CSVEncode, CSVFlag};
 use crate::encoding::push::Push;
 use crate::taproot::{TapLeaf, P2TR};
-use crate::{hash::hash_160, encoding::csv::to_csv_script_encode, taproot::TapRoot};
+use crate::{hash::hash_160, taproot::TapRoot};
 
 type Bytes = Vec<u8>;
 type Key = XOnlyPublicKey;
@@ -168,7 +168,7 @@ impl P2TR for Payload {
         // OP_ELSE
         tap_script.push(0x67);
 
-        tap_script.extend(to_csv_script_encode(CSVFlag::CSVWeek));
+        tap_script.extend(Bytes::csv_script(CSVFlag::CSVWeek));
 
         // Push msg.senders aggregate key into stack
         tap_script.push(0x20);

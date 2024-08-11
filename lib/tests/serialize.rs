@@ -1,8 +1,12 @@
 #[cfg(test)]
 mod serialize_tests {
     use brollup::encoding::{
-        csv::{to_csv_script_encode, to_n_sequence_encode, CSVFlag}, prefix::Prefix, push::Push
+        csv::{CSVEncode, CSVFlag},
+        prefix::Prefix,
+        push::Push,
     };
+
+    type Bytes = Vec<u8>;
 
     #[test]
     fn test_prefix_pushdata() {
@@ -88,10 +92,10 @@ mod serialize_tests {
     fn test_csv_days() {
         // 1
         let days = 1;
-        let n_sequence = to_n_sequence_encode(CSVFlag::Days(days));
+        let n_sequence = Bytes::n_sequence(CSVFlag::Days(days));
         let n_sequence_expected = hex::decode("90000000").unwrap();
 
-        let csv_script = to_csv_script_encode(CSVFlag::Days(days));
+        let csv_script = Bytes::csv_script(CSVFlag::Days(days));
         let csv_script_expected = hex::decode("029000b275").unwrap();
 
         assert_eq!(n_sequence, n_sequence_expected);
@@ -99,10 +103,10 @@ mod serialize_tests {
 
         // 2
         let days = 2;
-        let n_sequence = to_n_sequence_encode(CSVFlag::Days(days));
+        let n_sequence = Bytes::n_sequence(CSVFlag::Days(days));
         let n_sequence_expected = hex::decode("20010000").unwrap();
 
-        let csv_script = to_csv_script_encode(CSVFlag::Days(days));
+        let csv_script = Bytes::csv_script(CSVFlag::Days(days));
         let csv_script_expected = hex::decode("022001b275").unwrap();
 
         assert_eq!(n_sequence, n_sequence_expected);
@@ -110,10 +114,10 @@ mod serialize_tests {
 
         // 3
         let days = 3;
-        let n_sequence = to_n_sequence_encode(CSVFlag::Days(days));
+        let n_sequence = Bytes::n_sequence(CSVFlag::Days(days));
         let n_sequence_expected = hex::decode("b0010000").unwrap();
 
-        let csv_script = to_csv_script_encode(CSVFlag::Days(days));
+        let csv_script = Bytes::csv_script(CSVFlag::Days(days));
         let csv_script_expected = hex::decode("02b001b275").unwrap();
 
         assert_eq!(n_sequence, n_sequence_expected);
@@ -121,10 +125,10 @@ mod serialize_tests {
 
         // 4
         let days = 4;
-        let n_sequence = to_n_sequence_encode(CSVFlag::Days(days));
+        let n_sequence = Bytes::n_sequence(CSVFlag::Days(days));
         let n_sequence_expected = hex::decode("40020000").unwrap();
 
-        let csv_script = to_csv_script_encode(CSVFlag::Days(days));
+        let csv_script = Bytes::csv_script(CSVFlag::Days(days));
         let csv_script_expected = hex::decode("024002b275").unwrap();
 
         assert_eq!(n_sequence, n_sequence_expected);
@@ -132,10 +136,10 @@ mod serialize_tests {
 
         // 5
         let days = 5;
-        let n_sequence = to_n_sequence_encode(CSVFlag::Days(days));
+        let n_sequence = Bytes::n_sequence(CSVFlag::Days(days));
         let n_sequence_expected = hex::decode("d0020000").unwrap();
 
-        let csv_script = to_csv_script_encode(CSVFlag::Days(days));
+        let csv_script = Bytes::csv_script(CSVFlag::Days(days));
         let csv_script_expected = hex::decode("02d002b275").unwrap();
 
         assert_eq!(n_sequence, n_sequence_expected);
@@ -143,10 +147,10 @@ mod serialize_tests {
 
         // 10
         let days = 10;
-        let n_sequence = to_n_sequence_encode(CSVFlag::Days(days));
+        let n_sequence = Bytes::n_sequence(CSVFlag::Days(days));
         let n_sequence_expected = hex::decode("a0050000").unwrap();
 
-        let csv_script = to_csv_script_encode(CSVFlag::Days(days));
+        let csv_script = Bytes::csv_script(CSVFlag::Days(days));
         let csv_script_expected = hex::decode("02a005b275").unwrap();
 
         assert_eq!(n_sequence, n_sequence_expected);
@@ -154,10 +158,10 @@ mod serialize_tests {
 
         // 55
         let days = 55;
-        let n_sequence = to_n_sequence_encode(CSVFlag::Days(days));
+        let n_sequence = Bytes::n_sequence(CSVFlag::Days(days));
         let n_sequence_expected = hex::decode("f01e0000").unwrap();
 
-        let csv_script = to_csv_script_encode(CSVFlag::Days(days));
+        let csv_script = Bytes::csv_script(CSVFlag::Days(days));
         let csv_script_expected = hex::decode("02f01eb275").unwrap();
 
         assert_eq!(n_sequence, n_sequence_expected);
@@ -165,10 +169,10 @@ mod serialize_tests {
 
         // 100
         let days = 100;
-        let n_sequence = to_n_sequence_encode(CSVFlag::Days(days));
+        let n_sequence = Bytes::n_sequence(CSVFlag::Days(days));
         let n_sequence_expected = hex::decode("40380000").unwrap();
 
-        let csv_script = to_csv_script_encode(CSVFlag::Days(days));
+        let csv_script = Bytes::csv_script(CSVFlag::Days(days));
         let csv_script_expected = hex::decode("024038b275").unwrap();
 
         assert_eq!(n_sequence, n_sequence_expected);
@@ -176,10 +180,10 @@ mod serialize_tests {
 
         // 200
         let days = 200;
-        let n_sequence = to_n_sequence_encode(CSVFlag::Days(days));
+        let n_sequence = Bytes::n_sequence(CSVFlag::Days(days));
         let n_sequence_expected = hex::decode("80700000").unwrap();
 
-        let csv_script = to_csv_script_encode(CSVFlag::Days(days));
+        let csv_script = Bytes::csv_script(CSVFlag::Days(days));
         let csv_script_expected = hex::decode("028070b275").unwrap();
 
         assert_eq!(n_sequence, n_sequence_expected);
@@ -187,21 +191,21 @@ mod serialize_tests {
 
         // 220
         let days = 220;
-        let n_sequence = to_n_sequence_encode(CSVFlag::Days(days));
+        let n_sequence = Bytes::n_sequence(CSVFlag::Days(days));
         let n_sequence_expected = hex::decode("c07b0000").unwrap();
 
-        let csv_script = to_csv_script_encode(CSVFlag::Days(days));
-        let csv_script_expected = hex::decode("02c07bb275").unwrap();
+        let csv_script = Bytes::csv_script(CSVFlag::Days(days));
+        let csv_script_expected: Vec<u8> = hex::decode("02c07bb275").unwrap();
 
         assert_eq!(n_sequence, n_sequence_expected);
         assert_eq!(csv_script, csv_script_expected);
 
         // 230
         let days = 230;
-        let n_sequence = to_n_sequence_encode(CSVFlag::Days(days));
+        let n_sequence = Bytes::n_sequence(CSVFlag::Days(days));
         let n_sequence_expected = hex::decode("60810000").unwrap();
 
-        let csv_script = to_csv_script_encode(CSVFlag::Days(days));
+        let csv_script = Bytes::csv_script(CSVFlag::Days(days));
         let csv_script_expected = hex::decode("03608100b275").unwrap();
 
         assert_eq!(n_sequence, n_sequence_expected);
@@ -209,10 +213,10 @@ mod serialize_tests {
 
         // 240
         let days = 240;
-        let n_sequence = to_n_sequence_encode(CSVFlag::Days(days));
+        let n_sequence = Bytes::n_sequence(CSVFlag::Days(days));
         let n_sequence_expected = hex::decode("00870000").unwrap();
 
-        let csv_script = to_csv_script_encode(CSVFlag::Days(days));
+        let csv_script = Bytes::csv_script(CSVFlag::Days(days));
         let csv_script_expected = hex::decode("03008700b275").unwrap();
 
         assert_eq!(n_sequence, n_sequence_expected);
@@ -220,10 +224,10 @@ mod serialize_tests {
 
         // 254
         let days = 254;
-        let n_sequence = to_n_sequence_encode(CSVFlag::Days(days));
+        let n_sequence = Bytes::n_sequence(CSVFlag::Days(days));
         let n_sequence_expected = hex::decode("e08e0000").unwrap();
 
-        let csv_script = to_csv_script_encode(CSVFlag::Days(days));
+        let csv_script = Bytes::csv_script(CSVFlag::Days(days));
         let csv_script_expected = hex::decode("03e08e00b275").unwrap();
 
         assert_eq!(n_sequence, n_sequence_expected);
@@ -231,10 +235,10 @@ mod serialize_tests {
 
         // 254
         let days = 255;
-        let n_sequence = to_n_sequence_encode(CSVFlag::Days(days));
+        let n_sequence = Bytes::n_sequence(CSVFlag::Days(days));
         let n_sequence_expected = hex::decode("708f0000").unwrap();
 
-        let csv_script = to_csv_script_encode(CSVFlag::Days(days));
+        let csv_script = Bytes::csv_script(CSVFlag::Days(days));
         let csv_script_expected = hex::decode("03708f00b275").unwrap();
 
         assert_eq!(n_sequence, n_sequence_expected);

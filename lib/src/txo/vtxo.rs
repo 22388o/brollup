@@ -1,10 +1,7 @@
 #![allow(dead_code)]
 
 use crate::{
-    signature::musig2::keys_to_key_agg_ctx,
-    encoding::csv::{to_csv_script_encode, CSVFlag},
-    taproot::{TapLeaf, TapRoot, P2TR},
-    well_known::operator,
+    encoding::csv::{CSVEncode, CSVFlag}, signature::musig2::keys_to_key_agg_ctx, taproot::{TapLeaf, TapRoot, P2TR}, well_known::operator
 };
 use musig2::{
     secp256k1::{self, PublicKey, XOnlyPublicKey},
@@ -57,7 +54,7 @@ impl P2TR for VTXO {
 
         //// Exit Path: (Self after 3 months)
         let mut exit_path_script = Vec::<u8>::new();
-        exit_path_script.extend(to_csv_script_encode(CSVFlag::CSVThreeMonths)); // Relative Timelock
+        exit_path_script.extend(Bytes::csv_script(CSVFlag::CSVThreeMonths)); // Relative Timelock
         exit_path_script.push(0x20); // OP_PUSHDATA_32
         exit_path_script.extend(self.self_key().serialize()); // Self Key 32-bytes
         exit_path_script.push(0xac); // OP_CHECKSIG
