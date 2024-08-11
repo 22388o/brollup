@@ -1,21 +1,20 @@
 # Transaction Outputs
-`Bitcoin Virtual Machine` employs of 9 types of transaction outputs (TXOs):
+`Brollup` employs of 9 transaction outputs types:
 
 | TXO Type               | Kind           |  Spending Condition                                        |
 |:-----------------------|:---------------|:-----------------------------------------------------------|
 | Lift 🛗                | Bare           | `(Self + Operator) or (Self after 12 months)`              | 
 | VTXO 💵                | Virtual        | `(Self + Operator) or (Self after 3 months)`               |
-| VTXO Projector 🎥      | Bare           | `(msg.senders[] + Operator) or (Operator after 3 months)`  |
 | Channel 👥             | Virtual        | `(Self + Operator) after degrading timelock`               |
 | Connector 🔌           | Virtual        | `(Self + Operator)`                                        |
-| Connector Projector 🎥 | Bare           | `(msg.senders[] + Operator) or (Operator after 3 months)`  |
+| Projector 🎥           | Bare           | `(msg.senders[] + Operator) or (Operator after 3 months)`  |
 | Payload 📦             | Bare           | `(msg.senders[] after 1 week) or (Operator with hashlocks)`|
 | Self 👨‍💻                | Bare & Virtual | `(Self)`                                                   |
 | Operator 🏭            | Bare & Virtual | `(Operator)`                                               |
 
-Four of the transaction output types are bare, meaning they are literal, on-chain transaction outputs that consume block space, while the other five are virtual, meaning they are committed but not yet revealed transaction outputs that optimistically consume no block space.
+Some output types are bare, meaning they are literal, on-chain transaction outputs that consume block space, while some other types are virtual, meaning they are committed but not yet revealed transaction outputs that optimistically consume no block space.
 
-The `Bitcoin Virtual Machine` advances the rollup state by chaining `Pool Transactions` at regular intervals. Three output types—`VTXO Projector`, `Connector Projector`, and `Payload`—and optionally one or more `Bare Connectors` are contained in the `Pool Transaction`.
+`Brollup` advances the rollup state by chaining `Pool Transactions` at regular intervals. Three output types—`Payload`, `Projector`—and optionally one or more `Lift` outputs are contained in the `Pool Transaction`.
 
                                                                               ⋰
                                                                             ⋰  ┌────────────────┐   ┌────────────────┐
@@ -25,19 +24,16 @@ The `Bitcoin Virtual Machine` advances the rollup state by chaining `Pool Transa
         #0 │      Payload      │   #0 │       Payload       │       ⋰          ┌────────────────┐   ┌────────────────┐
            └───────────────────┘      └─────────────────────┘     ⋰            │     VTXO #y    │-->│   Channel #y   │ 
            ┌───────────────────┐      ┌─────────────────────┐   ⋰              └────────────────┘   └────────────────┘
-        #1 │      Lift #0      │   #1 │    VTXO Projector   │ 🎥 ┈ ┈ ┈ ┈ ┈ ┈ ┈ ┈      
-           └───────────────────┘      └─────────────────────┘         
-                     ┊                ┌─────────────────────┐                          
-           ┌───────────────────┐   #2 │ Connector Projector │ 🎥 ┈ ┈ ┈ ┈ ┈ ┈ ┈ ┈            
-      #1+n │      Lift #n      │      └─────────────────────┘   ⋱              ┌────────────────┐  
-           └───────────────────┘      ┌─────────────────────┐     ⋱            │  Connector #0  │       
-                     ┊             #3 │       Lift #0       │       ⋱          └────────────────┘
-                                      └─────────────────────┘         ⋱                 ┊
-                                                 ┊                      ⋱      ┌────────────────┐   
-                                      ┌─────────────────────┐             ⋱    │  Connector #z  │
-                                 #x+3 │       Lift #x       │               ⋱  └────────────────┘
-                                      └─────────────────────┘                 ⋱                    
-      
+        #1 │      Lift #0      │   #1 │      Projector      │ 🎥                
+           └───────────────────┘      └─────────────────────┘   ⋱              ┌────────────────┐
+                     ┊                ┌─────────────────────┐     ⋱            │  Connector #0  │   
+           ┌───────────────────┐   #2 │       Lift #0       │       ⋱          └────────────────┘
+      #1+n │      Lift #n      │      └─────────────────────┘         ⋱                 ┊  
+           └───────────────────┘                 ┊                      ⋱      ┌────────────────┐       
+                     ┊                ┌─────────────────────┐             ⋱    │  Connector #z  │
+                                 #x+2 │       Lift #x       │               ⋱  └────────────────┘         
+                                      └─────────────────────┘                 ⋱  
+                                                                           
                          Pool Transaction     
 
 ## Lift 🛗
@@ -96,30 +92,6 @@ Once a `VTXO` expires, it can no longer be redeemed or claimed on-chain; therefo
     
 -   **Exit Path:** In case the `Operator` is non-collaborative and does not sign from the channel path, `Self` can trigger the exit path `(Self after 3 month)` to unilaterally claim the `VTXO`.
 
-## VTXO Projector 🎥
-`VTXO Projector` is a bare, on-chain transaction output type contained in each pool transaction. `VTXO Projector` projects `VTXOs` into a covenant template.
-                                                      
-                                           ⋰ ┌──────────────────┐
-                                         ⋰   │      VTXO #0     │
-                                       ⋰     └──────────────────┘
-                                     ⋰       ┌──────────────────┐
-                                   ⋰         │      VTXO #1     │
-        ┌──────────────────┐     ⋰           └──────────────────┘
-        │  VTXO Projector  │ 🎥 ⋮                        
-        └──────────────────┘     ⋱                    ┊
-                                   ⋱                
-                                     ⋱       ┌──────────────────┐
-                                       ⋱     │      VTXO #n     │
-                                         ⋱   └──────────────────┘
-                                           ⋱
-
-`VTXO Projector` carries two spending conditions:
-`(msg.senders[] + Operator) or (Operator after 3 months)`
-
--   **Reveal Path:** The aggregated [MuSig2](https://github.com/bitcoin/bips/blob/master/bip-0327.mediawiki) key of msg.senders[] and `Operator` pre-sign from the reveal path `(msg.senders[] + Operator)` to constrain `VTXOs` in a pseudo-covenant manner.
-    
--  **Sweep Path:** `VTXO Projector` expires in three months, at which point all `VTXOs` contained within the projector also expire. Upon expiry, the `Operator` triggers the sweep path `(Operator after 3 months)` to reclaim all expired `VTXOs` directly from the projector root, in a footprint-minimal way, without claiming `VTXOs` one by one.          
-
 ## Channel 👥
 `Channel` turns its parent `VTXO` into a state channel that operates as a 2-of-2 between `Self` and `Remote`. 
 
@@ -169,29 +141,31 @@ In contrast to the state channel design employed by Lightning Network, `Channel`
       
                                        Channel State Update 
 
-## Connector Projector 🎥
-`Connector Projector` is the same as `VTXO Projector`, but for `Connectors` instead. `Connector Projector` is a bare, on-chain transaction output type contained in each pool transaction, and projects `Connectors` into a covenant template.
+## Projector 🎥
+`Projector` is a bare, on-chain transaction output type contained in each pool transaction. `Projector` projects `VTXOs` and `Connectors` into a covenant template.
                                                       
-                                                ⋰ ┌──────────────────┐
-                                              ⋰   │   Connector #0   │
-                                            ⋰     └──────────────────┘
-                                          ⋰       ┌──────────────────┐
-                                        ⋰         │   Connector #1   │
-        ┌───────────────────────┐     ⋰           └──────────────────┘
-        │  Connector Projector  │ 🎥 ⋮                        
-        └───────────────────────┘     ⋱                    ┊
-                                        ⋱                
-                                          ⋱       ┌──────────────────┐
-                                            ⋱     │   Connector #n   │
-                                              ⋱   └──────────────────┘
-                                                ⋱
+                                              ⋰ ┌──────────────────┐
+                                            ⋰   │      VTXO #0     │
+                                          ⋰     └──────────────────┘
+                                        ⋰                ┊
+                                      ⋰         ┌──────────────────┐
+                                    ⋰           │      VTXO #x     │
+        ┌───────────────────┐     ⋰             └──────────────────┘   
+        │     Projector     │ 🎥 ⋮                     
+        └───────────────────┘     ⋱             ┌──────────────────┐
+                                    ⋱           │   Connector #0   │    
+                                      ⋱         └──────────────────┘
+                                        ⋱                ┊
+                                          ⋱     ┌──────────────────┐
+                                            ⋱   │   Connector #y   │
+                                              ⋱ └──────────────────┘    
 
-`Connector Projector` carries two spending conditions:
+`Projector` carries two spending conditions:
 `(msg.senders[] + Operator) or (Operator after 3 months)`
 
--   **Reveal Path:** The aggregated [MuSig2](https://github.com/bitcoin/bips/blob/master/bip-0327.mediawiki) key of msg.senders[] and `Operator` pre-sign from the reveal path `(msg.senders[] + Operator)` to constrain `Virtual Connectors` in a pseudo-covenant manner.
-
--  **Sweep Path:** `Connector Projector` expires in three months, at which point all `Virtual Connectors` contained within the projector also expire. Upon expiry, the `Operator` triggers the sweep path `(Operator after 3 months)` to reclaim all expired `Virtual Connectors` directly from the projector root, in a footprint-minimal way, without claiming `Virtual Connectors` one by one.          
+-   **Reveal Path:** The aggregated [MuSig2](https://github.com/bitcoin/bips/blob/master/bip-0327.mediawiki) key of msg.senders[] and `Operator` pre-sign from the reveal path `(msg.senders[] + Operator)` to constrain `VTXOs` in a pseudo-covenant manner.
+    
+-  **Sweep Path:** `Projector` expires in three months, at which point all `VTXOs` contained within the projector also expire. Upon expiry, the `Operator` triggers the sweep path `(Operator after 3 months)` to reclaim all expired `VTXOs` directly from the projector root, in a footprint-minimal way, without claiming `VTXOs` one by one.          
 
 ## Payload 📦
 `Payload` is a bare, on-chain transaction output type contained in each pool transaction.  `Payload` stores entries, projector signatures, s commitments, and the fresh operator key of the session.
