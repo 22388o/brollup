@@ -1,5 +1,5 @@
 # Transaction Outputs
-`Brollup` employs of 9 transaction outputs types:
+`Brollup` employs of 8 transaction outputs types:
 
 | TXO Type               | Kind           |  Spending Condition                                        |
 |:-----------------------|:---------------|:-----------------------------------------------------------|
