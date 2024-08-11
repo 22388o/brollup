@@ -1,4 +1,4 @@
-use crate::serialization::conversion::IntoByteArray;
+use crate::encoding::conversion::IntoByteArray;
 
 use super::schnorr::SecpError;
 use secp::{MaybePoint, MaybeScalar, Point, Scalar};

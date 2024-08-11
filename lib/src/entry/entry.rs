@@ -1,7 +1,7 @@
 use super::transfer::Transfer;
 use crate::{
     hash::{tagged_hash, HashTag},
-    serialization::{cpe::CompactPayloadEncoding, serialize::Serialize, sighash::Sighash},
+    encoding::{cpe::CompactPayloadEncoding, serialize::Serialize, sighash::Sighash},
     signature::schnorr::{sign_schnorr, verify_schnorr, verify_schnorr_batch, SecpError, SignFlag},
 };
 use bit_vec::BitVec;

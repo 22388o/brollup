@@ -1,6 +1,6 @@
 #[cfg(test)]
 mod serialize_tests {
-    use brollup::serialization::{
+    use brollup::encoding::{
         csv::{to_csv_script_encode, to_n_sequence_encode, CSVFlag}, prefix::Prefix, push::Push
     };
 

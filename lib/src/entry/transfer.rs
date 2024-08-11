@@ -7,7 +7,7 @@ type Bytes = Vec<u8>;
 type Key = XOnlyPublicKey;
 
 use crate::{
-    serialization::{
+    encoding::{
         cpe::CompactPayloadEncoding,
         serialize::{Serialize, SerializeError},
     },

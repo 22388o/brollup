@@ -1,6 +1,6 @@
 #![allow(dead_code)]
 
-use crate::serialization::cpe::CompactPayloadEncoding;
+use crate::encoding::cpe::CompactPayloadEncoding;
 use bit_vec::BitVec;
 use uintx::{u24, u40, u48, u56};
 

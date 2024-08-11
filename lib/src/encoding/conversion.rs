@@ -2,6 +2,7 @@ pub enum ParseError {
     ParseError32,
     ParseError33,
     ParseError64,
+    ParseError65
 }
 
 pub trait IntoByteArray {
@@ -39,7 +40,7 @@ impl IntoByteArray for Vec<u8> {
     fn into_byte_array_65(&self) -> Result<[u8; 65], ParseError> {
         let mut vec = Vec::<u8>::with_capacity(65);
         vec.extend(self);
-        let bytes_65: [u8; 65] = vec.try_into().map_err(|_| ParseError::ParseError64)?;
+        let bytes_65: [u8; 65] = vec.try_into().map_err(|_| ParseError::ParseError65)?;
 
         Ok(bytes_65)
     }

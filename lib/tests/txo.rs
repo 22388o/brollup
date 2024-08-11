@@ -2,7 +2,7 @@
 mod txo_tests {
     use brollup::{
         entry::{entry::Entry, transfer::Transfer},
-        serialization::cpe::CompactPayloadEncoding,
+        encoding::cpe::CompactPayloadEncoding,
         taproot::P2TR,
         txo::{
             connector::Connector,

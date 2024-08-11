@@ -1,7 +1,7 @@
 #![allow(dead_code)]
 
 use super::value::ShortVal;
-use crate::serialization::cpe::CompactPayloadEncoding;
+use crate::encoding::cpe::CompactPayloadEncoding;
 use bit_vec::BitVec;
 use musig2::secp256k1::XOnlyPublicKey;
 

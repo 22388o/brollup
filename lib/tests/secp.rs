@@ -1,7 +1,7 @@
 #[cfg(test)]
 mod secp_tests {
     use brollup::{
-        serialization::conversion::IntoByteArray,
+        encoding::conversion::IntoByteArray,
         signature::{
             into::{IntoPoint, IntoScalar},
             schnorr::{
